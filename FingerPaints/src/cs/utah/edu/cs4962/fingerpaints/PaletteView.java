@@ -4,6 +4,7 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Rect;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
@@ -44,9 +45,10 @@ public class PaletteView extends ViewGroup
     	paletteImg.getDrawingRect(bound);
     	
     	// Next: layout paint blobs
+    	// Yeah, these are some pretty arbitrary constants - oh well, looks nice enough.
         int paintWidth = (int)((float)bound.width() / 9.0f);
         int paintHeight = paintWidth;
-        int padding = (int)((float)paintWidth * (4.0f / 5.0f)); 	   		  // Further TODO: something more dynamic
+        int padding = (int)((float)paintWidth * (4.0f / 5.0f));
         
         bound.left += padding;
         bound.top  += padding;
@@ -64,6 +66,7 @@ public class PaletteView extends ViewGroup
             float radiusY = bound.height() / 2.0f;
             
             // Sentinel values:
+            // Yep, more trashy looking constants. Sorry - it worked out nicely, though!
             float gapAngle = (float)(Math.PI / 2.0);
             float startAngle = (float)(-Math.PI / 12.0) + gapAngle;
             int childCnt = getChildCount() - 1;	// we don't count the palette image
@@ -94,20 +97,64 @@ public class PaletteView extends ViewGroup
     	
     	float scalar;
     	
+    	/*
     	if (widthMode == MeasureSpec.EXACTLY)
     		scalar = (float)width / (float)bound.width();
     	else if (heightMode == MeasureSpec.EXACTLY)
     		scalar = (float)height / (float)bound.height();
     	else if (widthMode == MeasureSpec.UNSPECIFIED)
-    		scalar = (float)width / (float)bound.width();
-    	else if (heightMode == MeasureSpec.UNSPECIFIED)
     		scalar = (float)height / (float)bound.height();
+    	else if (heightMode == MeasureSpec.UNSPECIFIED)
+    		scalar = (float)width / (float)bound.width();
     	else
     	{
     		scalar = (width < height) ? 
     				(float)width / (float)bound.width() :
     				(float)height / (float)bound.height();
     	}
+    	*/
+    	
+    	switch (widthMode)
+    	{
+    	// We will treat these as the same, even though they aren't
+    	case MeasureSpec.EXACTLY:
+    	case MeasureSpec.AT_MOST:
+    		switch (heightMode)
+    		{
+    		case MeasureSpec.EXACTLY:
+    		case MeasureSpec.AT_MOST:
+    			scalar = (width > height) ? (float)height / (float)bound.height() :
+    										(float)width / (float)bound.width();
+    			break;
+    			
+    		case MeasureSpec.UNSPECIFIED:
+			default:
+				scalar = (float)width / (float)bound.width();
+				break;
+    		}
+    		break;
+    	
+    	// These cases are the same - just specifying to be explicit
+    	case MeasureSpec.UNSPECIFIED:
+    	default:
+    		switch (heightMode)
+    		{
+    		case MeasureSpec.EXACTLY:
+    		case MeasureSpec.AT_MOST:
+    			scalar = (float)height / (float)bound.height();
+    			break;
+    			
+    		case MeasureSpec.UNSPECIFIED:
+			default:
+				scalar = (width > height) ? (float)height / (float)bound.height() :
+					(float)width / (float)bound.width();
+				break;
+    		}
+    		break;
+    	}
+
+    	Log.i("Width", MeasureSpec.toString(widthMeasureSpec));
+    	Log.i("Height", MeasureSpec.toString(heightMeasureSpec));
 
 		float scaledWidth = bound.width() * scalar;
 		float scaledHeight = bound.height() * scalar;
