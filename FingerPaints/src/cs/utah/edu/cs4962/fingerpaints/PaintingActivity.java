@@ -12,8 +12,6 @@ import android.widget.LinearLayout;
 
 public class PaintingActivity extends Activity
 {
-    private PainterModel painterModel; // Holds data regarding user's drawing
-    private PaletteModel paletteModel; // Holds data regarding color selections
 
     private PaintingView paintingView;
     private PaletteView paletteView;
@@ -41,35 +39,38 @@ public class PaintingActivity extends Activity
         }
     };
 
-    @Override
+    @SuppressWarnings("deprecation")
+	@Override
     protected void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
 
         colorSelection = 0xFF000000;
 
-        painterModel = new PainterModel();
-        paletteModel = new PaletteModel();
-
-        paintingView = new PaintingView(this, painterModel);
-        paletteView = new PaletteView(this, paletteModel);
+        paintingView = new PaintingView(this);
+        paletteView = new PaletteView(this);
 
         LinearLayout layout = new LinearLayout(this);
-        layout.setOrientation(LinearLayout.VERTICAL);
-
-        /*
-        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,
-        																 LinearLayout.LayoutParams.MATCH_PARENT);
-        params.weight = 0.5f;
-        paintingView.setLayoutParams(params);
-        paletteView.setLayoutParams(params);
-        layout.addView(paintingView);
-        layout.addView(paletteView);
-        */
-        layout.addView(paletteView);
         
-        paintingView.setBackgroundColor(0xFFFF0000);
-        paletteView.setBackgroundColor(0xFFccFFcc);
+        if (getWindowManager().getDefaultDisplay().getWidth() < getWindowManager().getDefaultDisplay().getHeight())
+        	layout.setOrientation(LinearLayout.VERTICAL);
+        else
+        	layout.setOrientation(LinearLayout.HORIZONTAL);
+
+        LinearLayout.LayoutParams paintingParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,
+        																 		 LinearLayout.LayoutParams.MATCH_PARENT);
+        paintingParams.weight = 1.0f;
+        LinearLayout.LayoutParams paletteParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,
+		 		 																LinearLayout.LayoutParams.MATCH_PARENT);
+        paletteParams.weight = 1.0f;
+        
+        paintingView.setLayoutParams(paintingParams);
+        paletteView.setLayoutParams(paletteParams);
+        layout.addView(paletteView);
+        layout.addView(paintingView);
+        
+        //paintingView.setBackgroundColor(0xFFFF0000);
+        //paletteView.setBackgroundColor(0xFFccFFcc);
         
         PaintView red   = new PaintView(this, 0xFFFF0000);
         PaintView green = new PaintView(this, 0xFF00FF00);
@@ -82,12 +83,6 @@ public class PaintingActivity extends Activity
         paletteView.addView(red);
         paletteView.addView(green);
         paletteView.addView(blue);
-        
-        for (int i = 0; i < 100; i++)
-        {
-        	PaintView v = new PaintView(this, 0xFF000000 | (i * 16));
-        	paletteView.addView(v);
-        }
 
         setContentView(layout);
     }

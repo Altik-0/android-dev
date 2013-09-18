@@ -1,9 +1,13 @@
 package cs.utah.edu.cs4962.fingerpaints;
 
+import java.util.LinkedList;
+
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Path;
+import android.graphics.Point;
 import android.os.Debug;
 import android.util.Log;
 import android.view.MotionEvent;
@@ -14,44 +18,63 @@ import android.view.View;
  */
 public class PaintingView extends View
 {
-    private PainterModel model;
-    private Vector2 offset;     // Denotes offset of points in model with points on view
+	private LinkedList<LinkedList<Point>> curves;
+	private LinkedList<Integer> curveColors;
+	private LinkedList<Float> curveWidths;
+	
+    private Point offset;     // Denotes offset of points in model with points on view
 
     public PaintingView(Context context)
     {
         super(context);
 
-        model = new PainterModel();
-        offset = new Vector2((float)getWidth() / 2.0f, (float)getHeight() / 2.0f);
+        curves = new LinkedList<LinkedList<Point>>();
+		curveColors = new LinkedList<Integer>();
+		curveWidths = new LinkedList<Float>();
+        offset = new Point(getWidth() / 2, getHeight() / 2);
     }
-
-    public PaintingView(Context context, PainterModel _model)
-    {
-        super(context);
-
-        model = _model;
-        offset = new Vector2((float) getWidth() / 2.0f, (float)getHeight() / 2.0f);
-    }
+    
+    private void newCurve(int color, float width)
+	{
+		curves.addFirst(new LinkedList<Point>());
+		curveColors.addFirst(color);
+		curveWidths.addFirst(width);
+	}
+    
+    private void addPoint(int x, int y)
+	{
+		curves.get(0).add(new Point(x, y));
+	}
 
     @Override
     public void onDraw(Canvas canvas)
     {
         super.onDraw(canvas);
 
-        Log.d("Model check:", Integer.toString(model.curves.size()));
-        for (PainterModel.Curve curve : model.curves)
+        Log.d("Model check:", Integer.toString(curves.size()));
+        for (int i = 0; i < curves.size(); i++)
         {
+        	LinkedList<Point> curve = curves.get(i);
+        	int color = curveColors.get(i);
+        	float width = curveWidths.get(i);
+        	
             Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
-            paint.setColor(curve.color);
-            paint.setStrokeWidth(curve.width);
+            paint.setColor(color);
+            paint.setStrokeWidth(width);
             paint.setStyle(Paint.Style.STROKE);
 
             Path path = new Path();
-            Vector2 initPoint = Vector2.add(curve.points.get(0), offset);
+            Point initPoint = new Point(curve.get(0));
+            initPoint.x += offset.x;
+            initPoint.y += offset.y;
+            
             path.moveTo(initPoint.x, initPoint.y);
-            for (Vector2 point : curve.points)
+            for (Point point : curve)
             {
-                Vector2 nextPoint = Vector2.add(point, offset);
+                Point nextPoint = new Point(point);
+                nextPoint.x += offset.x;
+                nextPoint.y += offset.y;
+                
                 path.lineTo(nextPoint.x, nextPoint.y);
             }
 
@@ -59,15 +82,16 @@ public class PaintingView extends View
         }
     }
 
-    @Override
+    @SuppressLint("NewApi")
+	@Override
     public boolean onTouchEvent(MotionEvent motionEvent)
     {
         switch (motionEvent.getAction())
         {
             case MotionEvent.ACTION_DOWN:
-                model.BeginNewCurve(0xFF000000, 5.0f);      //TODO: make not static values
-                model.AddPoint(new Vector2(motionEvent.getAxisValue(MotionEvent.AXIS_X),
-                                           motionEvent.getAxisValue(MotionEvent.AXIS_Y)));
+                newCurve(0xFF000000, 5.0f);      //TODO: make not static values
+                addPoint((int)motionEvent.getAxisValue(MotionEvent.AXIS_X),
+                         (int)motionEvent.getAxisValue(MotionEvent.AXIS_Y));
                 invalidate();
                 break;
 
@@ -76,8 +100,8 @@ public class PaintingView extends View
                 // Do nothing, because they stopped
                 break;
             default:
-                model.AddPoint(new Vector2(motionEvent.getAxisValue(MotionEvent.AXIS_X),
-                        motionEvent.getAxisValue(MotionEvent.AXIS_Y)));
+                addPoint((int)motionEvent.getAxisValue(MotionEvent.AXIS_X),
+                        	   (int)motionEvent.getAxisValue(MotionEvent.AXIS_Y));
                 invalidate();
                 break;
         }
