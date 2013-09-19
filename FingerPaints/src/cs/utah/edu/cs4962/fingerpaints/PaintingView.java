@@ -20,6 +20,8 @@ import android.view.View;
  */
 public class PaintingView extends View
 {
+	public final float MAX_WIDTH = 20.0f;
+	
 	private LinkedList<LinkedList<Point>> curves;
 	private LinkedList<Integer> curveColors;
 	private LinkedList<Float> curveWidths;

@@ -10,6 +10,8 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.SeekBar;
+import android.widget.SeekBar.OnSeekBarChangeListener;
 
 public class PaintingActivity extends Activity
 {
@@ -18,6 +20,7 @@ public class PaintingActivity extends Activity
     private PaletteView paletteView;
     private Button mixButton;
     private Button handButton;
+    private SeekBar widthSelector;
 
     private int colorSelection;
 
@@ -72,6 +75,28 @@ public class PaintingActivity extends Activity
 			}
 		}
     };
+    
+    private OnSeekBarChangeListener widthChangedListener = new OnSeekBarChangeListener()
+    {
+
+		@Override
+		public void onProgressChanged(SeekBar seekBar, int progress, boolean arg2) 
+		{
+			paintingView.setCurWidth(paintingView.MAX_WIDTH * (float)progress / 100.0f);
+		}
+
+		@Override
+		public void onStartTrackingTouch(SeekBar seekBar)
+		{
+			// this method intentionally left blank
+		}
+
+		@Override
+		public void onStopTrackingTouch(SeekBar seekBar)
+		{
+			// do nothing!
+		}
+    };
 
     @SuppressWarnings("deprecation")
 	@Override
@@ -122,10 +147,18 @@ public class PaintingActivity extends Activity
         handButton.setText("Hand Tool! <3");
         handButton.setOnClickListener(handButtonListener);
         
+        widthSelector = new SeekBar(this);
+        widthSelector.setMax(100);
+        widthSelector.setProgress(50);
+        widthSelector.setId(0xCADEDEAD);
+        widthSelector.setOnSeekBarChangeListener(widthChangedListener);
+        paintingView.setCurWidth(paintingView.MAX_WIDTH * 50.0f / 100.0f);
+        
         buttonLayout.addView(mixButton);
         buttonLayout.addView(handButton);
         
         innerLayout.addView(buttonLayout);
+        innerLayout.addView(widthSelector);
         innerLayout.addView(paletteView);
         innerLayout.setLayoutParams(paletteParams);
         
