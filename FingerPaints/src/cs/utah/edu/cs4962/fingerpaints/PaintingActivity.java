@@ -17,6 +17,7 @@ public class PaintingActivity extends Activity
     private PaintingView paintingView;
     private PaletteView paletteView;
     private Button mixButton;
+    private Button handButton;
 
     private int colorSelection;
 
@@ -51,6 +52,26 @@ public class PaintingActivity extends Activity
 			}
 		}
     };
+    
+    private View.OnClickListener handButtonListener = new View.OnClickListener()
+    {
+		@Override
+		public void onClick(View v)
+		{
+			if (handButton.isSelected())
+			{
+				handButton.setText("Hand Tool! <3");
+				handButton.setSelected(false);
+				paintingView.isHandTool = false;
+			}
+			else
+			{
+				handButton.setText("Disable Hand... </3");
+				handButton.setSelected(true);
+				paintingView.isHandTool = true;
+			}
+		}
+    };
 
     @SuppressWarnings("deprecation")
 	@Override
@@ -65,16 +86,19 @@ public class PaintingActivity extends Activity
 
         LinearLayout outerLayout = new LinearLayout(this);
         LinearLayout innerLayout = new LinearLayout(this);
+        LinearLayout buttonLayout = new LinearLayout(this);
         
         if (getWindowManager().getDefaultDisplay().getWidth() < getWindowManager().getDefaultDisplay().getHeight())
         {
         	outerLayout.setOrientation(LinearLayout.VERTICAL);
         	innerLayout.setOrientation(LinearLayout.VERTICAL);
+        	buttonLayout.setOrientation(LinearLayout.HORIZONTAL);
         }
         else
         {
         	outerLayout.setOrientation(LinearLayout.HORIZONTAL);
         	innerLayout.setOrientation(LinearLayout.VERTICAL);
+        	buttonLayout.setOrientation(LinearLayout.HORIZONTAL);
         }
 
         LinearLayout.LayoutParams paintingParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,
@@ -89,12 +113,19 @@ public class PaintingActivity extends Activity
         paletteView.setId(0xFEEDF00D);
         paletteView.setOnColorChangeListener(colorChangeListener);
         paintingView.setCurColor(paletteView.getSelectedColor());
-        
+
         mixButton = new Button(this);
         mixButton.setText("Mix! :D");
         mixButton.setOnClickListener(mixButtonListener);
         
-        innerLayout.addView(mixButton);
+        handButton = new Button(this);
+        handButton.setText("Hand Tool! <3");
+        handButton.setOnClickListener(handButtonListener);
+        
+        buttonLayout.addView(mixButton);
+        buttonLayout.addView(handButton);
+        
+        innerLayout.addView(buttonLayout);
         innerLayout.addView(paletteView);
         innerLayout.setLayoutParams(paletteParams);
         

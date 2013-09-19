@@ -27,6 +27,10 @@ public class PaintingView extends View
     private float curWidth = 10.0f;
 	
     private Point offset;     // Denotes offset of points in model with points on view
+    
+    // True: when drag on screen, move offset. False: when drag on screen, draw lines
+    public boolean isHandTool = false;
+    private Point prevTouch;	// used for hand tool
 
     public PaintingView(Context context)
     {
@@ -35,7 +39,8 @@ public class PaintingView extends View
         curves = new LinkedList<LinkedList<Point>>();
 		curveColors = new LinkedList<Integer>();
 		curveWidths = new LinkedList<Float>();
-        offset = new Point(getWidth() / 2, getHeight() / 2);
+        //offset = new Point(getWidth() / 2, getHeight() / 2);
+		offset = new Point(0, 0);
     }
     
     private void newCurve()
@@ -110,25 +115,42 @@ public class PaintingView extends View
 	@Override
     public boolean onTouchEvent(MotionEvent motionEvent)
     {
-        switch (motionEvent.getAction())
-        {
-            case MotionEvent.ACTION_DOWN:
-                newCurve();
-                addPoint((int)motionEvent.getAxisValue(MotionEvent.AXIS_X),
-                         (int)motionEvent.getAxisValue(MotionEvent.AXIS_Y));
-                invalidate();
-                break;
-
-            case MotionEvent.ACTION_UP:
-            case MotionEvent.ACTION_CANCEL:
-                // Do nothing, because they stopped
-                break;
-            default:
-                addPoint((int)motionEvent.getAxisValue(MotionEvent.AXIS_X),
-                        	   (int)motionEvent.getAxisValue(MotionEvent.AXIS_Y));
-                invalidate();
-                break;
-        }
+    	if (isHandTool)
+    	{
+    		if (motionEvent.getAction() == MotionEvent.ACTION_MOVE)
+    		{
+    			Point curTouch = new Point((int)motionEvent.getAxisValue(MotionEvent.AXIS_X),
+    									   (int)motionEvent.getAxisValue(MotionEvent.AXIS_Y));
+    			offset = new Point(offset.x + curTouch.x - prevTouch.x,
+    							   offset.y + curTouch.y - prevTouch.y);
+    			
+    			invalidate();
+    		}
+    		prevTouch = new Point((int)motionEvent.getAxisValue(MotionEvent.AXIS_X),
+    							  (int)motionEvent.getAxisValue(MotionEvent.AXIS_Y));
+    	}
+    	else
+    	{
+	        switch (motionEvent.getAction())
+	        {
+	            case MotionEvent.ACTION_DOWN:
+	                newCurve();
+	                addPoint((int)motionEvent.getAxisValue(MotionEvent.AXIS_X) - offset.x,
+	                         (int)motionEvent.getAxisValue(MotionEvent.AXIS_Y) - offset.y);
+	                invalidate();
+	                break;
+	
+	            case MotionEvent.ACTION_UP:
+	            case MotionEvent.ACTION_CANCEL:
+	                // Do nothing, because they stopped
+	                break;
+	            default:
+	                addPoint((int)motionEvent.getAxisValue(MotionEvent.AXIS_X) - offset.x,
+	                         (int)motionEvent.getAxisValue(MotionEvent.AXIS_Y) - offset.y);
+	                invalidate();
+	                break;
+	        }
+    	}
 
         return true;
     }
@@ -142,6 +164,12 @@ public class PaintingView extends View
     	bundle.putSerializable("widths", curveWidths);
     	bundle.putInt("curColor", curColor);
     	bundle.putFloat("curWidth", curWidth);
+
+    	bundle.putInt("viewWidth", getWidth());
+    	bundle.putInt("viewHeight", getHeight());
+    	bundle.putInt("offsetX", offset.x);
+    	bundle.putInt("offsetY", offset.y);
+    	
     	bundle.putParcelable("super", super.onSaveInstanceState());
     	
     	return bundle;
@@ -159,6 +187,10 @@ public class PaintingView extends View
     		curveWidths = (LinkedList<Float>)bundle.getSerializable("widths");
     		curColor = bundle.getInt("curColor");
     		curWidth = bundle.getFloat("curWidth");
+
+    		int prevWidth = bundle.getInt("viewWidth");
+    		int prevHeight = bundle.getInt("viewHeight");
+    		offset = new Point(bundle.getInt("offsetX"), bundle.getInt("offsetY"));
     		
     		super.onRestoreInstanceState(bundle.getParcelable("super"));
     	}

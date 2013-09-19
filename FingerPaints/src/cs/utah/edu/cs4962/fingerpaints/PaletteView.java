@@ -74,9 +74,18 @@ public class PaletteView extends ViewGroup
         baseHeight = paletteBmp.getHeight();
         
         // Setup initial paint swatches
-        AddColor(0xFFFF0000);
-        AddColor(0xFF00FF00);
-        AddColor(0xFF0000FF);
+        //AddColor(0xFFFF0000);
+        //AddColor(0xFF00FF00);
+        //AddColor(0xFF0000FF);
+        
+        AddColor(0xFF00FFFF);	// CYAN
+        AddColor(0xFF0000FF);	// BLUE
+        AddColor(0xFFFF00FF);	// MAGENTA
+        AddColor(0xFFFF0000);	// RED
+        AddColor(0xFFFFFF00);	// YELLOW
+        AddColor(0xFF00FF00);	// GREEN
+        AddColor(0xFF000000);	// BLACK
+        AddColor(0xFFFFFFFF);	// WHITE
         
         getChildAt(0).setSelected(true);
     }
@@ -90,13 +99,8 @@ public class PaletteView extends ViewGroup
 	
     @Override
     protected void onLayout(boolean b, int i1, int i2, int i3, int i4)
-    {
-    	// First: layout palette image
-    	//ImageView paletteImg = (ImageView)this.findViewById(PALETTE_IMG_ID);
-    	//paletteImg.layout(0, 0, getWidth(), getHeight());
-    	//paletteImg.getDrawingRect(bound);
-    	    	
-    	// Next: layout paint blobs
+    {    	    	
+    	// layout paint blobs
     	// Yeah, these are some pretty arbitrary constants - oh well, looks nice enough.
         int paintWidth = (getWidth() < getHeight()) ? (int)((float)getWidth() / 6.0f) :
         											  (int)((float)getHeight() / 6.0f);
@@ -154,6 +158,51 @@ public class PaletteView extends ViewGroup
     public interface OnColorChangeListener
     {
     	public void onColorChange(int newColor);
+    }
+    
+    @Override
+    protected Parcelable onSaveInstanceState()
+    {
+    	Bundle bundle = new Bundle();
+    	
+    	LinkedList<Integer> colors = new LinkedList<Integer>();
+    	for (int i = 0; i < getChildCount(); i++)
+    	{
+    		PaintView pv = (PaintView)getChildAt(i);
+    		colors.add(pv.GetColor());
+    		
+    		if (pv.isSelected())
+    			bundle.putInt("selected", i);
+    	}
+    	bundle.putSerializable("colors", colors);
+    	
+    	bundle.putParcelable("super", super.onSaveInstanceState());
+    	
+    	return bundle;
+    }
+    
+    @Override
+    protected void onRestoreInstanceState(Parcelable parcel)
+    {
+    	// Sanity check
+    	if (parcel instanceof Bundle)
+    	{
+    		Bundle bundle = (Bundle)parcel;
+    		
+    		// Get old colors. Note: since we're replacing the colors, we need to clear
+    		// out the colors we put in from the constructor
+    		removeAllViews();
+    		LinkedList<Integer> colors = (LinkedList<Integer>)bundle.getSerializable("colors");
+    		for (int color : colors)
+    		{
+    			AddColor(color);
+    		}
+    		
+    		int selected = bundle.getInt("selected");
+    		getChildAt(selected).setSelected(true);
+    		
+    		super.onRestoreInstanceState(bundle.getParcelable("super"));
+    	}
     }
     
     /*
