@@ -9,6 +9,8 @@ import android.graphics.Rect;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
+import android.os.Bundle;
+import android.os.Parcelable;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
@@ -28,23 +30,64 @@ public class PaletteView extends ViewGroup
     private int baseWidth;
     private int baseHeight;
 
+    private OnColorChangeListener onColorChangeListener = null;
+    
+    public boolean isMixing = false;
+    
+    private View.OnTouchListener clickListener = new View.OnTouchListener()
+    {
+    	@Override
+		public boolean onTouch(View v, MotionEvent motionEvent)
+    	{
+    		if (motionEvent.getAction() != MotionEvent.ACTION_DOWN)
+    			return false;
+    		
+    		if (isMixing)
+    		{
+    			if (onColorChangeListener != null)
+					onColorChangeListener.onColorChange(((PaintView)v).GetColor());
+    		}
+    		else
+    		{
+				for (int i = 0; i < getChildCount(); i++)
+				{
+					getChildAt(i).setSelected(false);
+				}
+				v.setSelected(true);
+				if (onColorChangeListener != null)
+					onColorChangeListener.onColorChange(((PaintView)v).GetColor());
+    		}
+			
+			return true;
+		}
+    };
+    
 	@TargetApi(Build.VERSION_CODES.JELLY_BEAN)
 	public PaletteView(Context context)
     {
         super(context);
         bound = new Rect();
         
-        //ImageView paletteImg = new ImageView(context);
         Bitmap paletteBmp = BitmapFactory.decodeResource(getResources(), R.drawable.palette);
-        //paletteImg.setImageBitmap(paletteBmp);
-        //paletteImg.setId(PALETTE_IMG_ID);
-        
-        //addView(paletteImg);
         setBackground(getResources().getDrawable(R.drawable.palette));
         baseWidth  = paletteBmp.getWidth();
         baseHeight = paletteBmp.getHeight();
+        
+        // Setup initial paint swatches
+        AddColor(0xFFFF0000);
+        AddColor(0xFF00FF00);
+        AddColor(0xFF0000FF);
+        
+        getChildAt(0).setSelected(true);
     }
 
+	public void AddColor(int color)
+	{
+		PaintView pv = new PaintView(getContext(), color);
+		pv.setOnTouchListener(clickListener);
+		addView(pv);
+	}
+	
     @Override
     protected void onLayout(boolean b, int i1, int i2, int i3, int i4)
     {
@@ -91,7 +134,28 @@ public class PaletteView extends ViewGroup
             v.layout((int)left, (int)top, (int)right, (int)bottom);
         }
     }
-
+    
+    public int getSelectedColor()
+    {
+    	for (int i = 0; i < getChildCount(); i++)
+    	{
+    		if (getChildAt(i).isSelected())
+    			return ((PaintView)getChildAt(i)).GetColor();
+    	}
+    	// I guess if there is no selection, we'll go with a default?
+    	return 0xFF000000;
+    }
+    
+    public void setOnColorChangeListener(OnColorChangeListener _onColorChangeListener)
+    {
+    	onColorChangeListener = _onColorChangeListener;
+    }
+    
+    public interface OnColorChangeListener
+    {
+    	public void onColorChange(int newColor);
+    }
+    
     /*
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec)
@@ -175,7 +239,6 @@ public class PaletteView extends ViewGroup
 		setMeasuredDimension((int)scaledWidth, (int)scaledHeight);
     }
     */
-    
 
     /*
     @Override

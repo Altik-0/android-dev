@@ -7,6 +7,7 @@ import android.graphics.BitmapFactory;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 
@@ -15,28 +16,40 @@ public class PaintingActivity extends Activity
 
     private PaintingView paintingView;
     private PaletteView paletteView;
+    private Button mixButton;
 
     private int colorSelection;
 
-    private View.OnTouchListener touchListener = new View.OnTouchListener()
+    private PaletteView.OnColorChangeListener colorChangeListener = new PaletteView.OnColorChangeListener()
     {
-        private boolean active = true;
         @Override
-        public boolean onTouch(View view, MotionEvent motionEvent)
+        public void onColorChange(int newColor)
         {
-            // Really, this is just to cover our bases: you shouldn't ever add this
-            // as a touchListener for anything but a PaintView
-            if (!(view instanceof PaintView))
-                return false;
-
-            if (motionEvent.getAction() == MotionEvent.ACTION_DOWN)
-                active = true;
-            else if (motionEvent.getAction() == MotionEvent.ACTION_CANCEL)
-                active = false;
-            else if (motionEvent.getAction() == MotionEvent.ACTION_UP && active)
-                colorSelection = ((PaintView)view).GetColor();
-            return true;
+        	if (mixButton.isSelected())
+        		paletteView.AddColor(mixColors(newColor, paletteView.getSelectedColor()));
+        	else
+        		paintingView.setCurColor(newColor);
         }
+    };
+    
+    private View.OnClickListener mixButtonListener = new View.OnClickListener()
+    {
+		@Override
+		public void onClick(View v)
+		{
+			if (mixButton.isSelected())
+			{
+				mixButton.setText("Mix! :D");
+				mixButton.setSelected(false);
+				paletteView.isMixing = false;
+			}
+			else
+			{
+				mixButton.setText("Click another color to mix! :o");
+				mixButton.setSelected(true);
+				paletteView.isMixing = true;
+			}
+		}
     };
 
     @SuppressWarnings("deprecation")
@@ -50,12 +63,19 @@ public class PaintingActivity extends Activity
         paintingView = new PaintingView(this);
         paletteView = new PaletteView(this);
 
-        LinearLayout layout = new LinearLayout(this);
+        LinearLayout outerLayout = new LinearLayout(this);
+        LinearLayout innerLayout = new LinearLayout(this);
         
         if (getWindowManager().getDefaultDisplay().getWidth() < getWindowManager().getDefaultDisplay().getHeight())
-        	layout.setOrientation(LinearLayout.VERTICAL);
+        {
+        	outerLayout.setOrientation(LinearLayout.VERTICAL);
+        	innerLayout.setOrientation(LinearLayout.VERTICAL);
+        }
         else
-        	layout.setOrientation(LinearLayout.HORIZONTAL);
+        {
+        	outerLayout.setOrientation(LinearLayout.HORIZONTAL);
+        	innerLayout.setOrientation(LinearLayout.VERTICAL);
+        }
 
         LinearLayout.LayoutParams paintingParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,
         																 		 LinearLayout.LayoutParams.MATCH_PARENT);
@@ -65,25 +85,42 @@ public class PaintingActivity extends Activity
         paletteParams.weight = 1.0f;
         
         paintingView.setLayoutParams(paintingParams);
-        paletteView.setLayoutParams(paletteParams);
-        layout.addView(paletteView);
-        layout.addView(paintingView);
+        paintingView.setId(0xBADC0C0A);
+        paletteView.setId(0xFEEDF00D);
+        paletteView.setOnColorChangeListener(colorChangeListener);
+        paintingView.setCurColor(paletteView.getSelectedColor());
+        
+        mixButton = new Button(this);
+        mixButton.setText("Mix! :D");
+        mixButton.setOnClickListener(mixButtonListener);
+        
+        innerLayout.addView(mixButton);
+        innerLayout.addView(paletteView);
+        innerLayout.setLayoutParams(paletteParams);
+        
+        outerLayout.addView(innerLayout);
+        outerLayout.addView(paintingView);
         
         //paintingView.setBackgroundColor(0xFFFF0000);
         //paletteView.setBackgroundColor(0xFFccFFcc);
-        
-        PaintView red   = new PaintView(this, 0xFFFF0000);
-        PaintView green = new PaintView(this, 0xFF00FF00);
-        PaintView blue  = new PaintView(this, 0xFF0000FF);
 
-        red.setOnTouchListener(touchListener);
-        green.setOnTouchListener(touchListener);
-        blue.setOnTouchListener(touchListener);
-
-        paletteView.addView(red);
-        paletteView.addView(green);
-        paletteView.addView(blue);
-
-        setContentView(layout);
+        setContentView(outerLayout);
+    }
+    
+    private int mixColors(int color1, int color2)
+    {
+    	int r1 = (color1 >> 16) & 0xFF;
+    	int g1 = (color1 >> 8 ) & 0xFF;
+    	int b1 = (color1      ) & 0xFF;
+    	
+    	int r2 = (color2 >> 16) & 0xFF;
+    	int g2 = (color2 >> 8 ) & 0xFF;
+    	int b2 = (color2      ) & 0xFF;
+    	
+    	int r = ((r1 + r2) / 2) & 0xFF;
+    	int g = ((g1 + g2) / 2) & 0xFF;
+    	int b = ((b1 + b2) / 2) & 0xFF;
+    	
+    	return 0xFF000000 | (r << 16) | (g << 8) | b;
     }
 }

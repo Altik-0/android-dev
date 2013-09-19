@@ -8,7 +8,9 @@ import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.Point;
+import android.os.Bundle;
 import android.os.Debug;
+import android.os.Parcelable;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
@@ -21,6 +23,8 @@ public class PaintingView extends View
 	private LinkedList<LinkedList<Point>> curves;
 	private LinkedList<Integer> curveColors;
 	private LinkedList<Float> curveWidths;
+    private int curColor = 0xFF000000;
+    private float curWidth = 10.0f;
 	
     private Point offset;     // Denotes offset of points in model with points on view
 
@@ -34,17 +38,37 @@ public class PaintingView extends View
         offset = new Point(getWidth() / 2, getHeight() / 2);
     }
     
-    private void newCurve(int color, float width)
+    private void newCurve()
 	{
-		curves.addFirst(new LinkedList<Point>());
-		curveColors.addFirst(color);
-		curveWidths.addFirst(width);
+		curves.addLast(new LinkedList<Point>());
+		curveColors.addLast(curColor);
+		curveWidths.addLast(curWidth);
 	}
     
     private void addPoint(int x, int y)
 	{
-		curves.get(0).add(new Point(x, y));
+		curves.getLast().add(new Point(x, y));
 	}
+    
+    public void setCurColor(int newColor)
+    {
+    	curColor = newColor;
+    }
+    
+    public void setCurWidth(float newWidth)
+    {
+    	curWidth = newWidth;
+    }
+    
+    public int getCurColor()
+    {
+    	return curColor;
+    }
+    
+    public float getCurWidth()
+    {
+    	return curWidth;
+    }
 
     @Override
     public void onDraw(Canvas canvas)
@@ -89,7 +113,7 @@ public class PaintingView extends View
         switch (motionEvent.getAction())
         {
             case MotionEvent.ACTION_DOWN:
-                newCurve(0xFF000000, 5.0f);      //TODO: make not static values
+                newCurve();
                 addPoint((int)motionEvent.getAxisValue(MotionEvent.AXIS_X),
                          (int)motionEvent.getAxisValue(MotionEvent.AXIS_Y));
                 invalidate();
@@ -107,5 +131,36 @@ public class PaintingView extends View
         }
 
         return true;
+    }
+    
+    @Override
+    protected Parcelable onSaveInstanceState()
+    {
+    	Bundle bundle = new Bundle();
+    	bundle.putSerializable("curves", curves);
+    	bundle.putSerializable("colors", curveColors);
+    	bundle.putSerializable("widths", curveWidths);
+    	bundle.putInt("curColor", curColor);
+    	bundle.putFloat("curWidth", curWidth);
+    	bundle.putParcelable("super", super.onSaveInstanceState());
+    	
+    	return bundle;
+    }
+    
+    @Override
+    protected void onRestoreInstanceState(Parcelable parcel)
+    {
+    	// Sanity check
+    	if (parcel instanceof Bundle)
+    	{
+    		Bundle bundle = (Bundle)parcel;
+			curves = (LinkedList<LinkedList<Point>>)bundle.getSerializable("curves");
+    		curveColors = (LinkedList<Integer>)bundle.getSerializable("colors");
+    		curveWidths = (LinkedList<Float>)bundle.getSerializable("widths");
+    		curColor = bundle.getInt("curColor");
+    		curWidth = bundle.getFloat("curWidth");
+    		
+    		super.onRestoreInstanceState(bundle.getParcelable("super"));
+    	}
     }
 }
