@@ -12,14 +12,16 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.SeekBar;
 import android.widget.SeekBar.OnSeekBarChangeListener;
+import android.widget.ToggleButton;
 
 public class PaintingActivity extends Activity
 {
 
     private PaintingView paintingView;
     private PaletteView paletteView;
-    private Button mixButton;
-    private Button handButton;
+    private ToggleButton mixButton;
+    private ToggleButton handButton;
+    private ToggleButton removeButton;
     private SeekBar widthSelector;
 
     private int colorSelection;
@@ -43,14 +45,18 @@ public class PaintingActivity extends Activity
 		{
 			if (mixButton.isSelected())
 			{
-				mixButton.setText("Mix! :D");
+				mixButton.setChecked(false);
+				mixButton.setText("Mix");
 				mixButton.setSelected(false);
+				removeButton.setEnabled(true);
 				paletteView.isMixing = false;
 			}
 			else
 			{
-				mixButton.setText("Click another color to mix! :o");
+				mixButton.setChecked(true);
+				mixButton.setText("Stop Mixing");
 				mixButton.setSelected(true);
+				removeButton.setEnabled(false);
 				paletteView.isMixing = true;
 			}
 		}
@@ -63,15 +69,41 @@ public class PaintingActivity extends Activity
 		{
 			if (handButton.isSelected())
 			{
-				handButton.setText("Hand Tool! <3");
+				handButton.setChecked(false);
+				handButton.setText("Hand Tool");
 				handButton.setSelected(false);
 				paintingView.isHandTool = false;
 			}
 			else
 			{
-				handButton.setText("Disable Hand... </3");
+				handButton.setChecked(true);
+				handButton.setText("Disable Hand");
 				handButton.setSelected(true);
 				paintingView.isHandTool = true;
+			}
+		}
+    };
+    
+    private View.OnClickListener removeButtonListener = new View.OnClickListener()
+    {
+		@Override
+		public void onClick(View v)
+		{
+			if (removeButton.isSelected())
+			{
+				removeButton.setChecked(false);
+				removeButton.setText("Remove Color");
+				removeButton.setSelected(false);
+				mixButton.setEnabled(true);
+				paletteView.isRemoving = false;
+			}
+			else
+			{
+				removeButton.setChecked(true);
+				removeButton.setText("Stop Removing");
+				removeButton.setSelected(true);
+				mixButton.setEnabled(false);
+				paletteView.isRemoving = true;
 			}
 		}
     };
@@ -139,13 +171,17 @@ public class PaintingActivity extends Activity
         paletteView.setOnColorChangeListener(colorChangeListener);
         paintingView.setCurColor(paletteView.getSelectedColor());
 
-        mixButton = new Button(this);
-        mixButton.setText("Mix! :D");
+        mixButton = new ToggleButton(this);
+        mixButton.setText("Mix");
         mixButton.setOnClickListener(mixButtonListener);
         
-        handButton = new Button(this);
-        handButton.setText("Hand Tool! <3");
+        handButton = new ToggleButton(this);
+        handButton.setText("Hand Tool");
         handButton.setOnClickListener(handButtonListener);
+        
+        removeButton = new ToggleButton(this);
+        removeButton.setText("Remove Color");
+        removeButton.setOnClickListener(removeButtonListener);
         
         widthSelector = new SeekBar(this);
         widthSelector.setMax(100);
@@ -156,6 +192,7 @@ public class PaintingActivity extends Activity
         
         buttonLayout.addView(mixButton);
         buttonLayout.addView(handButton);
+        buttonLayout.addView(removeButton);
         
         innerLayout.addView(buttonLayout);
         innerLayout.addView(widthSelector);

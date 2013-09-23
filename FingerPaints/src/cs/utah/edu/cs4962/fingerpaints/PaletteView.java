@@ -33,6 +33,7 @@ public class PaletteView extends ViewGroup
     private OnColorChangeListener onColorChangeListener = null;
     
     public boolean isMixing = false;
+    public boolean isRemoving = false;
     
     private View.OnTouchListener clickListener = new View.OnTouchListener()
     {
@@ -46,6 +47,10 @@ public class PaletteView extends ViewGroup
     		{
     			if (onColorChangeListener != null)
 					onColorChangeListener.onColorChange(((PaintView)v).GetColor());
+    		}
+    		else if (isRemoving)
+    		{
+    			RemoveColor(v.getId());
     		}
     		else
     		{
@@ -94,7 +99,38 @@ public class PaletteView extends ViewGroup
 	{
 		PaintView pv = new PaintView(getContext(), color);
 		pv.setOnTouchListener(clickListener);
+		pv.setId(getChildCount());
 		addView(pv);
+	}
+	
+	public void RemoveColor(int viewId)
+	{
+		PaintView pv = (PaintView)findViewById(viewId);
+		
+		if (pv.isSelected())
+		{
+			if (viewId > 0)
+			{
+				PaintView newPv = (PaintView)findViewById(viewId-1);
+				newPv.setSelected(true);
+				if (onColorChangeListener != null)
+					onColorChangeListener.onColorChange(newPv.GetColor());
+			}
+			else if (viewId < getChildCount() - 1)
+			{
+				PaintView newPv = (PaintView)findViewById(viewId+1);
+				newPv.setSelected(true);
+				if (onColorChangeListener != null)
+					onColorChangeListener.onColorChange(newPv.GetColor());
+			}
+		}
+
+		for (int i = viewId+1; i < getChildCount(); i++)
+		{
+			findViewById(i).setId(i-1);
+		}
+		
+		removeView(pv);
 	}
 	
     @Override
@@ -102,8 +138,8 @@ public class PaletteView extends ViewGroup
     {    	    	
     	// layout paint blobs
     	// Yeah, these are some pretty arbitrary constants - oh well, looks nice enough.
-        int paintWidth = (getWidth() < getHeight()) ? (int)((float)getWidth() / 6.0f) :
-        											  (int)((float)getHeight() / 6.0f);
+        int paintWidth = (getWidth() < getHeight()) ? (int)((float)getWidth() / 5.0f) :
+        											  (int)((float)getHeight() / 5.0f);
         int paintHeight = paintWidth;
         int padding = paintWidth;
         
@@ -115,8 +151,6 @@ public class PaletteView extends ViewGroup
         for (int i = 0; i < getChildCount(); i++)
         {
             View v = getChildAt(i);
-            if (v.getId() == PALETTE_IMG_ID)
-            	continue;
             
             //float radius = (bound.width() > bound.height()) ? bound.height() / 2.0f : bound.width() / 2.0f;
             float radiusX = bound.width() / 2.0f;
@@ -124,9 +158,9 @@ public class PaletteView extends ViewGroup
             
             // Sentinel values:
             // Yep, more trashy looking constants. Sorry - it worked out nicely, though!
-            float gapAngle = (float)(Math.PI / 2.0);
-            float startAngle = (float)(-Math.PI / 12.0) + gapAngle;
-            int childCnt = getChildCount() - 1;	// we don't count the palette image
+            float gapAngle = (float)(34.0 * Math.PI / 64.0);
+            float startAngle = (float)(-3.0 * Math.PI / 32.0) + gapAngle;
+            int childCnt = getChildCount();
             float angleItr = ((float)i / (float)childCnt);
             float angle = ((float)((Math.PI * 2.0) - gapAngle) * angleItr) + startAngle;
             float left = ((float)(Math.cos(angle) + 1.0) * radiusX) - (paintWidth  / 2.0f) + bound.left;
@@ -204,104 +238,4 @@ public class PaletteView extends ViewGroup
     		super.onRestoreInstanceState(bundle.getParcelable("super"));
     	}
     }
-    
-    /*
-    @Override
-    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec)
-    {
-    	super.onMeasure(widthMeasureSpec, heightMeasureSpec);
-    	
-    	int padding = (getWidth() < getHeight()) ? (int)((float)getWidth() / 6.0f) :
-			  									   (int)((float)getHeight() / 6.0f);
-    	bound.left = padding;
-        bound.top  = padding;
-        bound.right  = bound.left + getWidth()  - padding - padding;
-        bound.bottom = bound.top  + getHeight() - padding - padding;
-    	
-    	int width  = MeasureSpec.getSize(widthMeasureSpec);
-    	int height = MeasureSpec.getSize(heightMeasureSpec);
-    	int widthMode  = MeasureSpec.getMode(widthMeasureSpec);
-    	int heightMode = MeasureSpec.getMode(heightMeasureSpec);
-    	
-    	float scalar;
-    	
-    	switch (widthMode)
-    	{
-    	// We will treat these as the same, even though they aren't
-    	case MeasureSpec.EXACTLY:
-    	case MeasureSpec.AT_MOST:
-    		switch (heightMode)
-    		{
-    		case MeasureSpec.EXACTLY:
-    		case MeasureSpec.AT_MOST:
-    			scalar = (width > height) ? (float)height / (float)bound.height() :
-    										(float)width / (float)bound.width();
-    			break;
-    			
-    		case MeasureSpec.UNSPECIFIED:
-			default:
-				scalar = (float)width / (float)bound.width();
-				break;
-    		}
-    		break;
-    	
-    	// These cases are the same - just specifying to be explicit
-    	case MeasureSpec.UNSPECIFIED:
-    	default:
-    		switch (heightMode)
-    		{
-    		case MeasureSpec.EXACTLY:
-    		case MeasureSpec.AT_MOST:
-    			scalar = (float)height / (float)bound.height();
-    			break;
-    			
-    		case MeasureSpec.UNSPECIFIED:
-			default:
-				scalar = (width > height) ? (float)height / (float)bound.height() :
-					(float)width / (float)bound.width();
-				break;
-    		}
-    		break;
-    	}
-
-    	Log.i("Width", MeasureSpec.toString(widthMeasureSpec));
-    	Log.i("Height", MeasureSpec.toString(heightMeasureSpec));
-
-		float scaledWidth = bound.width() * scalar;
-		float scaledHeight = bound.height() * scalar;
-		
-		// Arbitrary minimum imposed: if our system is too small, we'll just request more space
-		if (scaledWidth < 300)
-		{
-			scalar = 300.0f / (float)bound.width();
-			scaledWidth = bound.width() * scalar;
-			scaledHeight = bound.height() * scalar;
-			resolveSize((int) scaledWidth, widthMeasureSpec);
-		}
-		if (scaledHeight < 150)
-		{
-			scalar = 150.0f / (float)bound.height();
-			scaledWidth = bound.width() * scalar;
-			scaledHeight = bound.height() * scalar;
-			resolveSize((int) scaledHeight, heightMeasureSpec);
-		}
-		setMeasuredDimension((int)scaledWidth, (int)scaledHeight);
-    }
-    */
-
-    /*
-    @Override
-    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec)
-    {
-    	int width  = MeasureSpec.getSize(widthMeasureSpec);
-    	int height = MeasureSpec.getSize(heightMeasureSpec);
-    	//int widthSpec  = MeasureSpec.getMode(widthMeasureSpec);
-    	//int heightSpec = MeasureSpec.getMode(heightMeasureSpec);
-    	
-    	float scalar = (width < height) ? (float)width / (float)baseWidth :
-    									  (float)height / (float)baseHeight;
-    	
-    	setMeasuredDimension((int)(baseWidth * scalar), (int)(baseHeight * scalar));
-    }
-    */
 }
