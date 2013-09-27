@@ -9,6 +9,8 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.RectF;
+import android.graphics.Typeface;
+import android.graphics.Paint.Align;
 import android.util.Log;
 import android.view.View;
 
@@ -43,12 +45,18 @@ public class CardView extends View
 	public final float NAME_BAR_RADIUS_Y = 3.0f;
 	public final float NAME_BAR_HEIGHT = 6.0f;
 	public final float NAME_BAR_WIDTH = 55.0f;
+	public final float NAME_TEXT_POS_X = 6.0f;
+	public final float NAME_TEXT_POS_Y = 7.9f;
+	public final float NAME_TEXT_FONT_SIZE = 2.7f;
 	public final float TYPE_BAR_POS_X = 4.0f;
 	public final float TYPE_BAR_POS_Y = 49.0f;
 	public final float TYPE_BAR_RADIUS_X = 1.5f;
 	public final float TYPE_BAR_RADIUS_Y = 3.0f;
 	public final float TYPE_BAR_HEIGHT = 6.0f;
 	public final float TYPE_BAR_WIDTH = 55.0f;
+	public final float TYPE_TEXT_POS_X = 5.5f;
+	public final float TYPE_TEXT_POS_Y = 52.9f;
+	public final float TYPE_TEXT_FONT_SIZE = 2.7f;
 	public final float TEXT_BOX_POS_X = 5.0f;
 	public final float TEXT_BOX_POS_Y = 55.0f;
 	public final float TEXT_BOX_HEIGHT = 24.0f;
@@ -57,43 +65,24 @@ public class CardView extends View
 	public final float ART_BOX_POS_Y = 10.0f;
 	public final float ART_BOX_HEIGHT = 41.0f;
 	public final float ART_BOX_WIDTH = 53.0f;
+	public final float PT_BOX_POS_X = 46.0f;
+	public final float PT_BOX_POS_Y = 77.0f;
+	public final float PT_BOX_HEIGHT = 6.0f;
+	public final float PT_BOX_WIDTH = 13.0f;
+	public final float PT_BOX_RADIUS_X = 1.5f;
+	public final float PT_BOX_RADIUS_Y = 3.0f;
+	public final float PT_TEXT_FONT_SIZE = 4.3f;
+	public final float PT_TEXT_POS_X = 52.5f;
+	public final float PT_TEXT_POS_Y = 81.5f;
 	public final float STROKE_WIDTH = 1.0f;
 	
-	private String name;
-	private String cost;
-	private int power;
-	private int toughness;
-	private ArrayList<CardType> types;
-	private ArrayList<CardColor> colors;
-	// TODO: private Bitmap image;
-	// TODO: private String artist;
+	private CardData card;
 	
 	// Constructor that assumes you are using a creature
-	public CardView(Context context, String _name, String _cost,
-			ArrayList<CardColor> _colors, ArrayList<CardType> _types)
+	public CardView(Context context, CardData _card)
 	{
 		super(context);
-		setName(_name);
-		setCost(_cost);
-		setColors(_colors);
-		setTypes(_types);
-		
-		// Sentinel value for noncreatures
-		setPower(0);
-		setToughness(0);
-	}
-	
-	// Constructor that assumes you are using a creature
-	public CardView(Context context, String _name, String _cost, int _power, int _toughness,
-			ArrayList<CardColor> _colors, ArrayList<CardType> _types)
-	{
-		super(context);
-		setName(_name);
-		setCost(_cost);
-		setPower(_power);
-		setToughness(_toughness);
-		setColors(_colors);
-		setTypes(_types);
+		card = new CardData(_card);
 	}
 
 	@Override
@@ -172,8 +161,7 @@ public class CardView extends View
 		
 		RectF textBox = new RectF(bounds);
 		textBox.left   += TEXT_BOX_POS_X * scalar;
-		textBox.top    += TEXT_BOX_POS_Y * scalar
-				;
+		textBox.top    += TEXT_BOX_POS_Y * scalar;
 		textBox.right   = textBox.left + (TEXT_BOX_WIDTH * scalar);
 		textBox.bottom  = textBox.top  + (TEXT_BOX_HEIGHT * scalar);
 		canvas.drawRect(textBox, textBoxPaint);
@@ -191,7 +179,7 @@ public class CardView extends View
 		nameBar.bottom  = nameBar.top  + (NAME_BAR_HEIGHT * scalar);
 		canvas.drawRoundRect(nameBar, NAME_BAR_RADIUS_X * scalar, NAME_BAR_RADIUS_Y * scalar, nameBarPaint);
 		canvas.drawRoundRect(nameBar, NAME_BAR_RADIUS_X * scalar, NAME_BAR_RADIUS_Y * scalar, strokePaint);
-
+				
 		Paint typeBarPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
 		typeBarPaint.setStyle(Paint.Style.FILL);
 		typeBarPaint.setColor(0xFFaaaaaa);
@@ -203,26 +191,66 @@ public class CardView extends View
 		typeBar.bottom  = typeBar.top  + (TYPE_BAR_HEIGHT * scalar);
 		canvas.drawRoundRect(typeBar, TYPE_BAR_RADIUS_X * scalar, TYPE_BAR_RADIUS_Y * scalar, typeBarPaint);
 		canvas.drawRoundRect(typeBar, TYPE_BAR_RADIUS_X * scalar, TYPE_BAR_RADIUS_Y * scalar, strokePaint);
+			
+		// Next up: draw the text elements
+		Paint textPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+		textPaint.setTextSize(NAME_TEXT_FONT_SIZE * scalar);
+		textPaint.setColor(Color.BLACK);
+		textPaint.setStyle(Paint.Style.FILL);
+		Typeface tf = Typeface.create("Times New Roman", Typeface.BOLD);
+		textPaint.setTypeface(tf);
+		
+		canvas.drawText(card.getName(),
+						bounds.left + (NAME_TEXT_POS_X * scalar),
+						bounds.top  + (NAME_TEXT_POS_Y * scalar),
+						textPaint);
+		
+		textPaint.setTextSize(TYPE_TEXT_FONT_SIZE * scalar);
+		canvas.drawText(card.getTypeString(),
+						bounds.left + (TYPE_TEXT_POS_X * scalar),
+						bounds.top + (TYPE_TEXT_POS_Y * scalar),
+						textPaint);
+
+		// Draw PT only if a creature
+		if (card.getTypes().contains(CardType.Creature))
+		{
+			RectF ptBar = new RectF(bounds);
+			ptBar.left   += PT_BOX_POS_X * scalar;
+			ptBar.top    += PT_BOX_POS_Y * scalar;
+			ptBar.right   = ptBar.left + (PT_BOX_WIDTH  * scalar);
+			ptBar.bottom  = ptBar.top  + (PT_BOX_HEIGHT * scalar);
+			canvas.drawRoundRect(ptBar, PT_BOX_RADIUS_X * scalar, PT_BOX_RADIUS_Y * scalar, typeBarPaint);
+			canvas.drawRoundRect(ptBar, PT_BOX_RADIUS_X * scalar, PT_BOX_RADIUS_Y * scalar, strokePaint);
+			
+			textPaint.setTextSize(PT_TEXT_FONT_SIZE * scalar);
+			textPaint.setTextAlign(Align.CENTER);
+			canvas.drawText(card.getPowerToughnessString(),
+							bounds.left + (PT_TEXT_POS_X * scalar),
+							bounds.top  + (PT_TEXT_POS_Y * scalar),
+							textPaint);
+		}
+		
+		Log.i("M:TG card type", card.getTypeString());
 	}
 	
 	// Used to determine the frame's color based on card type, color, etc.
 	private int getBackgroundColor()
 	{
 		// Land always brown:
-		if (types.contains(CardType.Land))
+		if (card.getTypes().contains(CardType.Land))
 			return 0xFF662a0e;
 		// Artifacts always grey:
-		else if (types.contains(CardType.Artifact))
+		else if (card.getTypes().contains(CardType.Artifact))
 			return Color.GRAY;
 		// Eldrazi / other colorless options
-		else if (colors.size() == 0)
+		else if (card.getColors().size() == 0)
 		{
 			return Color.DKGRAY;	// ??? Eldrazi and friends are just going to be dark grey for now
 		}
 		// Single color options:
-		else if (colors.size() == 1)
+		else if (card.getColors().size() == 1)
 		{
-			switch(colors.get(0))
+			switch(card.getColors().get(0))
 			{
 			case White:
 				return Color.WHITE;
@@ -243,27 +271,27 @@ public class CardView extends View
 			return 0xFFE0C100;
 	}
 	
-	// Used to determine outline colors based on card type, color, etc.
+	// Used to determine outline card.getColors() based on card type, color, etc.
 	private int getOutlineColor()
 	{
 		// Land always brown:
-		if (types.contains(CardType.Land))
+		if (card.getTypes().contains(CardType.Land))
 			return 0xFF421B09;			// Dark brown
 		// Colorless options, based on type:
-		else if (colors.size() == 0)
+		else if (card.getColors().size() == 0)
 		{
-			if (types.contains(CardType.Artifact))
+			if (card.getTypes().contains(CardType.Artifact))
 				return 0xFFbbbbbb;
 			else
 				return Color.GRAY;		// ??? Eldrazi and friends are just going to be dark grey for now
 		}
 		// Single color options:
-		if (colors.size() == 1)
+		if (card.getColors().size() == 1)
 		{
 			// If a colored artifact, do a greyed tint color:
-			if (types.contains(CardType.Artifact))
+			if (card.getTypes().contains(CardType.Artifact))
 			{
-				switch(colors.get(0))
+				switch(card.getColors().get(0))
 				{
 				case White:
 					return 0xFFdddddd;
@@ -280,7 +308,7 @@ public class CardView extends View
 			}
 			else
 			{
-				switch(colors.get(0))
+				switch(card.getColors().get(0))
 				{
 				case White:
 					return 0xFFdddddd;
@@ -301,69 +329,4 @@ public class CardView extends View
 		else
 			return 0xFFC78F00;
 	}
-	
-	@Override
-	public int getMinimumWidth()
-	{
-		return (int)CARD_WIDTH;
-	}
-
-	@Override
-	public int getMinimumHeight()
-	{
-		return (int)CARD_HEIGHT;
-	}
-
-	public String getName()
-	{
-		return name;
-	}
-
-	public void setName(String name)
-	{
-		this.name = name;
-	}
-
-	public ArrayList<CardType> getTypes()
-	{
-		return types;
-	}
-
-	public void setTypes(ArrayList<CardType> types)
-	{
-		this.types = types;
-	}
-
-	public int getPower() {
-		return power;
-	}
-
-	public void setPower(int power) {
-		this.power = power;
-	}
-
-	public int getToughness() {
-		return toughness;
-	}
-
-	public void setToughness(int toughness) {
-		this.toughness = toughness;
-	}
-
-	public ArrayList<CardColor> getColors() {
-		return colors;
-	}
-
-	public void setColors(ArrayList<CardColor> colors) {
-		this.colors = colors;
-	}
-
-	public String getCost() {
-		return cost;
-	}
-
-	public void setCost(String cost) {
-		this.cost = cost;
-	}
-
 }
