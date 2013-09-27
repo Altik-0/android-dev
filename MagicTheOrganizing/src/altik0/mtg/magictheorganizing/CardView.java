@@ -57,6 +57,7 @@ public class CardView extends View
 	public final float ART_BOX_POS_Y = 10.0f;
 	public final float ART_BOX_HEIGHT = 41.0f;
 	public final float ART_BOX_WIDTH = 53.0f;
+	public final float STROKE_WIDTH = 1.0f;
 	
 	private String name;
 	private String cost;
@@ -129,8 +130,14 @@ public class CardView extends View
 			bounds.top += heightPadding;
 			bounds.bottom -= heightPadding;
 		}
+
+		int strokeColor = getOutlineColor();
+		Paint strokePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+		strokePaint.setStyle(Paint.Style.STROKE);
+		strokePaint.setStrokeWidth(STROKE_WIDTH * scalar);
+		strokePaint.setColor(strokeColor);
 		
-		// First objective: draw black border
+		// First objective: draw black border		
 		Paint borderPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
 		borderPaint.setColor(Color.BLACK);
 		borderPaint.setStyle(Paint.Style.FILL);
@@ -157,6 +164,7 @@ public class CardView extends View
 		artBox.right   = artBox.left + (ART_BOX_WIDTH * scalar);
 		artBox.bottom  = artBox.top  + (ART_BOX_HEIGHT * scalar);
 		canvas.drawRect(artBox, artBoxPaint);
+		canvas.drawRect(artBox, strokePaint);
 		
 		Paint textBoxPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
 		textBoxPaint.setStyle(Paint.Style.FILL);
@@ -169,6 +177,7 @@ public class CardView extends View
 		textBox.right   = textBox.left + (TEXT_BOX_WIDTH * scalar);
 		textBox.bottom  = textBox.top  + (TEXT_BOX_HEIGHT * scalar);
 		canvas.drawRect(textBox, textBoxPaint);
+		canvas.drawRect(textBox, strokePaint);
 		
 		// Draw type and name bars
 		Paint nameBarPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
@@ -181,6 +190,7 @@ public class CardView extends View
 		nameBar.right   = nameBar.left + (NAME_BAR_WIDTH  * scalar);
 		nameBar.bottom  = nameBar.top  + (NAME_BAR_HEIGHT * scalar);
 		canvas.drawRoundRect(nameBar, NAME_BAR_RADIUS_X * scalar, NAME_BAR_RADIUS_Y * scalar, nameBarPaint);
+		canvas.drawRoundRect(nameBar, NAME_BAR_RADIUS_X * scalar, NAME_BAR_RADIUS_Y * scalar, strokePaint);
 
 		Paint typeBarPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
 		typeBarPaint.setStyle(Paint.Style.FILL);
@@ -192,6 +202,7 @@ public class CardView extends View
 		typeBar.right   = typeBar.left + (TYPE_BAR_WIDTH * scalar);
 		typeBar.bottom  = typeBar.top  + (TYPE_BAR_HEIGHT * scalar);
 		canvas.drawRoundRect(typeBar, TYPE_BAR_RADIUS_X * scalar, TYPE_BAR_RADIUS_Y * scalar, typeBarPaint);
+		canvas.drawRoundRect(typeBar, TYPE_BAR_RADIUS_X * scalar, TYPE_BAR_RADIUS_Y * scalar, strokePaint);
 	}
 	
 	// Used to determine the frame's color based on card type, color, etc.
@@ -199,14 +210,52 @@ public class CardView extends View
 	{
 		// Land always brown:
 		if (types.contains(CardType.Land))
-			return 0xFF662a0e;			// Dark brown
+			return 0xFF662a0e;
+		// Artifacts always grey:
+		else if (types.contains(CardType.Artifact))
+			return Color.GRAY;
+		// Eldrazi / other colorless options
+		else if (colors.size() == 0)
+		{
+			return Color.DKGRAY;	// ??? Eldrazi and friends are just going to be dark grey for now
+		}
+		// Single color options:
+		else if (colors.size() == 1)
+		{
+			switch(colors.get(0))
+			{
+			case White:
+				return Color.WHITE;
+			case Blue:
+				return 0xFF000088;
+			case Black:
+				return 0xFF333333;
+			case Red:
+				return 0xFF880000;
+			case Green:
+			default:
+				return 0xFF008800;
+			}
+		}
+		// Multicolor options:
+		// For now, just gold
+		else
+			return 0xFFE0C100;
+	}
+	
+	// Used to determine outline colors based on card type, color, etc.
+	private int getOutlineColor()
+	{
+		// Land always brown:
+		if (types.contains(CardType.Land))
+			return 0xFF421B09;			// Dark brown
 		// Colorless options, based on type:
 		else if (colors.size() == 0)
 		{
 			if (types.contains(CardType.Artifact))
-				return Color.GRAY;
+				return 0xFFbbbbbb;
 			else
-				return Color.DKGRAY;	// ??? Eldrazi and friends are just going to be dark grey for now
+				return Color.GRAY;		// ??? Eldrazi and friends are just going to be dark grey for now
 		}
 		// Single color options:
 		if (colors.size() == 1)
@@ -217,7 +266,7 @@ public class CardView extends View
 				switch(colors.get(0))
 				{
 				case White:
-					return 0xFFA0A0A0;
+					return 0xFFdddddd;
 				case Blue:
 					return 0xFF6D6DA0;
 				case Black:
@@ -234,22 +283,19 @@ public class CardView extends View
 				switch(colors.get(0))
 				{
 				case White:
-					return Color.WHITE;
+					return 0xFFdddddd;
 				case Blue:
-					return 0xFF000088;
+					return 0xFF000044;
 				case Black:
 					return 0xFF111111;
 				case Red:
-					return 0xFF880000;
+					return 0xFF660000;
 				case Green:
 				default:
-					return 0xFF008800;
+					return 0xFF006600;
 				}
 			}
 		}
-		// All other artifacts are just grey
-		else if (types.contains(CardType.Artifact))
-			return Color.GRAY;
 		// Multicolor options:
 		// For now, just gold
 		else
