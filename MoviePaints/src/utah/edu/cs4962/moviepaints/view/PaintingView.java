@@ -16,37 +16,21 @@ import android.view.View;
 
 public class PaintingView extends View
 {
-    public interface onCreateCurveListener
-    {
-        public void onCreateCurve(int color, float width);
-    }
-    public interface onDrawPointListener
-    {
-        public void onDrawPoint(Point newPoint, long time);
-    }
-    public interface onHandMovementListener
-    {
-        public void onHandMovemnt(Point move, long time);
-    }
-    
     // TODO: handle curColor + curWidth better
     private int curColor = 0xFF000000;
     private float curWidth = 0.5f;
     private Point offset;     // Denotes offset of points in model with points on view
     private PaintingViewAdapter adapter;    // Gives us the painting data
-
-    private onCreateCurveListener createCurveListener = null;
-    private onDrawPointListener drawPointListener = null;
-    private onHandMovementListener handMovementListener = null;
     
     // True: when drag on screen, move offset. False: when drag on screen, draw lines
     public boolean isHandTool = false;
     private Point prevTouch;    // used for hand tool
 
-    public PaintingView(Context context)
+    public PaintingView(Context context, PaintingViewAdapter _adapter)
     {
         super(context);
 
+        adapter = _adapter;
         offset = new Point(0, 0);
         prevTouch = new Point(0, 0);
     }
@@ -100,8 +84,7 @@ public class PaintingView extends View
                                     offset.y + curTouch.y - prevTouch.y);
                 
                 // TODO: handle times better
-                if (handMovementListener != null)
-                    handMovementListener.onHandMovemnt(curTouch, System.currentTimeMillis());
+                adapter.onHandMovement(curTouch, System.currentTimeMillis());
                 
                 invalidate();
             }
@@ -116,10 +99,8 @@ public class PaintingView extends View
             {
                 case MotionEvent.ACTION_DOWN:
                     
-                    if (createCurveListener != null)
-                        createCurveListener.onCreateCurve(curColor, curWidth);
-                    if (drawPointListener != null)
-                        drawPointListener.onDrawPoint(newPoint, System.currentTimeMillis());
+                    adapter.onCreateCurve(curColor, curWidth);
+                    adapter.onDrawPoint(newPoint, System.currentTimeMillis());
                     
                     invalidate();
                     break;
@@ -129,8 +110,7 @@ public class PaintingView extends View
                     // Do nothing, because they stopped
                     break;
                 default:
-                    if (drawPointListener != null)
-                        drawPointListener.onDrawPoint(newPoint, System.currentTimeMillis());
+                    adapter.onDrawPoint(newPoint, System.currentTimeMillis());
                     
                     invalidate();
                     break;
@@ -192,35 +172,5 @@ public class PaintingView extends View
     public void setAdapter(PaintingViewAdapter adapter)
     {
         this.adapter = adapter;
-    }
-
-    public onCreateCurveListener getCreateCurveListener()
-    {
-        return createCurveListener;
-    }
-
-    public void setCreateCurveListener(onCreateCurveListener createCurveListener)
-    {
-        this.createCurveListener = createCurveListener;
-    }
-
-    public onDrawPointListener getDrawPointListener()
-    {
-        return drawPointListener;
-    }
-
-    public void setDrawPointListener(onDrawPointListener drawPointListener)
-    {
-        this.drawPointListener = drawPointListener;
-    }
-
-    public onHandMovementListener getHandMovementListener()
-    {
-        return handMovementListener;
-    }
-
-    public void setHandMovementListener(onHandMovementListener handMovementListener)
-    {
-        this.handMovementListener = handMovementListener;
     }
 }

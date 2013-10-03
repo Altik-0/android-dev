@@ -120,9 +120,19 @@ public class PaintingModel
         curves.getLast().drawPoint(newPoint, time);
     }
     
-    public void performNewHandMovement(Point move, long time)
+    public void createHandMovement(Point move, long time)
     {
         handMoves.add(new HandMovement(move, time));
+    }
+    
+    public int getCurveCount()
+    {
+        return curves.size();
+    }
+
+    public Curve getCurve(int index)
+    {
+        return curves.get(index);
     }
     
     // TODO: figure out how to properly make these members read-only
