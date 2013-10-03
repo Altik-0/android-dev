@@ -16,6 +16,8 @@ import android.view.View;
 
 public class PaintingView extends View
 {
+    public static final float MAX_WIDTH = 20.0f;
+    
     // TODO: handle curColor + curWidth better
     private int curColor = 0xFF000000;
     private float curWidth = 0.5f;
@@ -29,7 +31,7 @@ public class PaintingView extends View
     public PaintingView(Context context, PaintingViewAdapter _adapter)
     {
         super(context);
-
+        
         adapter = _adapter;
         offset = new Point(0, 0);
         prevTouch = new Point(0, 0);
@@ -172,5 +174,25 @@ public class PaintingView extends View
     public void setAdapter(PaintingViewAdapter adapter)
     {
         this.adapter = adapter;
+    }
+
+    public int getCurColor()
+    {
+        return curColor;
+    }
+
+    public void setCurColor(int curColor)
+    {
+        this.curColor = curColor;
+    }
+
+    public float getCurWidth()
+    {
+        return curWidth;
+    }
+
+    public void setCurWidth(float curWidth)
+    {
+        this.curWidth = curWidth;
     }
 }

@@ -22,7 +22,7 @@ public class MainActivity extends Activity implements PaintingViewAdapter
     private PaintingView paintView;
     
     // IDs and etc.
-    private final int REQUEST_CODE = 0xBADA5500;
+    private final int REQUEST_CODE = 0x00BADA55;
     
     // TODO: other buttons
     private ToggleButton handTool;
@@ -98,6 +98,24 @@ public class MainActivity extends Activity implements PaintingViewAdapter
 		
 		setContentView(layout);
 	}
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data)
+    {
+        if (requestCode == REQUEST_CODE)
+        {
+            if (resultCode == RESULT_OK)
+            {
+                Bundle bndl = data.getExtras();
+                paintView.setCurColor(bndl.getInt("color"));
+                paintView.setCurWidth(bndl.getFloat("width"));
+            }
+        }
+        else
+            super.onActivityResult(requestCode, resultCode, data);
+    }
+
+
 
     @Override
     public int getCurveCount()

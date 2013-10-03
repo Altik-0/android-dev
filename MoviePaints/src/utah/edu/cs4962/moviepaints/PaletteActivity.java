@@ -1,5 +1,6 @@
 package utah.edu.cs4962.moviepaints;
 
+import utah.edu.cs4962.moviepaints.view.PaintingView;
 import utah.edu.cs4962.moviepaints.view.PaletteView;
 import android.os.Bundle;
 import android.app.Activity;
@@ -8,7 +9,9 @@ import android.view.Menu;
 import android.view.View;
 import android.widget.Button;
 import android.widget.LinearLayout;
+import android.widget.SeekBar;
 import android.widget.ToggleButton;
+import android.widget.SeekBar.OnSeekBarChangeListener;
 
 public class PaletteActivity extends Activity
 {
@@ -21,6 +24,9 @@ public class PaletteActivity extends Activity
     private ToggleButton deleteButton;
     private Button okButton;
     private Button cancelButton;
+    
+    // Width slider
+    private SeekBar widthSelector;
     
     // IDs for views that need to persist
     private final int PALETTE_ID = 0xBADC0C0A;
@@ -75,6 +81,7 @@ public class PaletteActivity extends Activity
             okIntent.putExtra("color", curColor);
             okIntent.putExtra("width", curWidth);
             setResult(RESULT_OK, okIntent);
+            finish();
         }
     };
     private View.OnClickListener cancelClickListener = new View.OnClickListener()
@@ -84,6 +91,38 @@ public class PaletteActivity extends Activity
         {
             Intent cancelIntent = new Intent();
             setResult(RESULT_CANCELED, cancelIntent);
+            finish();
+        }
+    };
+    
+    PaletteView.OnColorChangeListener colorChangeListener = new PaletteView.OnColorChangeListener()
+    {
+        @Override
+        public void onColorChange(int newColor)
+        {
+            curColor = newColor;
+        }
+    };
+    
+    private OnSeekBarChangeListener widthChangedListener = new OnSeekBarChangeListener()
+    {
+
+        @Override
+        public void onProgressChanged(SeekBar seekBar, int progress, boolean arg2) 
+        {
+            curWidth = PaintingView.MAX_WIDTH * (float)progress / 100.0f;
+        }
+
+        @Override
+        public void onStartTrackingTouch(SeekBar seekBar)
+        {
+            // this method intentionally left blank
+        }
+
+        @Override
+        public void onStopTrackingTouch(SeekBar seekBar)
+        {
+            // do nothing!
         }
     };
     
@@ -94,6 +133,8 @@ public class PaletteActivity extends Activity
         
         paletteView = new PaletteView(this);
         paletteView.setId(PALETTE_ID);
+        paletteView.setOnColorChangeListener(colorChangeListener);
+        curColor = paletteView.getSelectedColor();
         
         mixButton = new ToggleButton(this);
         mixButton.setText("Mix Colors");
@@ -110,6 +151,12 @@ public class PaletteActivity extends Activity
         cancelButton = new Button(this);
         cancelButton.setText("Cancel");
         cancelButton.setOnClickListener(cancelClickListener);
+        
+        widthSelector = new SeekBar(this);
+        widthSelector.setMax(100);
+        widthSelector.setProgress(50);
+        widthSelector.setOnSeekBarChangeListener(widthChangedListener);
+        curWidth = PaintingView.MAX_WIDTH * (float)widthSelector.getProgress() / 100.0f;
         
         LinearLayout mainLayout = new LinearLayout(this);
         LinearLayout bottomLayout = new LinearLayout(this);
@@ -138,6 +185,7 @@ public class PaletteActivity extends Activity
         
         mainLayout.addView(topLayout);
         mainLayout.addView(bottomLayout);
+        mainLayout.addView(widthSelector);
         mainLayout.addView(paletteView);
         
         setContentView(mainLayout);

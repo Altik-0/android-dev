@@ -36,7 +36,7 @@ public class PaletteView extends ViewGroup
     
     public boolean isMixing = false;
     public boolean isRemoving = false;
-    
+
     private View.OnTouchListener clickListener = new View.OnTouchListener()
     {
     	@Override
@@ -47,8 +47,7 @@ public class PaletteView extends ViewGroup
     		
     		if (isMixing)
     		{
-    			if (onColorChangeListener != null)
-					onColorChangeListener.onColorChange(((PaintView)v).GetColor());
+    		    AddColor(mixColors(((PaintView)v).GetColor(), getSelectedColor()));
     		}
     		else if (isRemoving)
     		{
@@ -56,13 +55,16 @@ public class PaletteView extends ViewGroup
     		}
     		else
     		{
-				for (int i = 0; i < getChildCount(); i++)
-				{
-					getChildAt(i).setSelected(false);
-				}
-				v.setSelected(true);
-				if (onColorChangeListener != null)
-					onColorChangeListener.onColorChange(((PaintView)v).GetColor());
+    		    // Swap selection
+    		    for (int i = 0; i < getChildCount(); i++)
+    		    {
+    		        PaintView pv = (PaintView)getChildAt(i);
+    		        if (pv.isSelected())
+    		            pv.setSelected(false);
+    		    }
+    		    v.setSelected(true);
+    		    if (onColorChangeListener != null)
+                    onColorChangeListener.onColorChange(getSelectedColor());
     		}
 			
 			return true;
@@ -116,14 +118,14 @@ public class PaletteView extends ViewGroup
 				PaintView newPv = (PaintView)findViewById(viewId-1);
 				newPv.setSelected(true);
 				if (onColorChangeListener != null)
-					onColorChangeListener.onColorChange(newPv.GetColor());
+					onColorChangeListener.onColorChange(getSelectedColor());
 			}
 			else if (viewId < getChildCount() - 1)
 			{
 				PaintView newPv = (PaintView)findViewById(viewId+1);
 				newPv.setSelected(true);
 				if (onColorChangeListener != null)
-					onColorChangeListener.onColorChange(newPv.GetColor());
+					onColorChangeListener.onColorChange(getSelectedColor());
 			}
 		}
 
@@ -239,5 +241,22 @@ public class PaletteView extends ViewGroup
     		
     		super.onRestoreInstanceState(bundle.getParcelable("super"));
     	}
+    }
+    
+    private int mixColors(int color1, int color2)
+    {
+        int r1 = (color1 >> 16) & 0xFF;
+        int g1 = (color1 >> 8 ) & 0xFF;
+        int b1 = (color1      ) & 0xFF;
+        
+        int r2 = (color2 >> 16) & 0xFF;
+        int g2 = (color2 >> 8 ) & 0xFF;
+        int b2 = (color2      ) & 0xFF;
+        
+        int r = ((r1 + r2) / 2) & 0xFF;
+        int g = ((g1 + g2) / 2) & 0xFF;
+        int b = ((b1 + b2) / 2) & 0xFF;
+        
+        return 0xFF000000 | (r << 16) | (g << 8) | b;
     }
 }
