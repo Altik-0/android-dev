@@ -35,6 +35,7 @@ public class PaintingView extends View
         adapter = _adapter;
         offset = new Point(0, 0);
         prevTouch = new Point(0, 0);
+        setEnabled(false);
     }
 
     @Override
@@ -76,6 +77,10 @@ public class PaintingView extends View
     @Override
     public boolean onTouchEvent(MotionEvent motionEvent)
     {
+        // Do nothing if not enabled
+        if (!isEnabled())
+            return false;
+        
         if (isHandTool)
         {
             if (motionEvent.getAction() == MotionEvent.ACTION_MOVE)
@@ -86,7 +91,7 @@ public class PaintingView extends View
                                     offset.y + curTouch.y - prevTouch.y);
                 
                 // TODO: handle times better
-                adapter.onHandMovement(curTouch, System.currentTimeMillis());
+                adapter.onHandMovement(curTouch);
                 
                 invalidate();
             }
@@ -102,7 +107,7 @@ public class PaintingView extends View
                 case MotionEvent.ACTION_DOWN:
                     
                     adapter.onCreateCurve(curColor, curWidth);
-                    adapter.onDrawPoint(newPoint, System.currentTimeMillis());
+                    adapter.onDrawPoint(newPoint);
                     
                     invalidate();
                     break;
@@ -112,7 +117,7 @@ public class PaintingView extends View
                     // Do nothing, because they stopped
                     break;
                 default:
-                    adapter.onDrawPoint(newPoint, System.currentTimeMillis());
+                    adapter.onDrawPoint(newPoint);
                     
                     invalidate();
                     break;
@@ -194,5 +199,29 @@ public class PaintingView extends View
     public void setCurWidth(float curWidth)
     {
         this.curWidth = curWidth;
+    }
+
+    // Technically, these are pretty sloppy; should probably not
+    // have pause and stop be equivalent. w/e, I'll just slap a
+    // TODO here.
+    public void startRecord()
+    {
+        setEnabled(true);
+        invalidate();
+    }
+    
+    public void pauseRecord()
+    {
+        setEnabled(false);
+    }
+    
+    public void resumeRecord()
+    {
+        setEnabled(true);
+    }
+    
+    public void stopRecord()
+    {
+        setEnabled(false);
     }
 }

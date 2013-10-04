@@ -103,11 +103,51 @@ public class PaintingModel
     
     private LinkedList<Curve> curves;
     private LinkedList<HandMovement> handMoves;
+
+    private Stopwatch watch;
     
     public PaintingModel()
     {
         curves = new LinkedList<Curve>();
         handMoves = new LinkedList<HandMovement>();
+        watch = new Stopwatch();
+    }
+    
+    public void startTimer()
+    {
+        watch.Start();
+    }
+    
+    public void pauseTimer()
+    {
+        watch.Pause();
+    }
+    
+    public void resumeTimer()
+    {
+        watch.Unpause();
+    }
+    
+    public boolean isStarted()
+    {
+        return watch.isStarted();
+    }
+    
+    public boolean isPaused()
+    {
+        return watch.isPaused();
+    }
+    
+    public void restart()
+    {
+        watch.Restart();
+        curves.clear();
+        handMoves.clear();
+    }
+    
+    public void stopTimer()
+    {
+        watch.Restart();
     }
     
     public void createNewCurve(int color, float width)
@@ -115,13 +155,15 @@ public class PaintingModel
         curves.addLast(new Curve(color, width));
     }
     
-    public void drawPoint(Point newPoint, long time)
+    public void drawPoint(Point newPoint)
     {
+        long time = watch.GetTime();
         curves.getLast().drawPoint(newPoint, time);
     }
     
-    public void createHandMovement(Point move, long time)
+    public void createHandMovement(Point move)
     {
+        long time = watch.GetTime();
         handMoves.add(new HandMovement(move, time));
     }
     

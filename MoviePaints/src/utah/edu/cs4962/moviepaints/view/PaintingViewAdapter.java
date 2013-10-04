@@ -15,6 +15,6 @@ public interface PaintingViewAdapter
     
     // "Setters"
     public void onCreateCurve(int color, float width);
-    public void onDrawPoint(Point newPoint, long time);
-    public void onHandMovement(Point move, long time);
+    public void onDrawPoint(Point newPoint);
+    public void onHandMovement(Point move);
 }
