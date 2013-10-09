@@ -21,7 +21,6 @@ public class PaintingView extends View
     // TODO: handle curColor + curWidth better
     private int curColor = 0xFF000000;
     private float curWidth = 0.5f;
-    private Point offset;     // Denotes offset of points in model with points on view
     private PaintingViewAdapter adapter;    // Gives us the painting data
     
     // True: when drag on screen, move offset. False: when drag on screen, draw lines
@@ -33,7 +32,6 @@ public class PaintingView extends View
         super(context);
         
         adapter = _adapter;
-        offset = new Point(0, 0);
         prevTouch = new Point(0, 0);
         setEnabled(false);
     }
@@ -54,12 +52,19 @@ public class PaintingView extends View
             paint.setStrokeWidth(width);
             paint.setStyle(Paint.Style.STROKE);
 
-            Path path = new Path();
-            Point initPoint = new Point(curve.get(0));
-            initPoint.x += offset.x;
-            initPoint.y += offset.y;
+            Point offset = adapter.getHandOffset();
             
-            path.moveTo(initPoint.x, initPoint.y);
+            Path path = new Path();
+            Point initPoint;
+            if (curve.size() > 0)
+            {
+                initPoint = new Point(curve.get(0));
+                initPoint.x += offset.x;
+                initPoint.y += offset.y;
+                
+                path.moveTo(initPoint.x, initPoint.y);
+            }
+            
             for (Point point : curve)
             {
                 Point nextPoint = new Point(point);
@@ -87,11 +92,10 @@ public class PaintingView extends View
             {
                 Point curTouch = new Point((int)motionEvent.getAxisValue(MotionEvent.AXIS_X),
                                            (int)motionEvent.getAxisValue(MotionEvent.AXIS_Y));
-                offset  = new Point(offset.x + curTouch.x - prevTouch.x,
-                                    offset.y + curTouch.y - prevTouch.y);
+                Point offset = new Point(curTouch.x - prevTouch.x,
+                                        curTouch.y - prevTouch.y);
                 
-                // TODO: handle times better
-                adapter.onHandMovement(curTouch);
+                adapter.onHandMovement(offset);
                 
                 invalidate();
             }
@@ -100,6 +104,7 @@ public class PaintingView extends View
         }
         else
         {
+            Point offset = adapter.getHandOffset();
             Point newPoint = new Point((int)motionEvent.getAxisValue(MotionEvent.AXIS_X) - offset.x,
                                        (int)motionEvent.getAxisValue(MotionEvent.AXIS_Y) - offset.y);
             switch (motionEvent.getAction())

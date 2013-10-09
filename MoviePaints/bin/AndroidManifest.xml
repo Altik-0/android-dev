@@ -26,6 +26,10 @@
             android:name="utah.edu.cs4962.moviepaints.PaletteActivity"
             android:label="@string/title_activity_palette" >
         </activity>
+        <activity
+            android:name="utah.edu.cs4962.moviepaints.MovieActivity"
+            android:label="@string/title_activity_movie" >
+        </activity>
     </application>
 
 </manifest>

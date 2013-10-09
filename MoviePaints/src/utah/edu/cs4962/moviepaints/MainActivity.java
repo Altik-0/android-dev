@@ -16,6 +16,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.CompoundButton.OnCheckedChangeListener;
+import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.ToggleButton;
 
@@ -23,9 +24,6 @@ public class MainActivity extends Activity implements PaintingViewAdapter
 {
     private PaintingModel paintModel;
     private PaintingView paintView;
-    
-    // IDs and etc.
-    private final int REQUEST_CODE = 0x00BADA55;
     
     // TODO: other buttons
     private ToggleButton handTool;
@@ -37,6 +35,7 @@ public class MainActivity extends Activity implements PaintingViewAdapter
     
     // Layout components
     private LinearLayout toolBar;
+    private LinearLayout recordBar;
     private LinearLayout mainLayout;
     
     // Used to determine if unpausing is needed after returning from subactivity
@@ -79,7 +78,7 @@ public class MainActivity extends Activity implements PaintingViewAdapter
                 needsUnpause = false;
             
             Intent paletteIntent = new Intent(MainActivity.this, PaletteActivity.class);
-            startActivityForResult(paletteIntent, REQUEST_CODE);
+            startActivityForResult(paletteIntent, PaletteActivity.REQUEST_CODE);
         }
     };
     private OnClickListener recordButtonListener = new View.OnClickListener()
@@ -88,12 +87,10 @@ public class MainActivity extends Activity implements PaintingViewAdapter
         public void onClick(View v)
         {
             // Re-layout:
-            toolBar.removeAllViews();
-            toolBar.addView(handTool);
-            toolBar.addView(brushTool);
-            toolBar.addView(pauseButton);
-            toolBar.addView(stopButton);
-            toolBar.addView(viewMovieButton);
+            recordBar.removeAllViews();
+            recordBar.addView(pauseButton);
+            recordBar.addView(stopButton);
+            recordBar.addView(viewMovieButton);
             viewMovieButton.setEnabled(false);
             
             paintView.startRecord();
@@ -131,10 +128,8 @@ public class MainActivity extends Activity implements PaintingViewAdapter
             paintView.stopRecord();
             
             // Layout again
-            toolBar.removeAllViews();
-            toolBar.addView(handTool);
-            toolBar.addView(brushTool);
-            toolBar.addView(recordButton);
+            recordBar.removeAllViews();
+            recordBar.addView(recordButton);
         }
     };
     private OnClickListener viewMovieButtonListener = new Button.OnClickListener()
@@ -142,7 +137,8 @@ public class MainActivity extends Activity implements PaintingViewAdapter
         @Override
         public void onClick(View v)
         {
-            // TODO: launch Movie activity to view it.
+            Intent movieIntent = new Intent(MainActivity.this, MovieActivity.class);
+            startActivity(movieIntent);
         }
     };
     
@@ -151,14 +147,14 @@ public class MainActivity extends Activity implements PaintingViewAdapter
 	{
 		super.onCreate(savedInstanceState);
 		
-		paintModel = new PaintingModel();
+		paintModel = PaintingModel.getInstance();
 		paintView = new PaintingView(this, this);
 		
 		handTool = new ToggleButton(this);
 		handTool.setText("Hand Tool");
         handTool.setOnClickListener(handButtonListener);
         brushTool = new Button(this);
-        brushTool.setText("Brush Tool");
+        brushTool.setText("Brush tool");
         brushTool.setOnClickListener(brushButtonListener);
         
         // Recording buttons: not all laid out now, but all initialized now.
@@ -174,26 +170,44 @@ public class MainActivity extends Activity implements PaintingViewAdapter
         viewMovieButton = new Button(this);
         viewMovieButton.setText("View Movie");
         viewMovieButton.setOnClickListener(viewMovieButtonListener);
+        
+        // Button layout params
+        LinearLayout.LayoutParams buttonParams = 
+                new LinearLayout.LayoutParams(
+                        LinearLayout.LayoutParams.WRAP_CONTENT,
+                        LinearLayout.LayoutParams.WRAP_CONTENT,
+                        1.0f);
+        
+        handTool.setLayoutParams(buttonParams);
+        brushTool.setLayoutParams(buttonParams);
+        recordButton.setLayoutParams(buttonParams);
+        stopButton.setLayoutParams(buttonParams);
+        viewMovieButton.setLayoutParams(buttonParams);
 		
 		mainLayout = new LinearLayout(this);
 		toolBar = new LinearLayout(this);
+		recordBar = new LinearLayout(this);
 		// Determine orientation
 		if (getWindowManager().getDefaultDisplay().getWidth() < getWindowManager().getDefaultDisplay().getHeight())
         {
             mainLayout.setOrientation(LinearLayout.VERTICAL);
             toolBar.setOrientation(LinearLayout.HORIZONTAL);
+            recordBar.setOrientation(LinearLayout.HORIZONTAL);
         }
         else
         {
             mainLayout.setOrientation(LinearLayout.HORIZONTAL);
             toolBar.setOrientation(LinearLayout.VERTICAL);
+            recordBar.setOrientation(LinearLayout.VERTICAL);
         }
 		
 		toolBar.addView(handTool);
 		toolBar.addView(brushTool);
-		toolBar.addView(recordButton);
 		
-		mainLayout.addView(toolBar);
+		recordBar.addView(recordButton);
+
+        mainLayout.addView(toolBar);
+        mainLayout.addView(recordBar);
 		mainLayout.addView(paintView);
 		
 		setContentView(mainLayout);
@@ -202,7 +216,7 @@ public class MainActivity extends Activity implements PaintingViewAdapter
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data)
     {
-        if (requestCode == REQUEST_CODE)
+        if (requestCode == PaletteActivity.REQUEST_CODE)
         {
             if (resultCode == RESULT_OK)
             {
@@ -244,6 +258,12 @@ public class MainActivity extends Activity implements PaintingViewAdapter
     public float getCurveWidth(int index)
     {
         return paintModel.getCurve(index).getWidth();
+    }
+
+    @Override
+    public Point getHandOffset()
+    {
+        return paintModel.getHandOffset();
     }
 
     @Override

@@ -1,5 +1,7 @@
 package utah.edu.cs4962.moviepaints.model;
 
+import android.util.Log;
+
 public class Stopwatch
 {
     private long startTime;
@@ -31,7 +33,7 @@ public class Stopwatch
         
         if (!isPaused)
         {
-            pauseTime = System.currentTimeMillis();
+            pauseTime = System.currentTimeMillis() - startTime;
             isPaused = true;
         }
     }
@@ -42,6 +44,12 @@ public class Stopwatch
         {
             long tmp = System.currentTimeMillis();
             totalPauseLength += tmp - startTime - pauseTime;
+            isPaused = false;
+
+            Log.i("Pause data; start time", Long.toString(startTime));
+            Log.i("Pause data; pause time", Long.toString(pauseTime));
+            Log.i("Pause data; tmp", Long.toString(tmp));
+            Log.i("Pause data; total pause length", Long.toString(totalPauseLength));
         }
     }
     
@@ -54,10 +62,14 @@ public class Stopwatch
         if (!isStarted)
             throw new IllegalStateException("Watch cannot be timed when it isn't started!");
         
+        long toRet = 0;
+        
         if (isPaused)
-            return pauseTime;
+            toRet = pauseTime - totalPauseLength;
         else
-            return tmp - startTime - totalPauseLength;
+            toRet = tmp - startTime - totalPauseLength;
+        
+        return toRet;
     }
     
     public void Restart()

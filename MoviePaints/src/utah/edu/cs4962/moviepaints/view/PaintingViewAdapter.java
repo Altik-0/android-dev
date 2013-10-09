@@ -12,6 +12,7 @@ public interface PaintingViewAdapter
     public LinkedList<Point> getCurve(int index);
     public int getCurveColor(int index);
     public float getCurveWidth(int index);
+    public Point getHandOffset();
     
     // "Setters"
     public void onCreateCurve(int color, float width);

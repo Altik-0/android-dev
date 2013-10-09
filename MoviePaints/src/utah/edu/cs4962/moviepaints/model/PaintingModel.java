@@ -101,12 +101,21 @@ public class PaintingModel
         }
     }
     
+    // This class is a singleton!
+    private static PaintingModel instance;
+    public static PaintingModel getInstance()
+    {
+        if(instance == null)
+            instance = new PaintingModel();
+        return instance;
+    }
+    
     private LinkedList<Curve> curves;
     private LinkedList<HandMovement> handMoves;
 
     private Stopwatch watch;
     
-    public PaintingModel()
+    private PaintingModel()
     {
         curves = new LinkedList<Curve>();
         handMoves = new LinkedList<HandMovement>();
@@ -176,6 +185,33 @@ public class PaintingModel
     {
         return curves.get(index);
     }
+
+    public Point getHandOffset()
+    {
+        Point toRet = new Point(0, 0);
+        for (HandMovement move : handMoves)
+        {
+            toRet.x += move.movement.x;
+            toRet.y += move.movement.y;
+        }
+        
+        return toRet;
+    }
+    
+    public Point getHandOffsetAtTime(long time)
+    {
+        Point toRet = new Point(0, 0);
+        for (HandMovement move: handMoves)
+        {
+            if (move.time < time)
+            {
+                toRet.x += move.movement.x;
+                toRet.y += move.movement.y;
+            }
+        }
+        
+        return toRet;
+    }
     
     // TODO: figure out how to properly make these members read-only
     public LinkedList<Curve> getCurves()
@@ -185,5 +221,38 @@ public class PaintingModel
     public LinkedList<HandMovement> getHandMoves()
     {
         return handMoves;
+    }
+    
+    public LinkedList<Curve> getCurvesUpToTime(long time)
+    {
+        LinkedList<Curve> toRet = new LinkedList<Curve>();
+        
+        for (Curve curve : curves)
+        {
+            // If the curve is entirely drawn by the end of this time,
+            // then we'll just stash it
+            if(curve.times.getLast() < time)
+                toRet.add(curve);
+            // If it wasn't entirely drawn, we build a new curve that has
+            // only the points that will be drawn so far.
+            else
+            {
+                Curve lastCurve = new Curve(curve.color, curve.width);
+                for(int i = 0; i < curve.points.size(); i++)
+                    if (curve.times.get(i) < time)
+                        lastCurve.drawPoint(curve.points.get(i), curve.times.get(i));
+                toRet.add(lastCurve);
+            }
+        }
+        
+        return toRet;
+    }
+
+    public long getEndTime()
+    {
+        if(!watch.isStarted())
+            return 0;
+
+        return watch.GetTime();
     }
 }

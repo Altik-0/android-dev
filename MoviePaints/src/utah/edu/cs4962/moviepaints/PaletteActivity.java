@@ -15,6 +15,8 @@ import android.widget.SeekBar.OnSeekBarChangeListener;
 
 public class PaletteActivity extends Activity
 {
+    public static final int REQUEST_CODE = 0x00BADA55;
+    
     private PaletteView paletteView;
     private int curColor;
     private float curWidth;
