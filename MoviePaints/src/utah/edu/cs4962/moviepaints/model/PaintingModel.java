@@ -1,7 +1,20 @@
 package utah.edu.cs4962.moviepaints.model;
 
+import java.io.BufferedReader;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.util.LinkedList;
+
+import com.google.gson.Gson;
+import com.google.gson.stream.JsonWriter;
+
+import android.content.Context;
 import android.graphics.Point;
+import android.util.Log;
 
 public class PaintingModel
 {
@@ -254,5 +267,60 @@ public class PaintingModel
             return 0;
 
         return watch.GetTime();
+    }
+
+    // Saves this object as a JSON file to the given file path
+    public void saveTo(String filepath, Context context)
+    {
+        Gson gson = new Gson();
+        String str = gson.toJson(this);
+        
+        try
+        {
+            FileOutputStream outStream = context.openFileOutput(filepath, Context.MODE_PRIVATE);
+            OutputStreamWriter writer = new OutputStreamWriter(outStream);
+            writer.write(str);
+            writer.close();
+        }
+        catch (IOException e)
+        {
+            e.printStackTrace();
+        }
+    }
+
+    public void loadFrom(String filepath, Context context)
+    {
+        try
+        {
+            FileInputStream inStream = context.openFileInput(filepath);
+            
+            // File may not be there, so double check:
+            if (filepath != null)
+            {
+                InputStreamReader reader = new InputStreamReader(inStream);
+                BufferedReader buff = new BufferedReader(reader);
+                String json = "";
+                
+                String str;
+                while ((str = buff.readLine()) != null)
+                    json += str;
+                
+                reader.close();
+                
+                // Rewrite our instance
+                if (instance == null)
+                    instance = new PaintingModel();
+                
+                Gson gson = new Gson();
+                PaintingModel tmp = gson.fromJson(json, PaintingModel.class);
+                instance.curves = tmp.curves;
+                instance.handMoves = tmp.handMoves;
+                instance.watch = tmp.watch;
+            }
+        }
+        catch (IOException e)
+        {
+            e.printStackTrace();
+        }
     }
 }

@@ -1,7 +1,7 @@
 package utah.edu.cs4962.moviepaints.view;
 
-import java.util.LinkedList;
 
+import java.util.LinkedList;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Canvas;
