@@ -112,6 +112,7 @@ public class MainActivity extends Activity implements PaintingViewAdapter
                         public void onClick(DialogInterface dialog, int whichButton)
                         {
                             paintModel.restart();
+                            paintView.postInvalidate();
                         }
                     });
             clearAlert.setNegativeButton("No",
@@ -124,7 +125,9 @@ public class MainActivity extends Activity implements PaintingViewAdapter
                             // Do nothing - they're cancelling
                         }
                     });
-        }  
+            
+            clearAlert.show();
+        }
     };
     private OnClickListener pauseButtonListener = new OnClickListener()
     {
