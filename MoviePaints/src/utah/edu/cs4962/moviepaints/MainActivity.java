@@ -40,9 +40,8 @@ public class MainActivity extends Activity implements PaintingViewAdapter
     // TODO: other buttons
     private ToggleButton handTool;
     private Button brushTool;
-    private Button recordButton;
+    private Button clearButton;
     private ToggleButton pauseButton;
-    private Button stopButton;
     private Button viewMovieButton;
     private Button saveButton;
     private Button loadButton;
@@ -96,55 +95,54 @@ public class MainActivity extends Activity implements PaintingViewAdapter
             startActivityForResult(paletteIntent, PaletteActivity.REQUEST_CODE);
         }
     };
-    private OnClickListener recordButtonListener = new View.OnClickListener()
+    private OnClickListener clearButtonListener = new OnClickListener()
     {
         @Override
-        public void onClick(View v)
+        public void onClick(View arg0)
         {
-            // Re-layout:
-            recordBar.removeAllViews();
-            recordBar.addView(pauseButton);
-            recordBar.addView(stopButton);
-            recordBar.addView(viewMovieButton);
-            viewMovieButton.setEnabled(false);
-            
-            paintView.startRecord();
-            paintModel.restart();
-            paintModel.startTimer();
-        }
+            // Alert the user what they're about to do!
+            AlertDialog.Builder clearAlert = new AlertDialog.Builder(MainActivity.this);
+            clearAlert.setTitle("Clear Painting");
+            clearAlert.setMessage("Are you sure you want to delete your painting?");
+            clearAlert.setPositiveButton("Yes",
+                    // Listener inside a listener! :o
+                    new DialogInterface.OnClickListener()
+                    {
+                        @Override
+                        public void onClick(DialogInterface dialog, int whichButton)
+                        {
+                            paintModel.restart();
+                        }
+                    });
+            clearAlert.setNegativeButton("No",
+                    // Listener inside a listener! :o
+                    new DialogInterface.OnClickListener()
+                    {
+                        @Override
+                        public void onClick(DialogInterface dialog, int whichButton)
+                        {
+                            // Do nothing - they're cancelling
+                        }
+                    });
+        }  
     };
     private OnClickListener pauseButtonListener = new OnClickListener()
     {
         @Override
         public void onClick(View v)
         {
-            if (pauseButton.isChecked())
+            if (!pauseButton.isChecked())
             {
                 paintModel.pauseTimer();
                 paintView.pauseRecord();
-                pauseButton.setText("Continue");
-                viewMovieButton.setEnabled(true);
+                pauseButton.setText("Record");
             }
             else
             {
                 pauseButton.setText("Pause");
-                viewMovieButton.setEnabled(false);
                 paintView.resumeRecord();
                 paintModel.resumeTimer();
             }
-        }
-    };
-    private OnClickListener stopButtonListener = new OnClickListener()
-    {
-        @Override
-        public void onClick(View arg0)
-        {
-            paintModel.stopTimer();
-            paintView.stopRecord();
-            
-            // Layout again
-            recordBar.removeAllViews();
-            recordBar.addView(recordButton);
         }
     };
     private OnClickListener viewMovieButtonListener = new Button.OnClickListener()
@@ -238,6 +236,7 @@ public class MainActivity extends Activity implements PaintingViewAdapter
                             
                             // Reset layout, since the timer will be fucked up
                             // TODO
+                            paintView.postInvalidate();
                         }
                     });
             alert.setNegativeButton("Cancel",
@@ -264,26 +263,26 @@ public class MainActivity extends Activity implements PaintingViewAdapter
 		paintModel = PaintingModel.getInstance();
 		paintView = new PaintingView(this, this);
 		
+		// Art tool buttons
 		handTool = new ToggleButton(this);
 		handTool.setText("Hand Tool");
         handTool.setOnClickListener(handButtonListener);
         brushTool = new Button(this);
         brushTool.setText("Brush tool");
         brushTool.setOnClickListener(brushButtonListener);
+        clearButton = new Button(this);
+        clearButton.setText("Clear");
+        clearButton.setOnClickListener(clearButtonListener);
         
         // Recording buttons: not all laid out now, but all initialized now.
-        recordButton = new Button(this);
-        recordButton.setText("Record");
-        recordButton.setOnClickListener(recordButtonListener );
         pauseButton = new ToggleButton(this);
-        pauseButton.setText("Pause");
+        pauseButton.setText("Record");
         pauseButton.setOnClickListener(pauseButtonListener);
-        stopButton = new Button(this);
-        stopButton.setText("Stop");
-        stopButton.setOnClickListener(stopButtonListener);
         viewMovieButton = new Button(this);
         viewMovieButton.setText("View Movie");
         viewMovieButton.setOnClickListener(viewMovieButtonListener);
+        
+        // File management buttons
         saveButton = new Button(this);
         saveButton.setText("Save");
         saveButton.setOnClickListener(saveButtonListener);
@@ -300,8 +299,7 @@ public class MainActivity extends Activity implements PaintingViewAdapter
         
         handTool.setLayoutParams(buttonParams);
         brushTool.setLayoutParams(buttonParams);
-        recordButton.setLayoutParams(buttonParams);
-        stopButton.setLayoutParams(buttonParams);
+        clearButton.setLayoutParams(buttonParams);
         viewMovieButton.setLayoutParams(buttonParams);
         saveButton.setLayoutParams(buttonParams);
         loadButton.setLayoutParams(buttonParams);
@@ -328,9 +326,11 @@ public class MainActivity extends Activity implements PaintingViewAdapter
 		
 		toolBar.addView(handTool);
 		toolBar.addView(brushTool);
+		toolBar.addView(clearButton);
 		
-		recordBar.addView(recordButton);
-        
+		recordBar.addView(pauseButton);
+		recordBar.addView(viewMovieButton);
+		        
         fileBar.addView(saveButton);
         fileBar.addView(loadButton);
 
@@ -340,6 +340,11 @@ public class MainActivity extends Activity implements PaintingViewAdapter
 		mainLayout.addView(paintView);
 		
 		setContentView(mainLayout);
+		
+		// Do this last, so we don't waste time with all the init garbage
+        if (!paintModel.isStarted())
+            paintModel.startTimer();
+        paintModel.pauseTimer();
 	}
 
     @Override

@@ -1,5 +1,7 @@
 package utah.edu.cs4962.moviepaints.model;
 
+import com.google.gson.Gson;
+
 import android.util.Log;
 
 public class Stopwatch
@@ -72,7 +74,7 @@ public class Stopwatch
         return toRet;
     }
     
-    public void Restart()
+    public void Reset()
     {
         totalPauseLength = 0;
         isPaused = false;
@@ -87,5 +89,42 @@ public class Stopwatch
     public boolean isPaused()
     {
         return isPaused;
+    }
+    
+    // Serialization functionality
+    private class StopwatchSerialization
+    {
+        public long oldStartTime;       // May not need this to be serialized, but may be useful, *shrug*
+        public long oldPauseTotal;
+        public long lastSampledTime;
+    }
+    
+    public String toJson()
+    {
+        long tmp = System.currentTimeMillis();
+        
+        StopwatchSerialization serial = new StopwatchSerialization();
+        serial.oldPauseTotal = totalPauseLength;
+        serial.oldStartTime = startTime;
+        serial.lastSampledTime = tmp;
+        
+        Gson gson = new Gson();
+        return gson.toJson(serial, StopwatchSerialization.class);
+    }
+    
+    public static Stopwatch fromJson(String json)
+    {
+        Stopwatch toRet = new Stopwatch();
+        Gson gson = new Gson();
+        StopwatchSerialization serial = gson.fromJson(json, StopwatchSerialization.class);
+        
+        toRet.totalPauseLength = serial.oldPauseTotal;
+        toRet.startTime -= serial.lastSampledTime;
+        
+        // We really want our watch to be paused and started, not reset.
+        toRet.isPaused = true;
+        toRet.isStarted = true;
+        
+        return toRet;
     }
 }

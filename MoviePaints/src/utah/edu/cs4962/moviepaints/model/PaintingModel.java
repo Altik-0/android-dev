@@ -7,9 +7,11 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
+import java.lang.reflect.Type;
 import java.util.LinkedList;
 
 import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import com.google.gson.stream.JsonWriter;
 
 import android.content.Context;
@@ -162,14 +164,10 @@ public class PaintingModel
     
     public void restart()
     {
-        watch.Restart();
+        watch.Reset();
         curves.clear();
         handMoves.clear();
-    }
-    
-    public void stopTimer()
-    {
-        watch.Restart();
+        watch.Start();
     }
     
     public void createNewCurve(int color, float width)
@@ -269,17 +267,33 @@ public class PaintingModel
         return watch.GetTime();
     }
 
+    // Serialization stuff
+    private class PaintingModelSerialization
+    {
+        public String curveSerial;
+        public String handMoveSerial;
+        public String watchSerial;
+    }
     // Saves this object as a JSON file to the given file path
     public void saveTo(String filepath, Context context)
     {
+        String watchSerialization = watch.toJson();
+        
+        PaintingModelSerialization serial = new PaintingModelSerialization();
+        
         Gson gson = new Gson();
-        String str = gson.toJson(this);
+        // Need type tokens because generics. :\
+        Type curveType = new TypeToken<LinkedList<Curve>>(){}.getType();
+        Type handMoveType = new TypeToken<LinkedList<HandMovement>>(){}.getType();
+        serial.curveSerial = gson.toJson(curves, curveType);
+        serial.handMoveSerial = gson.toJson(handMoves, handMoveType);
+        serial.watchSerial = watchSerialization;
         
         try
         {
             FileOutputStream outStream = context.openFileOutput(filepath, Context.MODE_PRIVATE);
             OutputStreamWriter writer = new OutputStreamWriter(outStream);
-            writer.write(str);
+            writer.write(gson.toJson(serial, PaintingModelSerialization.class));
             writer.close();
         }
         catch (IOException e)
@@ -312,10 +326,14 @@ public class PaintingModel
                     instance = new PaintingModel();
                 
                 Gson gson = new Gson();
-                PaintingModel tmp = gson.fromJson(json, PaintingModel.class);
-                instance.curves = tmp.curves;
-                instance.handMoves = tmp.handMoves;
-                instance.watch = tmp.watch;
+                PaintingModelSerialization serial = gson.fromJson(json, PaintingModelSerialization.class);
+
+                // Need type tokens because generics. :\
+                Type curveType = new TypeToken<LinkedList<Curve>>(){}.getType();
+                Type handMoveType = new TypeToken<LinkedList<HandMovement>>(){}.getType();
+                instance.curves = gson.fromJson(serial.curveSerial, curveType);
+                instance.handMoves = gson.fromJson(serial.handMoveSerial, handMoveType);
+                instance.watch = Stopwatch.fromJson(serial.watchSerial);
             }
         }
         catch (IOException e)
