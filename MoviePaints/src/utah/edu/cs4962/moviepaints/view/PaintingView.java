@@ -18,13 +18,8 @@ public class PaintingView extends View
 {
     public static final float MAX_WIDTH = 20.0f;
     
-    // TODO: handle curColor + curWidth better
-    private int curColor = 0xFF000000;
-    private float curWidth = 0.5f;
     private PaintingViewAdapter adapter;    // Gives us the painting data
     
-    // True: when drag on screen, move offset. False: when drag on screen, draw lines
-    public boolean isHandTool = false;
     private Point prevTouch;    // used for hand tool
 
     public PaintingView(Context context, PaintingViewAdapter _adapter)
@@ -83,10 +78,10 @@ public class PaintingView extends View
     public boolean onTouchEvent(MotionEvent motionEvent)
     {
         // Do nothing if not enabled
-        if (!isEnabled())
+        if (!adapter.isEnabled())
             return false;
         
-        if (isHandTool)
+        if (adapter.isHandTool())
         {
             if (motionEvent.getAction() == MotionEvent.ACTION_MOVE)
             {
@@ -111,7 +106,7 @@ public class PaintingView extends View
             {
                 case MotionEvent.ACTION_DOWN:
                     
-                    adapter.onCreateCurve(curColor, curWidth);
+                    adapter.onCreateCurve(adapter.getCurColor(), adapter.getCurWidth());
                     adapter.onDrawPoint(newPoint);
                     
                     invalidate();
@@ -184,49 +179,5 @@ public class PaintingView extends View
     public void setAdapter(PaintingViewAdapter adapter)
     {
         this.adapter = adapter;
-    }
-
-    public int getCurColor()
-    {
-        return curColor;
-    }
-
-    public void setCurColor(int curColor)
-    {
-        this.curColor = curColor;
-    }
-
-    public float getCurWidth()
-    {
-        return curWidth;
-    }
-
-    public void setCurWidth(float curWidth)
-    {
-        this.curWidth = curWidth;
-    }
-
-    // Technically, these are pretty sloppy; should probably not
-    // have pause and stop be equivalent. w/e, I'll just slap a
-    // TODO here.
-    public void startRecord()
-    {
-        setEnabled(true);
-        invalidate();
-    }
-    
-    public void pauseRecord()
-    {
-        setEnabled(false);
-    }
-    
-    public void resumeRecord()
-    {
-        setEnabled(true);
-    }
-    
-    public void stopRecord()
-    {
-        setEnabled(false);
     }
 }

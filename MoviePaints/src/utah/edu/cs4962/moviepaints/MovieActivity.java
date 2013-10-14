@@ -73,8 +73,7 @@ public class MovieActivity extends Activity implements PaintingViewAdapter
         @Override
         public void onClick(View arg0)
         {
-            Intent mainIntent = new Intent(MovieActivity.this, MainActivity.class);
-            startActivity(mainIntent);
+            finish();
         }  
     };
     
@@ -197,6 +196,34 @@ public class MovieActivity extends Activity implements PaintingViewAdapter
     {
         long time = scrubber.getProgress();
         return paintModel.getHandOffsetAtTime(time);
+    }
+    
+    @Override
+    public int getCurColor()
+    {
+        // We don't care, so just return transparent black
+        return 0;
+    }
+    
+    @Override
+    public float getCurWidth()
+    {
+        // We don't care, so just return 0
+        return 0.0f;
+    }
+
+    @Override
+    public boolean isHandTool()
+    {
+        // We don't care, so just return false
+        return false;
+    }
+
+    @Override
+    public boolean isEnabled()
+    {
+        // We are always disabled
+        return false;
     }
 
     @Override

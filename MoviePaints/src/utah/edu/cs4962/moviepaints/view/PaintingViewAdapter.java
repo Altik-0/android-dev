@@ -13,6 +13,10 @@ public interface PaintingViewAdapter
     public int getCurveColor(int index);
     public float getCurveWidth(int index);
     public Point getHandOffset();
+    public int getCurColor();
+    public float getCurWidth();
+    public boolean isHandTool();
+    public boolean isEnabled();
     
     // "Setters"
     public void onCreateCurve(int color, float width);

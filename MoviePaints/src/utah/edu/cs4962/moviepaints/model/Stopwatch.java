@@ -106,7 +106,7 @@ public class Stopwatch
         StopwatchSerialization serial = new StopwatchSerialization();
         serial.oldPauseTotal = totalPauseLength;
         serial.oldStartTime = startTime;
-        serial.lastSampledTime = tmp;
+        serial.lastSampledTime = GetTime();
         
         Gson gson = new Gson();
         return gson.toJson(serial, StopwatchSerialization.class);
@@ -119,7 +119,8 @@ public class Stopwatch
         StopwatchSerialization serial = gson.fromJson(json, StopwatchSerialization.class);
         
         toRet.totalPauseLength = serial.oldPauseTotal;
-        toRet.startTime -= serial.lastSampledTime;
+        toRet.startTime = System.currentTimeMillis() - serial.lastSampledTime;
+        toRet.pauseTime = System.currentTimeMillis() - toRet.startTime - toRet.totalPauseLength;
         
         // We really want our watch to be paused and started, not reset.
         toRet.isPaused = true;
