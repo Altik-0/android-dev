@@ -8,7 +8,6 @@ public class Stopwatch
 {
     private long startTime;
     private long pauseTime;
-    private long totalPauseLength;
     private boolean isPaused;
     private boolean isStarted;
     
@@ -16,7 +15,6 @@ public class Stopwatch
     {
         isPaused = false;
         isStarted = false;
-        totalPauseLength = 0;
     }
     
     public void Start()
@@ -45,13 +43,8 @@ public class Stopwatch
         if (isPaused)
         {
             long tmp = System.currentTimeMillis();
-            totalPauseLength += tmp - startTime - pauseTime;
+            startTime = tmp - pauseTime;
             isPaused = false;
-
-            Log.i("Pause data; start time", Long.toString(startTime));
-            Log.i("Pause data; pause time", Long.toString(pauseTime));
-            Log.i("Pause data; tmp", Long.toString(tmp));
-            Log.i("Pause data; total pause length", Long.toString(totalPauseLength));
         }
     }
     
@@ -67,16 +60,15 @@ public class Stopwatch
         long toRet = 0;
         
         if (isPaused)
-            toRet = pauseTime - totalPauseLength;
+            toRet = pauseTime;
         else
-            toRet = tmp - startTime - totalPauseLength;
+            toRet = tmp - startTime;
         
         return toRet;
     }
     
     public void Reset()
     {
-        totalPauseLength = 0;
         isPaused = false;
         isStarted = false;
     }
@@ -94,8 +86,8 @@ public class Stopwatch
     // Serialization functionality
     private class StopwatchSerialization
     {
-        public long oldStartTime;       // May not need this to be serialized, but may be useful, *shrug*
-        public long oldPauseTotal;
+        //public long oldStartTime;       // May not need this to be serialized, but may be useful, *shrug*
+        //public long oldPauseTotal;
         public long lastSampledTime;
     }
     
@@ -104,8 +96,6 @@ public class Stopwatch
         long tmp = System.currentTimeMillis();
         
         StopwatchSerialization serial = new StopwatchSerialization();
-        serial.oldPauseTotal = totalPauseLength;
-        serial.oldStartTime = startTime;
         serial.lastSampledTime = GetTime();
         
         Gson gson = new Gson();
@@ -118,9 +108,8 @@ public class Stopwatch
         Gson gson = new Gson();
         StopwatchSerialization serial = gson.fromJson(json, StopwatchSerialization.class);
         
-        toRet.totalPauseLength = serial.oldPauseTotal;
         toRet.startTime = System.currentTimeMillis() - serial.lastSampledTime;
-        toRet.pauseTime = System.currentTimeMillis() - toRet.startTime - toRet.totalPauseLength;
+        toRet.pauseTime = serial.lastSampledTime;
         
         // We really want our watch to be paused and started, not reset.
         toRet.isPaused = true;

@@ -108,6 +108,11 @@ public class MainActivity extends Activity implements PaintingViewAdapter
                         public void onClick(DialogInterface dialog, int whichButton)
                         {
                             paintModel.restart();
+                            // need to stop recording
+                            pauseButton.setChecked(false);
+                            // May need to pause the model, so just to be safe:
+                            paintModel.pauseTimer();
+                            
                             paintView.postInvalidate();
                         }
                     });

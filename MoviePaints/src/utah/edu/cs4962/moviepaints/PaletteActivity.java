@@ -34,6 +34,7 @@ public class PaletteActivity extends Activity
     private final int PALETTE_ID = 0xBADC0C0A;
     private final int MIX_BUTTON_ID = 0xDEADBEEF;
     private final int DELETE_BUTTON_ID = 0x90210000;
+    private final int WIDTH_SELECTOR_ID = 0x02933418;
     
     // Button click listeners
     private View.OnClickListener mixListener = new View.OnClickListener()
@@ -43,13 +44,11 @@ public class PaletteActivity extends Activity
         {
             if (mixButton.isChecked())
             {
-                mixButton.setText("Mix Colors");
                 paletteView.isMixing = true;
                 deleteButton.setEnabled(false);
             }
             else
             {
-                mixButton.setText("Mix Colors");
                 paletteView.isMixing = false;
                 deleteButton.setEnabled(true);
             }
@@ -62,13 +61,11 @@ public class PaletteActivity extends Activity
         {
             if (deleteButton.isChecked())
             {
-                deleteButton.setText("Delete Colors");
                 paletteView.isRemoving = true;
                 mixButton.setEnabled(false);
             }
             else
             {
-                deleteButton.setText("Delete Colors");
                 paletteView.isRemoving = false;
                 mixButton.setEnabled(true);
             }
@@ -139,11 +136,15 @@ public class PaletteActivity extends Activity
         curColor = paletteView.getSelectedColor();
         
         mixButton = new ToggleButton(this);
-        mixButton.setText("Mix Colors");
+        mixButton.setTextOn("Mix Colors");
+        mixButton.setTextOff("Mix Colors");
+        mixButton.setChecked(false);
         mixButton.setId(MIX_BUTTON_ID);
         mixButton.setOnClickListener(mixListener);
         deleteButton = new ToggleButton(this);
-        deleteButton.setText("Delete Colors");
+        deleteButton.setTextOn("Delete Colors");
+        deleteButton.setTextOff("Delete Colors");
+        deleteButton.setChecked(false);
         deleteButton.setId(DELETE_BUTTON_ID);
         deleteButton.setOnClickListener(deleteListener);
         
@@ -158,37 +159,38 @@ public class PaletteActivity extends Activity
         widthSelector.setMax(100);
         widthSelector.setProgress(50);
         widthSelector.setOnSeekBarChangeListener(widthChangedListener);
+        widthSelector.setId(WIDTH_SELECTOR_ID);
         curWidth = PaintingView.MAX_WIDTH * (float)widthSelector.getProgress() / 100.0f;
         
         LinearLayout mainLayout = new LinearLayout(this);
+        LinearLayout buttonLayout = new LinearLayout(this);
         LinearLayout bottomLayout = new LinearLayout(this);
-        LinearLayout topLayout = new LinearLayout(this);
         
         // Determine orientation
         if (getWindowManager().getDefaultDisplay().getWidth() < getWindowManager().getDefaultDisplay().getHeight())
         {
             mainLayout.setOrientation(LinearLayout.VERTICAL);
-            bottomLayout.setOrientation(LinearLayout.HORIZONTAL);
-            topLayout.setOrientation(LinearLayout.HORIZONTAL);
+            buttonLayout.setOrientation(LinearLayout.HORIZONTAL);
+            bottomLayout.setOrientation(LinearLayout.VERTICAL);
         }
         else
         {
             mainLayout.setOrientation(LinearLayout.HORIZONTAL);
+            buttonLayout.setOrientation(LinearLayout.VERTICAL);
             bottomLayout.setOrientation(LinearLayout.VERTICAL);
-            topLayout.setOrientation(LinearLayout.VERTICAL);
         }
         
         // Setup layouts
-        bottomLayout.addView(okButton);
-        bottomLayout.addView(cancelButton);
-        
-        topLayout.addView(mixButton);
-        topLayout.addView(deleteButton);
-        
-        mainLayout.addView(topLayout);
+        buttonLayout.addView(okButton);
+        buttonLayout.addView(cancelButton);
+        buttonLayout.addView(mixButton);
+        buttonLayout.addView(deleteButton);
+
+        bottomLayout.addView(widthSelector);
+        bottomLayout.addView(paletteView);
+
+        mainLayout.addView(buttonLayout);
         mainLayout.addView(bottomLayout);
-        mainLayout.addView(widthSelector);
-        mainLayout.addView(paletteView);
         
         setContentView(mainLayout);
     }

@@ -24,6 +24,7 @@ import android.widget.SeekBar.OnSeekBarChangeListener;
 public class MovieActivity extends Activity implements PaintingViewAdapter
 {
     public static final int REQUEST_CODE = 0x00CABB1E;
+    public static final int SCRUBBER_ID = 0xABBAEDDE;
     
     private PaintingView movieView;
     private PaintingModel paintModel;
@@ -133,28 +134,35 @@ public class MovieActivity extends Activity implements PaintingViewAdapter
         Log.i("scrubber max", Integer.toString(scrubber.getMax()));
         scrubber.setProgress(0);
         scrubber.setOnSeekBarChangeListener(scrubberListener);
+        scrubber.setId(SCRUBBER_ID);
         
         // Layout
         LinearLayout mainLayout = new LinearLayout(this);
+        LinearLayout bottomLayout = new LinearLayout(this);
         LinearLayout buttonLayout = new LinearLayout(this);
         
         // Determine orientations
         if (getWindowManager().getDefaultDisplay().getWidth() < getWindowManager().getDefaultDisplay().getHeight())
         {
             mainLayout.setOrientation(LinearLayout.VERTICAL);
+            bottomLayout.setOrientation(LinearLayout.VERTICAL);
             buttonLayout.setOrientation(LinearLayout.HORIZONTAL);
         }
         else
         {
             mainLayout.setOrientation(LinearLayout.HORIZONTAL);
+            bottomLayout.setOrientation(LinearLayout.VERTICAL);
             buttonLayout.setOrientation(LinearLayout.VERTICAL);
         }
         
         buttonLayout.addView(pauseButton);
         buttonLayout.addView(doneButton);
+
+        bottomLayout.addView(scrubber);
+        bottomLayout.addView(movieView);
+        
         mainLayout.addView(buttonLayout);
-        mainLayout.addView(scrubber);
-        mainLayout.addView(movieView);
+        mainLayout.addView(bottomLayout);
         
         setContentView(mainLayout);
         
