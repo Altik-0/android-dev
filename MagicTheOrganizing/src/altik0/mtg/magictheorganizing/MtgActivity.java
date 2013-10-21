@@ -3,6 +3,7 @@ package altik0.mtg.magictheorganizing;
 import java.util.ArrayList;
 
 import altik0.mtg.magictheorganizing.MtgDataTypes.*;
+import altik0.mtg.magictheorganizing.views.CardView;
 import android.os.Bundle;
 import android.app.Activity;
 import android.view.Menu;
