@@ -1,12 +1,20 @@
 package altik0.mtg.magictheorganizing.CardViewDrawables;
 
+import java.util.LinkedList;
+import java.util.Stack;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import altik0.mtg.magictheorganizing.MtgDataTypes.*;
+import android.annotation.TargetApi;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.RectF;
 import android.graphics.Typeface;
+import android.os.Build;
 
+@TargetApi(Build.VERSION_CODES.GINGERBREAD)
 public class NameBar
 {
     public final static float NAME_BAR_POS_X = 4.0f;
@@ -21,7 +29,7 @@ public class NameBar
     public final static float NAME_BAR_RADIUS_Y = 3.0f;
     
     // Definitions for mana symbols
-    public final static float MANA_SYMBOL_RADIUS = 4.5f;
+    public final static float MANA_SYMBOL_RADIUS = 1.65f;
     
 	public static void draw(Canvas canvas, CardData card, RectF bounds,
 	        int strokeColor, float scalar)
@@ -62,7 +70,31 @@ public class NameBar
                 textPaint);
         
 	    // Step 3: draw mana symbols
-        // TODO: regex split the symbols out
+        // regex split the symbols out
+        Pattern regex = Pattern.compile("\\{[^}]*\\}");
+        Matcher matcher = regex.matcher(card.getManaCost());
+        Stack<String> manaSymbols = new Stack<String>();
+        while (matcher.find())
+        {
+            manaSymbols.push(matcher.group());
+        }
+        
         // TODO: draw each symbol, starting from the right-most
+        float radius = MANA_SYMBOL_RADIUS * scalar;
+        RectF symbolBounds = new RectF(nameBar);
+        symbolBounds.right -= scalar;
+        symbolBounds.bottom -= (symbolBounds.height() - (2.0f * radius)) * 0.5f;
+        symbolBounds.left = symbolBounds.right - (2.0f * radius);
+        symbolBounds.top = symbolBounds.bottom - (2.0f * radius);
+        //symbolBounds.inset((nameBar.width() - (2.0f * radius)) / 2.0f,
+        //                   (nameBar.height() - (2.0f * radius)) / 2.0f);
+                
+        while (manaSymbols.size() > 0)
+        {
+            String symbol = manaSymbols.pop();
+            ManaSymbol.draw(canvas, symbolBounds, symbol, scalar);
+            symbolBounds.left -= (2.0f * radius) + (scalar / 2.0f);
+            symbolBounds.right -= (2.0f * radius) + (scalar / 2.0f);
+        }
 	}
 }

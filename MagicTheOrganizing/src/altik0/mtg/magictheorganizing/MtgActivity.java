@@ -130,13 +130,15 @@ public class MtgActivity extends Activity {
 		
 		LinearLayout layout = new LinearLayout(this);
 		CardData card = new CardData();
-		card.setName("Nylea, God of the Hunt");
+		card.setName("Cruel Ultimatum");
 		card.setPower(99);
 		card.setToughness(99);
 		card.addColor(CardColor.Green);
 		card.addType(CardType.Creature);
 		card.addSubtype("Human");
 		card.addSubtype("Soldier");
+		card.setManaCost("{U/W}{2/G}{B/R}{B/W}{P/B}{S}{2}");
+		
 		
 		CardView cv = new CardView(this, card);
 		cv.setPadding(10, 10, 10, 10);
