@@ -71,6 +71,9 @@ public class NameBar
         
 	    // Step 3: draw mana symbols
         // regex split the symbols out
+        // WAIT: don't do this if we don't have a cost!
+        if (card.getManaCost() == null)
+            return;
         Pattern regex = Pattern.compile("\\{[^}]*\\}");
         Matcher matcher = regex.matcher(card.getManaCost());
         Stack<String> manaSymbols = new Stack<String>();

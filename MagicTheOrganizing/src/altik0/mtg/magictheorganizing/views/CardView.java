@@ -220,4 +220,24 @@ public class CardView extends View
 		else
 			return 0xFFC78F00;
 	}
+	
+	public void setCardData(CardData data)
+	{
+	    card = data;
+	}
+	
+	public CardData getCardData()
+	{
+	    return card;
+	}
+	
+	@Override
+	protected void onMeasure (int widthMeasureSpec, int heightMeasureSpec)
+	{
+	    int width = 1000, height = 1000;
+	    
+	    // TODO: something substantially less shitty
+	    
+	    setMeasuredDimension(width, height);
+	}
 }

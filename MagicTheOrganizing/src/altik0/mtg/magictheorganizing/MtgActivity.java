@@ -6,12 +6,20 @@ import altik0.mtg.magictheorganizing.MtgDataTypes.*;
 import altik0.mtg.magictheorganizing.views.CardView;
 import android.os.Bundle;
 import android.app.Activity;
+import android.database.DataSetObserver;
 import android.view.Menu;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.LinearLayout.LayoutParams;
+import android.widget.ListAdapter;
+import android.widget.ListView;
 
-public class MtgActivity extends Activity {
-
+public class MtgActivity extends Activity
+{
+    private CardData[] cards;
+    
 	@Override
 	protected void onCreate(Bundle savedInstanceState)
 	{
@@ -128,21 +136,60 @@ public class MtgActivity extends Activity {
 //		layout.addView(row4);
 //		layout.setOrientation(LinearLayout.VERTICAL);
 		
+		cards = new CardData[5];
+		
 		LinearLayout layout = new LinearLayout(this);
-		CardData card = new CardData();
-		card.setName("Cruel Ultimatum");
-		card.setPower(99);
-		card.setToughness(99);
-		card.addColor(CardColor.Green);
-		card.addType(CardType.Creature);
-		card.addSubtype("Human");
-		card.addSubtype("Soldier");
-		card.setManaCost("{U/W}{2/G}{B/R}{B/W}{P/B}{S}{2}");
 		
+		CardData card0 = new CardData();
+        card0.setName("Cruel Ultimatum");
+        card0.addColor(CardColor.Red);
+        card0.addColor(CardColor.Blue);
+        card0.addColor(CardColor.Black);
+        card0.addType(CardType.Sorcery);
+        card0.setManaCost("{U}{U}{B}{B}{B}{R}{R}");
+        
+        CardData card1 = new CardData();
+        card1.setName("Nylea, God of the Hunt");
+        card1.addColor(CardColor.Green);
+        card1.addType(CardType.Legendary);
+        card1.addType(CardType.Enchantment);
+        card1.addType(CardType.Creature);
+        card1.addSubtype("God");
+        card1.setManaCost("{3}{G}");
+        card1.setPower(5);
+        card1.setToughness(6);
+        
+        CardData card2 = new CardData();
+        card2.setName("Greed");
+        card2.addColor(CardColor.Black);
+        card2.addType(CardType.Enchantment);
+        card2.setManaCost("{3}{B}");
+        
+        CardData card3 = new CardData();
+        card3.setName("Phyrexian Metamorph");
+        card3.addColor(CardColor.Blue);
+        card3.addType(CardType.Artifact);
+        card3.addType(CardType.Creature);
+        card3.setManaCost("{3}{P/U}");
+        
+        CardData card4 = new CardData();
+        card4.setName("Tropical Island");
+        card4.addType(CardType.Land);
+        card4.addSubtype("Island");
+        card4.addSubtype("Forest");
+
+        cards[0] = card0;
+        cards[1] = card1;
+        cards[2] = card2;
+        cards[3] = card3;
+        cards[4] = card4;
 		
-		CardView cv = new CardView(this, card);
-		cv.setPadding(10, 10, 10, 10);
-		layout.addView(cv);
-		setContentView(layout);
+        CardListAdapter cl = new CardListAdapter(this, cards);
+        
+        ListView lv = new ListView(this);
+        lv.setAdapter(cl);
+        //layout.addView(lv);
+		
+		setContentView(lv);
 	}
 }
