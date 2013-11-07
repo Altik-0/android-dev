@@ -3,6 +3,7 @@ package utah.edu.cs4962.collage;
 import android.os.Bundle;
 import android.app.Activity;
 import android.app.Fragment;
+import android.app.FragmentTransaction;
 import android.app.ListFragment;
 import android.view.Menu;
 import android.widget.FrameLayout;
@@ -10,12 +11,12 @@ import android.widget.LinearLayout;
 
 public class CollageActivity extends Activity
 {
+    private static final int LIBRARY_ID = 0x5138008;
+    private static final int COLLAGE_ID = 0xB00B1E5;
+    
     private LinearLayout splitView;
     private FrameLayout libraryFrame;
     private FrameLayout collageFrame;
-    
-    private ListFragment libraryFragment;
-    private Fragment collageFragment;       // TODO: make this a custom fragment
     
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -27,9 +28,9 @@ public class CollageActivity extends Activity
         // TODO: init fragments
         
         libraryFrame = new FrameLayout(this);
-        libraryFrame.addView(libraryFragment.getView());
+        libraryFrame.setId(LIBRARY_ID);
         collageFrame = new FrameLayout(this);
-        collageFrame.addView(collageFragment.getView());
+        collageFrame.setId(COLLAGE_ID);
         
         splitView.addView(libraryFrame,
                           new LinearLayout.LayoutParams(0,
@@ -39,6 +40,11 @@ public class CollageActivity extends Activity
                           new LinearLayout.LayoutParams(0,
                                                         LinearLayout.LayoutParams.MATCH_PARENT,
                                                         2));
+        
+        FragmentTransaction trans = getFragmentManager().beginTransaction();
+        trans.add(collageFrame.getId(), new CollageFragment());
+        // TODO: list fragment
+        trans.commit();
         
         setContentView(splitView);
     }

@@ -3,6 +3,7 @@ package utah.edu.cs4962.collage.model;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.LinkedList;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -17,13 +18,15 @@ public class CollageModel
     // Struct holding data loaded from path and interesting for user
     public class LibraryElementData
     {
+        public int ID;
         public Bitmap thumbnail;
         public int width;
         public int height;
         public Date lastModified;
         
-        public LibraryElementData(Bitmap _thumbnail, int _width, int _height, Date _lastModified)
+        public LibraryElementData(int _ID, Bitmap _thumbnail, int _width, int _height, Date _lastModified)
         {
+            ID = _ID;
             thumbnail = _thumbnail;
             width = _width;
             height = _height;
@@ -34,32 +37,16 @@ public class CollageModel
     // Data regarding image in the collage
     public class CollageEntry
     {
-        public Bitmap image;
-        public Rect bounds;
-        public String path;
+        public int imageID;
+        private Rect bounds;
         
-        public CollageEntry(String _path)
+        public CollageEntry(int _imageID)
         {
-            path = _path;
+            imageID = _imageID;
             
-            // Load image
-            File imageFile = new File(path);
-            if (imageFile.exists())
-            {
-                image = BitmapFactory.decodeFile(imageFile.getAbsolutePath());
-                bounds = new Rect(0, 0, image.getWidth(), image.getHeight());
-            }
-            else
-            {
-                // ??? Dunno what to do if the image doesn't exist
-            }
-        }
-        
-        public Bitmap getScaledImage()
-        {
-            int width = bounds.width();
-            int height = bounds.height();
-            return Bitmap.createScaledBitmap(image, width, height, true);
+            // Set default bounds
+            // TODO: properly scale image. For now, just go with width/heigh of collage
+            bounds = new Rect(0, 0, width, height);
         }
         
         public void setPosition(int x, int y)
@@ -91,6 +78,21 @@ public class CollageModel
         {
             return bounds.top;
         }
+        
+        public int getWidth()
+        {
+            return bounds.width();
+        }
+        
+        public int getHeight()
+        {
+            return bounds.height();
+        }
+        
+        public Rect getBounds()
+        {
+            return new Rect(bounds);
+        }
     }
     
     // Singleton accessor
@@ -103,14 +105,24 @@ public class CollageModel
     }
     
     // List of images inserted into the library. Listed as filepaths
-    ArrayList<String> libraryPaths;
+    private LinkedList<String> libraryPaths;
     
     // List of images already in collage
-    ArrayList<CollageEntry> collageEntries;
+    private LinkedList<CollageEntry> collageEntries;
+    
+    // Cache to handle loading images
+    private SimpleCache<Bitmap, Integer> imageCache;
+    private static final int MAX_CACHE_SIZE = 3;    // TODO: tweak to work nicely
+    
+    // Default size for the collage
+    private int width;
+    private int height;
     
     private CollageModel()
     {
-        libraryPaths = new ArrayList<String>();
+        libraryPaths = new LinkedList<String>();
+        collageEntries = new LinkedList<CollageEntry>();
+        imageCache = new SimpleCache<Bitmap, Integer>(MAX_CACHE_SIZE);
     }
     
     // TODO: remove? Not req.
@@ -135,27 +147,33 @@ public class CollageModel
         
         Date lastModified = new Date(f.lastModified());
         // TODO: something smart in case file doesn't exist
+        // TODO: reconsider opening image to get thumbnail
+        // TODO: MAYBE cache this (don't really want to, though tbh)
         Bitmap img = BitmapFactory.decodeFile(path);
         int width = img.getWidth();
         int height = img.getHeight();
         Bitmap thumbnail = Bitmap.createScaledBitmap(img, THUMB_WIDTH, THUMB_HEIGHT, true);
-        return new LibraryElementData(thumbnail, width, height, lastModified);
+        return new LibraryElementData(index, thumbnail, width, height, lastModified);
     }
     
     public synchronized void addLibraryElementToCollage(int index)
     {
-        String path = libraryPaths.get(index);
-        CollageEntry entry = new CollageEntry(path);
+        // If index out of range, ignore it
+        if (index > libraryPaths.size())
+            return;
+        CollageEntry entry = new CollageEntry(index);
         collageEntries.add(entry);
     }
     
     public synchronized CollageEntry getEntryFromLibraryIndex(int index)
     {
-        String path = libraryPaths.get(index);
+        // If index out of range, return null
+        if (index > libraryPaths.size())
+            return null;
         
         for (CollageEntry entry : collageEntries)
         {
-            if (entry.path == path)
+            if (entry.imageID == index)
                 return entry;
         }
         
@@ -165,10 +183,31 @@ public class CollageModel
     public synchronized void RemoveCollageEntry(int index)
     {
         collageEntries.remove(index);
+        // TODO: cache this library element isn't contained anymore?
     }
     
     public synchronized CollageEntry[] getCollageEntries()
     {
         return (CollageEntry[])collageEntries.toArray();
+    }
+
+    public int getWidth()
+    {
+        return width;
+    }
+
+    public void setWidth(int width)
+    {
+        this.width = width;
+    }
+
+    public int getHeight()
+    {
+        return height;
+    }
+
+    public void setHeight(int height)
+    {
+        this.height = height;
     }
 }
