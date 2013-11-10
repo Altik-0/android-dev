@@ -1,18 +1,22 @@
 package utah.edu.cs4962.collage;
 
 import utah.edu.cs4962.collage.model.CollageModel;
+import utah.edu.cs4962.collage.model.CollageUpdateListener;
 import utah.edu.cs4962.collage.view.CollageView;
 import utah.edu.cs4962.collage.view.CollageViewDataSource;
 import android.app.Fragment;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Point;
+import android.graphics.Rect;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 
-public class CollageFragment extends Fragment implements CollageViewDataSource
+public class CollageFragment extends Fragment implements CollageViewDataSource, CollageUpdateListener
 {
     private CollageView collageView;
     
@@ -27,6 +31,7 @@ public class CollageFragment extends Fragment implements CollageViewDataSource
     {
         // TODO: for now, just always assume collage is 2000 x 2000 pixels
         CollageModel.getInstance().setWidthAndHeight(2000, 2000);
+        CollageModel.getInstance().registerForCollageUpdates(this);
         collageView = new CollageView(getActivity(), this);
         return collageView;
     }
@@ -48,5 +53,62 @@ public class CollageFragment extends Fragment implements CollageViewDataSource
     public int getHeight()
     {
         return CollageModel.getInstance().getHeight();
+    }
+
+    @Override
+    public void collageEntryRemoved()
+    {
+        collageView.invalidate();
+    }
+
+    @Override
+    public void collageEntryAdded()
+    {
+        collageView.invalidate();
+    }
+    
+    @Override
+    public void collageImageUpdated()
+    {
+        collageView.invalidate();
+    }
+
+    @Override
+    public Rect getSelectedRegion()
+    {
+        CollageModel.CollageEntry entry = CollageModel.getInstance().getSelectedEntry();
+        if (entry == null)
+            return null;
+        return entry.getBounds();
+    }
+
+    private Integer entryToMod = null;
+    @Override
+    public Boolean tryTouchPoint(Point p)
+    {
+        entryToMod = CollageModel.getInstance().findAndSelectEntryAtPoint(p);
+        
+        // If we didn't hit something, deselect
+        if (entryToMod == null)
+            CollageModel.getInstance().setSelectedEntry(null);
+        
+        // Invalidate views, since things may have changed
+        collageView.invalidate();
+        
+        return entryToMod != null;
+    }
+
+    @Override
+    public Boolean tryMove(Point change)
+    {
+        if (entryToMod == null)
+            return false;
+        
+        // If we do have one, track the change, and submit that
+        CollageModel.getInstance().moveEntry(entryToMod, change.x, change.y);
+        
+        // Invalidate to show results
+        collageView.invalidate();
+        return true;
     }
 }

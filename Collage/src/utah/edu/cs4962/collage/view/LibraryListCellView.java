@@ -12,6 +12,7 @@ import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -181,5 +182,11 @@ public class LibraryListCellView extends ViewGroup
         int height = Math.max(MeasureSpec.getSize(heightMeasureSpec), 150);
         
         setMeasuredDimension(width, height);
+    }
+    
+    public void setPlusMinusCheckedChangeListener(OnCheckedChangeListener listener)
+    {
+        ToggleButton plusMinusButton = (ToggleButton)findViewById(PLUS_MINUS_ID);
+        plusMinusButton.setOnCheckedChangeListener(listener);
     }
 }

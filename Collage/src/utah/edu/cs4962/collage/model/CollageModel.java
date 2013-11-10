@@ -9,6 +9,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Point;
 import android.graphics.Rect;
 import android.support.v4.content.LocalBroadcastManager;
 
@@ -17,6 +18,13 @@ public class CollageModel
     // TODO: something smarter?
     public static final int THUMB_WIDTH  = 100;
     public static final int THUMB_HEIGHT = 100;
+    // To ensure that we do not run out of space, images will never be stored
+    // any larger than the below width and height.
+    public static final int MAX_IMG_WIDTH = 1000;
+    public static final int MAX_IMG_HEIGHT = 1000;
+    
+    // Listeners for broadcasts
+    LinkedList<CollageUpdateListener> updateListeners;
     
     // Struct holding data loaded from path and interesting for user
     public class LibraryElementData
@@ -52,16 +60,48 @@ public class CollageModel
             imageID = _imageID;
             
             // Set default bounds
-            // TODO: properly scale image. For now, just go with width/heigh of collage
-            bounds = new Rect(0, 0, width, height);
+            // First, get default width and height of image
+            BitmapFactory.Options opts = new BitmapFactory.Options();
+            opts.inJustDecodeBounds = true;
+            BitmapFactory.decodeFile(libraryPaths.get(imageID).path, opts);
+            
+            int baseWidth = opts.outWidth;
+            int baseHeight = opts.outHeight;
+            int desiredWidth = width / 4;
+            int desiredHeight = height / 4;
+            
+            // Compare aspect ratios:
+            float baseAspectRatio = (float)baseWidth / (float)baseHeight;
+            float collageAspectRatio = (float)width / (float)height;
+            float scalar = 1.0f;
+            // If too wide:
+            if (baseAspectRatio > collageAspectRatio)
+                scalar = (float)desiredWidth / (float)baseWidth;
+            // If too tall:
+            else
+                scalar = (float)desiredHeight / (float)baseHeight;
+            
+            // Build bounds
+            bounds = new Rect(0, 0, (int)(baseWidth * scalar), (int)(baseHeight * scalar));
+            
+            // Move bounds to center
+            setPosition((width / 2) - (bounds.width() / 2),
+                        (height / 2) - (bounds.height() / 2));
         }
         
         public void setPosition(int x, int y)
         {
-            bounds.left += x;
-            bounds.right += x;
-            bounds.top += y;
-            bounds.bottom += y;
+            int dx = x - bounds.left;
+            int dy = y - bounds.top;
+            movePosition(dx, dy);
+        }
+        
+        public void movePosition(int dx, int dy)
+        {
+            bounds.left += dx;
+            bounds.right += dx;
+            bounds.top += dy;
+            bounds.bottom += dy;
         }
         
         // TODO: scale cenetered at position
@@ -116,6 +156,8 @@ public class CollageModel
     
     // List of images already in collage
     private LinkedList<CollageEntry> collageEntries;
+    // Index of the presently selected image. null if none selected
+    Integer selectedEntry = null;
     
     // Cache to handle loading images
     private SimpleCache<Bitmap, Integer> imageCache;
@@ -130,6 +172,8 @@ public class CollageModel
     
     private CollageModel()
     {
+        updateListeners = new LinkedList<CollageUpdateListener>();
+        
         libraryPaths = new LinkedList<LibraryElementData>();
         collageEntries = new LinkedList<CollageEntry>();
         imageCache = new SimpleCache<Bitmap, Integer>(MAX_CACHE_SIZE);
@@ -176,6 +220,45 @@ public class CollageModel
             return;
         CollageEntry entry = new CollageEntry(index);
         collageEntries.add(entry);
+        
+        for (CollageUpdateListener listener : updateListeners)
+        {
+            listener.collageEntryAdded();
+        }
+        
+        // update our image to accommodate for the new entry
+        updateImage();
+    }
+    
+    public synchronized void removeLibraryElementFromCollage(int index)
+    {
+        // Search for the index to confirm it was in there
+        for (int i = 0; i < collageEntries.size(); i++)
+        {
+            CollageEntry entry = collageEntries.get(i);
+            if (entry.imageID == index)
+            {
+                collageEntries.remove(entry);
+                // TODO: note that we've removed it
+                
+                // Adjust selected image appropriately
+                if (selectedEntry != null)
+                {
+                    if (selectedEntry == i)
+                        selectedEntry = null;
+                    else if (selectedEntry > i)
+                        selectedEntry--;
+                }
+                
+                this.updateImage();
+                
+                for (CollageUpdateListener listener : updateListeners)
+                {
+                    listener.collageEntryRemoved();
+                }
+                return;
+            }
+        }
     }
     
     public synchronized CollageEntry getEntryFromLibraryIndex(int index)
@@ -193,47 +276,41 @@ public class CollageModel
         return null;
     }
     
-    public synchronized void RemoveCollageEntry(int index)
-    {
-        collageEntries.remove(index);
-        // TODO: cache this library element isn't contained anymore?
-    }
-    
     public synchronized CollageEntry[] getCollageEntries()
     {
         return (CollageEntry[])collageEntries.toArray();
     }
 
-    public int getWidth()
+    public synchronized int getWidth()
     {
         return width;
     }
 
-    public int getHeight()
+    public synchronized int getHeight()
     {
         return height;
     }
     
-    public int getLibraryCount()
+    public synchronized int getLibraryCount()
     {
         return libraryPaths.size();
     }
 
-    public void setWidth(int width)
+    public synchronized void setWidth(int width)
     {
         this.width = width;
         currentImage = Bitmap.createBitmap(width, width, Bitmap.Config.ARGB_8888);
         updateImage();
     }
 
-    public void setHeight(int height)
+    public synchronized void setHeight(int height)
     {
         this.height = height;
         currentImage = Bitmap.createBitmap(width, width, Bitmap.Config.ARGB_8888);
         updateImage();
     }
     
-    public void setWidthAndHeight(int _width, int _height)
+    public synchronized void setWidthAndHeight(int _width, int _height)
     {
         width = _width;
         height = _height;
@@ -241,15 +318,133 @@ public class CollageModel
         updateImage();
     }
     
-    // TODO: make this do more. For now, just wipes the background
-    private void updateImage()
+    private synchronized Bitmap loadCollageEntry(CollageEntry entry)
+    {
+        Bitmap bmp = imageCache.getDataFromID(entry.imageID);
+        // Image currently isn't cached, so let's load it
+        if (bmp == null)
+        {
+            // First, let's get image's base width and height:
+            BitmapFactory.Options opts = new BitmapFactory.Options();
+            opts.inJustDecodeBounds = true;
+            BitmapFactory.decodeFile(libraryPaths.get(entry.imageID).path, opts);
+            
+            int baseWidth = opts.outWidth;
+            int baseHeight = opts.outHeight;
+            
+            // Compute which power of two is best to scale down by:
+            int inSampleSize = 1;
+            while ((baseWidth / inSampleSize) > MAX_IMG_WIDTH ||
+                   (baseHeight / inSampleSize) > MAX_IMG_HEIGHT)
+            {
+                inSampleSize *= 2;
+            }
+            
+            // Load the actual image
+            opts.inSampleSize = inSampleSize;
+            opts.inJustDecodeBounds = false;
+            bmp = BitmapFactory.decodeFile(libraryPaths.get(entry.imageID).path, opts);
+            
+            // Inform the cache we loaded the image
+            imageCache.loadDataWithID(bmp, entry.imageID);
+        }
+        
+        return bmp;
+    }
+    
+    private synchronized void updateImage()
     {
         Canvas canvas = new Canvas(currentImage);
         canvas.drawColor(Color.WHITE);
+        
+        for (CollageEntry entry : collageEntries)
+        {
+            Bitmap bmp = Bitmap.createScaledBitmap(loadCollageEntry(entry),
+                                                   entry.bounds.width(),
+                                                   entry.bounds.height(),
+                                                   true);
+            
+            canvas.drawBitmap(bmp, entry.bounds.left, entry.bounds.top, null);
+        }
+        
+        for (CollageUpdateListener listener : updateListeners)
+        {
+            listener.collageImageUpdated();
+        }
     }
     
-    public Bitmap getRenderedCollage()
+    public synchronized Bitmap getRenderedCollage()
     {
         return currentImage;
+    }
+    
+    public synchronized void registerForCollageUpdates(CollageUpdateListener listener)
+    {
+        updateListeners.add(listener);
+    }
+    
+    public synchronized void setSelectedEntry(Integer libraryId)
+    {
+        // If the libraryId is null, we just set nothing as selected
+        if (libraryId == null)
+        {
+            selectedEntry = null;
+            return;
+        }
+        
+        // If the Id isn't contained in the library, do nothing
+        if (libraryPaths.size() <= libraryId)
+            return;
+        
+        // Search for it. If we find it, set value. Otherwise, set to null
+        for (int i = 0; i < collageEntries.size(); i++)
+        {
+            if (collageEntries.get(i).imageID == libraryId)
+            {
+                selectedEntry = i;
+                return;
+            }
+        }
+        selectedEntry = null;
+    }
+    
+    public synchronized CollageEntry getSelectedEntry()
+    {
+        if (selectedEntry == null)
+            return null;
+        return collageEntries.get(selectedEntry);
+    }
+    
+    public synchronized Integer findAndSelectEntryAtPoint(Point p)
+    {
+        // Check selected entry first
+        if (selectedEntry != null &&
+            collageEntries.get(selectedEntry).bounds.contains(p.x, p.y))
+        {
+            return selectedEntry;
+        }
+        
+        // Check, starting backwards (to check those drawn on top first)
+        for (int i = collageEntries.size() - 1; i >= 0; i--)
+        {
+            if (collageEntries.get(i).bounds.contains(p.x, p.y))
+            {
+                selectedEntry = i;
+                return i;
+            }
+        }
+        
+        // Didn't find one, so return null
+        return null;
+    }
+    
+    public synchronized void moveEntry(Integer entryIndex, int dx, int dy)
+    {
+        if (entryIndex == null)
+            return;
+        
+        collageEntries.get(entryIndex).movePosition(dx, dy);
+        
+        updateImage();
     }
 }

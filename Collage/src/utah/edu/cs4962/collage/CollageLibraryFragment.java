@@ -9,6 +9,8 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.CompoundButton;
+import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 
@@ -65,7 +67,7 @@ public class CollageLibraryFragment extends Fragment implements ListAdapter
     }
 
     @Override
-    public View getView(int position, View convertView, ViewGroup parent)
+    public View getView(final int position, View convertView, ViewGroup parent)
     {
         LibraryListCellView toRet = null;
         CollageModel.LibraryElementData data = (CollageModel.LibraryElementData)this.getItem(position);
@@ -83,6 +85,24 @@ public class CollageLibraryFragment extends Fragment implements ListAdapter
             toRet.setImgHeight(data.height);
             toRet.setTimestamp(data.lastModified);
         }
+        
+        toRet.setPlusMinusCheckedChangeListener(new OnCheckedChangeListener()
+        {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked)
+            {
+                // If it is now checked, then the action was an add
+                if (isChecked)
+                {
+                    CollageModel.getInstance().addLibraryElementToCollage(position);
+                }
+                // If it is not checked, then the action was a remove
+                else
+                {
+                    CollageModel.getInstance().removeLibraryElementFromCollage(position);
+                }
+            }
+        });
         
         return toRet;
     }
