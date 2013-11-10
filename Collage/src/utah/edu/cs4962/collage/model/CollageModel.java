@@ -7,7 +7,10 @@ import java.util.LinkedList;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Rect;
+import android.support.v4.content.LocalBroadcastManager;
 
 public class CollageModel
 {
@@ -23,14 +26,18 @@ public class CollageModel
         public int width;
         public int height;
         public Date lastModified;
+        public String path;
         
-        public LibraryElementData(int _ID, Bitmap _thumbnail, int _width, int _height, Date _lastModified)
+        public LibraryElementData(int _ID, Bitmap _thumbnail,
+                                  int _width, int _height, Date _lastModified,
+                                  String _path)
         {
             ID = _ID;
             thumbnail = _thumbnail;
             width = _width;
             height = _height;
             lastModified = _lastModified;
+            path = _path;
         }
     }
     
@@ -96,8 +103,8 @@ public class CollageModel
     }
     
     // Singleton accessor
-    private CollageModel instance = null;
-    public synchronized CollageModel getInstance()
+    private static CollageModel instance = null;
+    public synchronized static CollageModel getInstance()
     {
         if (instance == null)
             instance = new CollageModel();
@@ -105,7 +112,7 @@ public class CollageModel
     }
     
     // List of images inserted into the library. Listed as filepaths
-    private LinkedList<String> libraryPaths;
+    private LinkedList<LibraryElementData> libraryPaths;
     
     // List of images already in collage
     private LinkedList<CollageEntry> collageEntries;
@@ -114,35 +121,30 @@ public class CollageModel
     private SimpleCache<Bitmap, Integer> imageCache;
     private static final int MAX_CACHE_SIZE = 3;    // TODO: tweak to work nicely
     
+    // Cached bitmap. We'll update this regularly as necessary
+    private Bitmap currentImage;
+    
     // Default size for the collage
-    private int width;
-    private int height;
+    private int width = 100;
+    private int height = 100;
     
     private CollageModel()
     {
-        libraryPaths = new LinkedList<String>();
+        libraryPaths = new LinkedList<LibraryElementData>();
         collageEntries = new LinkedList<CollageEntry>();
         imageCache = new SimpleCache<Bitmap, Integer>(MAX_CACHE_SIZE);
+        
+        currentImage = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
     }
     
     // TODO: remove? Not req.
     
-    public synchronized void addImage(String path)
+    public synchronized void addImageToLibrary(String path)
     {
         // do not insert if path already included
         if (libraryPaths.contains(path))
             return;
-        libraryPaths.add(path);
-    }
-    
-    public synchronized String[] getPaths()
-    {
-        return (String[])libraryPaths.toArray();
-    }
-    
-    public synchronized LibraryElementData getDataForIndex(int index)
-    {
-        String path = libraryPaths.get(index);
+
         File f = new File(path);
         
         Date lastModified = new Date(f.lastModified());
@@ -153,7 +155,18 @@ public class CollageModel
         int width = img.getWidth();
         int height = img.getHeight();
         Bitmap thumbnail = Bitmap.createScaledBitmap(img, THUMB_WIDTH, THUMB_HEIGHT, true);
-        return new LibraryElementData(index, thumbnail, width, height, lastModified);
+        libraryPaths.add(new LibraryElementData(
+                libraryPaths.size(), thumbnail, width, height, lastModified, path));
+    }
+    
+    public synchronized String[] getPaths()
+    {
+        return (String[])libraryPaths.toArray();
+    }
+    
+    public synchronized LibraryElementData getDataForIndex(int index)
+    {
+        return libraryPaths.get(index);
     }
     
     public synchronized void addLibraryElementToCollage(int index)
@@ -196,18 +209,47 @@ public class CollageModel
         return width;
     }
 
-    public void setWidth(int width)
-    {
-        this.width = width;
-    }
-
     public int getHeight()
     {
         return height;
+    }
+    
+    public int getLibraryCount()
+    {
+        return libraryPaths.size();
+    }
+
+    public void setWidth(int width)
+    {
+        this.width = width;
+        currentImage = Bitmap.createBitmap(width, width, Bitmap.Config.ARGB_8888);
+        updateImage();
     }
 
     public void setHeight(int height)
     {
         this.height = height;
+        currentImage = Bitmap.createBitmap(width, width, Bitmap.Config.ARGB_8888);
+        updateImage();
+    }
+    
+    public void setWidthAndHeight(int _width, int _height)
+    {
+        width = _width;
+        height = _height;
+        currentImage = Bitmap.createBitmap(width, width, Bitmap.Config.ARGB_8888);
+        updateImage();
+    }
+    
+    // TODO: make this do more. For now, just wipes the background
+    private void updateImage()
+    {
+        Canvas canvas = new Canvas(currentImage);
+        canvas.drawColor(Color.WHITE);
+    }
+    
+    public Bitmap getRenderedCollage()
+    {
+        return currentImage;
     }
 }

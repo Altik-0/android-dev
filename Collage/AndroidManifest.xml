@@ -4,6 +4,9 @@
     android:versionCode="1"
     android:versionName="1.0" >
 
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
+    
     <uses-sdk
         android:minSdkVersion="11"
         android:targetSdkVersion="17" />
@@ -21,6 +24,10 @@
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+        </activity>
+        <activity
+            android:name="utah.edu.cs4962.collage.FileBrowserActivity"
+            android:label="@string/title_activity_file_browser" >
         </activity>
     </application>
 
