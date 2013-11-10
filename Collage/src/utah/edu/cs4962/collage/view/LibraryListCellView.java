@@ -2,6 +2,8 @@ package utah.edu.cs4962.collage.view;
 
 import java.util.Date;
 
+import utah.edu.cs4962.collage.R;
+
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.RectF;
@@ -9,16 +11,19 @@ import android.text.format.DateFormat;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.ToggleButton;
 
 public class LibraryListCellView extends ViewGroup
 {
     private static final int THUMB_ID = 0x666;
     private static final int WIDTH_HEIGHT_ID = 0xfa7a55;
     private static final int TIMESTAMP_ID = 0xcabb1e;
-    private static final int PLUS_MINUS_ID = 0xfeedf00d;
+    private static final int PLUS_MINUS_ID = 0xbadcab;
     
     private Bitmap thumbnail;
     private int imgWidth;
@@ -49,12 +54,17 @@ public class LibraryListCellView extends ViewGroup
         timestampView.setText(DateFormat.format("MMM/dd/yyyy kk:mm:ss", timestamp));
         timestampView.setId(TIMESTAMP_ID);
         
-        // TODO: \pm view
+        ToggleButton plusMinusButton = new ToggleButton(context);
+        plusMinusButton.setTextOn("-");
+        plusMinusButton.setTextOff("+");
+        plusMinusButton.setChecked(isInCollage);
+        plusMinusButton.setFocusable(false);
+        plusMinusButton.setId(PLUS_MINUS_ID);
 
         addView(thumbView);
         addView(widthHeightView);
         addView(timestampView);
-        // TODO: \pm view
+        addView(plusMinusButton);
     }
 
     @Override
@@ -63,10 +73,11 @@ public class LibraryListCellView extends ViewGroup
         ImageView thumbView = (ImageView)findViewById(THUMB_ID);
         TextView widthHeightView = (TextView)findViewById(WIDTH_HEIGHT_ID);
         TextView timestampView = (TextView)findViewById(TIMESTAMP_ID);
+        ToggleButton plusMinusButton = (ToggleButton)findViewById(PLUS_MINUS_ID);
         
         RectF bounds = new RectF(0, 0, getWidth(), getHeight());
         Log.i("Bounds:", bounds.left + ", " + bounds.top + ", " + bounds.right + ", " + bounds.bottom);
-        float widthUnit = getWidth() / 8.0f; // TODO: 9.0f when add \pm view
+        float widthUnit = getWidth() / 5.0f;
         
         RectF thumbBounds = new RectF(bounds);
         thumbBounds.right = thumbBounds.left + 
@@ -75,10 +86,14 @@ public class LibraryListCellView extends ViewGroup
         
         RectF widthHeightBounds = new RectF(bounds);
         widthHeightBounds.left = thumbBounds.right;
+        widthHeightBounds.right -= widthUnit;
         RectF timestampBounds = new RectF(widthHeightBounds);
         
         widthHeightBounds.bottom *= 0.3333f;
         timestampBounds.top = widthHeightBounds.bottom;
+        
+        RectF plusMinusBounds = new RectF(bounds);
+        plusMinusBounds.left = widthHeightBounds.right;
         
         // Actually lay them childrens out!
         thumbView.layout((int)thumbBounds.left,
@@ -93,6 +108,10 @@ public class LibraryListCellView extends ViewGroup
                              (int)timestampBounds.top,
                              (int)timestampBounds.right,
                              (int)timestampBounds.right);
+        plusMinusButton.layout((int)plusMinusBounds.left,
+                               (int)plusMinusBounds.top,
+                               (int)plusMinusBounds.right,
+                               (int)plusMinusBounds.bottom);
     }
 
     public Bitmap getThumbnail()
@@ -151,7 +170,8 @@ public class LibraryListCellView extends ViewGroup
     public void setIsInCollage(Boolean isInCollage)
     {
         this.isInCollage = isInCollage;
-        // TODO: handle \pm button
+        ToggleButton plusMinusButton = (ToggleButton)findViewById(PLUS_MINUS_ID);
+        plusMinusButton.setChecked(isInCollage);
     }
     
     @Override

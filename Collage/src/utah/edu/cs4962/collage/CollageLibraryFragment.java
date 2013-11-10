@@ -131,6 +131,6 @@ public class CollageLibraryFragment extends Fragment implements ListAdapter
     public boolean isEnabled(int position)
     {
         // TODO Auto-generated method stub
-        return false;
+        return true;
     }
 }
