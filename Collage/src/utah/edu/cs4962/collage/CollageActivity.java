@@ -1,6 +1,8 @@
 package utah.edu.cs4962.collage;
 
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -15,6 +17,7 @@ import android.app.AlertDialog;
 import android.app.FragmentTransaction;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.util.Log;
 import android.view.Menu;
@@ -121,6 +124,8 @@ public class CollageActivity extends Activity
     {
         File[] files;
         final ListView filelist;
+        final EditText input;
+        AlertDialog.Builder saveAlert;
         switch (item.getItemId())
         {
             case CAMERA_MENU:
@@ -133,11 +138,11 @@ public class CollageActivity extends Activity
                 // TODO
                 break;
             case SAVE_MODEL_MENU:
-                AlertDialog.Builder saveAlert = new AlertDialog.Builder(this);
+                saveAlert = new AlertDialog.Builder(this);
                 saveAlert.setTitle("Save File");
                 saveAlert.setMessage("Provide filepath to save to:");
                 
-                final EditText input = new EditText(this);
+                input = new EditText(this);
                 saveAlert.setView(input);
                 saveAlert.setPositiveButton("Save",
                         // Listener inside a listener! :o
@@ -166,7 +171,47 @@ public class CollageActivity extends Activity
                 saveAlert.show();
                 break;
             case SAVE_IMAGE_MENU:
-                // TODO
+                saveAlert = new AlertDialog.Builder(this);
+                saveAlert.setTitle("Save Image");
+                saveAlert.setMessage("Provide filepath to save to:");
+                
+                input = new EditText(this);
+                saveAlert.setView(input);
+                saveAlert.setPositiveButton("Save",
+                        // Listener inside a listener! :o
+                        new DialogInterface.OnClickListener()
+                        {
+                            @Override
+                            public void onClick(DialogInterface dialog, int whichButton)
+                            {
+                                // Have the model save with the user's input
+                                String filename = createImageFile(input.getText().toString()).getAbsolutePath();
+                                try
+                                {
+                                    FileOutputStream fs = new FileOutputStream(filename);
+                                    CollageModel.getInstance().getRenderedCollage().compress(
+                                                            Bitmap.CompressFormat.JPEG, 90, fs);
+                                    fs.close();
+                                }
+                                catch (IOException e)
+                                {
+                                    e.printStackTrace();
+                                }
+                            }
+                        });
+                saveAlert.setNegativeButton("Cancel",
+                        // Listener inside a listener! :o
+                        new DialogInterface.OnClickListener()
+                        {
+                            @Override
+                            public void onClick(DialogInterface dialog, int whichButton)
+                            {
+                                // Nothing, we're cancelling after all
+                            }
+                        });
+                
+                // Display the alert box!
+                saveAlert.show();
                 break;
             case LOAD_MODEL_MENU:
                 // Get file paths:
@@ -307,6 +352,27 @@ public class CollageActivity extends Activity
         
         String tmpFileName = cameraStorageDirectory.getPath() + File.separator + 
                              "Camera_" + new SimpleDateFormat("yyMMdd_HHmmss").format(new Date()) + ".jpg";
+        File f = new File(tmpFileName);
+        return f;
+    }
+    
+    private File createImageFile(String filename)
+    {
+     // Locate / create public directory for our pictures
+        File cameraStorageDirectory = new File(Environment.getExternalStoragePublicDirectory(
+                                                Environment.DIRECTORY_PICTURES), "CollageImgs");
+        // If it doesn't exist, try to create it
+        if (!cameraStorageDirectory.exists())
+        {
+            // We'll try to create it, but if we fail we can't do anything
+            if (!cameraStorageDirectory.mkdirs())
+            {
+                Log.i("Public directory didn't work", "Sorry, couldn't make cameraStorageDirectory");
+                return null;
+            }
+        }
+        
+        String tmpFileName = cameraStorageDirectory.getPath() + File.separator + filename + ".jpg";
         File f = new File(tmpFileName);
         return f;
     }
