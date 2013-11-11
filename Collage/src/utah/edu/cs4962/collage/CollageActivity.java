@@ -84,6 +84,12 @@ public class CollageActivity extends Activity
         if (getBaseContext().getFileStreamPath("tmp.json").exists())
             CollageModel.loadModel("tmp.json", this);
         
+        setContentView(splitView);
+    }
+    
+    @Override
+    protected void onResume()
+    {
         collageFragment = new CollageFragment();
         libraryFragment = new CollageLibraryFragment();
         FragmentTransaction trans = getFragmentManager().beginTransaction();
@@ -91,13 +97,19 @@ public class CollageActivity extends Activity
         trans.add(libraryFrame.getId(), libraryFragment);
         trans.commit();
         
-        setContentView(splitView);
+        super.onResume();
     }
     
     @Override
     protected void onPause()
     {
         CollageModel.getInstance().saveModel("tmp.json", this);
+        
+        // Remove fragments from their frames
+        FragmentTransaction trans = getFragmentManager().beginTransaction();
+        trans.remove(collageFragment);
+        trans.remove(libraryFragment);
+        trans.commit();
         
         super.onPause();
     }
