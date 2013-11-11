@@ -3,6 +3,7 @@ package utah.edu.cs4962.collage;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -97,8 +98,24 @@ public class CollageActivity extends Activity
     protected void onPause()
     {
         CollageModel.getInstance().saveModel("tmp.json", this);
-
+        
         super.onPause();
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState)
+    {
+        if (savedInstanceState.containsKey("cameraFile"))
+            cameraFile = new File(savedInstanceState.getString("cameraFile"));
+        super.onRestoreInstanceState(savedInstanceState);
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState)
+    {
+        if (cameraFile != null)
+            outState.putString("cameraFile", cameraFile.getAbsolutePath());
+        super.onSaveInstanceState(outState);
     }
 
     @Override
