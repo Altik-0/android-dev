@@ -116,4 +116,10 @@ public class CollageFragment extends Fragment implements CollageViewDataSource, 
         CollageModel.getInstance().scaleEntry(entryToMod, scaleFactor);
         return true;
     }
+
+    @Override
+    public void collageSelectionChanged()
+    {
+        collageView.invalidate();
+    }
 }

@@ -10,12 +10,16 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
 import android.widget.CompoundButton;
 import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 
-public class CollageLibraryFragment extends Fragment implements ListAdapter, LibraryUpdateListener
+public class CollageLibraryFragment extends Fragment implements ListAdapter,
+                                                                LibraryUpdateListener,
+                                                                OnItemClickListener
 {
     private ListView libraryList;
     
@@ -30,6 +34,7 @@ public class CollageLibraryFragment extends Fragment implements ListAdapter, Lib
     {
         libraryList = new ListView(getActivity());
         libraryList.setAdapter(this);
+        libraryList.setOnItemClickListener(this);
         CollageModel.getInstance().registerForLibraryUpdates(this);
         
         return libraryList;
@@ -154,7 +159,7 @@ public class CollageLibraryFragment extends Fragment implements ListAdapter, Lib
     public boolean isEnabled(int position)
     {
         // TODO Auto-generated method stub
-        return true;
+        return CollageModel.getInstance().getDataForIndex(position).inCollage;
     }
 
     @Override
@@ -173,5 +178,11 @@ public class CollageLibraryFragment extends Fragment implements ListAdapter, Lib
     public void libraryHasChanged()
     {
         libraryList.invalidateViews();
+    }
+
+    @Override
+    public void onItemClick(AdapterView<?> parent, View view, int position, long id)
+    {
+        CollageModel.getInstance().setSelectedEntry(position);
     }
 }

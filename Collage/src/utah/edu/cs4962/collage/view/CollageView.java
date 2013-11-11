@@ -145,7 +145,7 @@ public class CollageView extends View
             Paint highlightPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
             highlightPaint.setColor(Color.RED);
             highlightPaint.setStyle(Paint.Style.STROKE);
-            highlightPaint.setStrokeWidth(3.0f);
+            highlightPaint.setStrokeWidth(10.0f);
             if (highlightBounds != null)
                 canvas.drawRect(highlightBounds, highlightPaint);
         }

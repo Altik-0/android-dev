@@ -268,9 +268,21 @@ public class CollageModel
                 if (selectedEntry != null)
                 {
                     if (selectedEntry == i)
+                    {
                         selectedEntry = null;
+                        for (CollageUpdateListener listener : collageListeners)
+                        {
+                            listener.collageSelectionChanged();
+                        }
+                    }
                     else if (selectedEntry > i)
+                    {
                         selectedEntry--;
+                        for (CollageUpdateListener listener : collageListeners)
+                        {
+                            listener.collageSelectionChanged();
+                        }
+                    }
                 }
                 
                 this.updateImage();
@@ -421,6 +433,10 @@ public class CollageModel
         if (libraryId == null)
         {
             selectedEntry = null;
+            for (CollageUpdateListener listener : collageListeners)
+            {
+                listener.collageSelectionChanged();
+            }
             return;
         }
         
@@ -434,10 +450,19 @@ public class CollageModel
             if (collageEntries.get(i).imageID == libraryId)
             {
                 selectedEntry = i;
+                for (CollageUpdateListener listener : collageListeners)
+                {
+                    listener.collageSelectionChanged();
+                }
                 return;
             }
         }
         selectedEntry = null;
+        
+        for (CollageUpdateListener listener : collageListeners)
+        {
+            listener.collageSelectionChanged();
+        }
     }
     
     public synchronized CollageEntry getSelectedEntry()
@@ -462,6 +487,10 @@ public class CollageModel
             if (collageEntries.get(i).bounds.contains(p.x, p.y))
             {
                 selectedEntry = i;
+                for (CollageUpdateListener listener : collageListeners)
+                {
+                    listener.collageSelectionChanged();
+                }
                 return i;
             }
         }
@@ -595,6 +624,10 @@ public class CollageModel
             
             // Reset any other variables that should be
             instance.selectedEntry = null;
+            for (CollageUpdateListener listener : instance.collageListeners)
+            {
+                listener.collageSelectionChanged();
+            }
             
             // Now that we've done all that, let's update our image
             instance.updateImage();
