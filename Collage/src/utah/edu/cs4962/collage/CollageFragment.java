@@ -29,8 +29,6 @@ public class CollageFragment extends Fragment implements CollageViewDataSource, 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
     {
-        // TODO: for now, just always assume collage is 2000 x 2000 pixels
-        CollageModel.getInstance().setWidthAndHeight(2000, 2000);
         CollageModel.getInstance().registerForCollageUpdates(this);
         collageView = new CollageView(getActivity(), this);
         return collageView;
@@ -106,9 +104,16 @@ public class CollageFragment extends Fragment implements CollageViewDataSource, 
         
         // If we do have one, track the change, and submit that
         CollageModel.getInstance().moveEntry(entryToMod, change.x, change.y);
+        return true;
+    }
+    
+    @Override
+    public Boolean tryScaleBy(float scaleFactor)
+    {
+        if (entryToMod == null)
+            return false;
         
-        // Invalidate to show results
-        collageView.invalidate();
+        CollageModel.getInstance().scaleEntry(entryToMod, scaleFactor);
         return true;
     }
 }

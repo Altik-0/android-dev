@@ -1,10 +1,21 @@
 package utah.edu.cs4962.collage.model;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.LinkedList;
 
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
@@ -24,28 +35,32 @@ public class CollageModel
     public static final int MAX_IMG_HEIGHT = 1000;
     
     // Listeners for broadcasts
-    LinkedList<CollageUpdateListener> updateListeners;
+    LinkedList<CollageUpdateListener> collageListeners;
+    LinkedList<LibraryUpdateListener> libraryListeners;
     
     // Struct holding data loaded from path and interesting for user
     public class LibraryElementData
     {
-        public int ID;
         public Bitmap thumbnail;
         public int width;
         public int height;
         public Date lastModified;
         public String path;
+        public boolean inCollage;
         
-        public LibraryElementData(int _ID, Bitmap _thumbnail,
-                                  int _width, int _height, Date _lastModified,
-                                  String _path)
+        public LibraryElementData(String _path)
         {
-            ID = _ID;
-            thumbnail = _thumbnail;
-            width = _width;
-            height = _height;
-            lastModified = _lastModified;
             path = _path;
+            File f = new File(path);
+            
+            lastModified = new Date(f.lastModified());
+            // TODO: something smart in case file doesn't exist
+            // TODO: reconsider opening image to get thumbnail
+            Bitmap img = BitmapFactory.decodeFile(path);
+            width = img.getWidth();
+            height = img.getHeight();
+            thumbnail = Bitmap.createScaledBitmap(img, THUMB_WIDTH, THUMB_HEIGHT, true);
+            inCollage = false;
         }
     }
     
@@ -161,24 +176,29 @@ public class CollageModel
     
     // Cache to handle loading images
     private SimpleCache<Bitmap, Integer> imageCache;
-    private static final int MAX_CACHE_SIZE = 3;    // TODO: tweak to work nicely
+    private static final int MAX_CACHE_SIZE = 10;    // TODO: tweak to work nicely
     
     // Cached bitmap. We'll update this regularly as necessary
     private Bitmap currentImage;
     
     // Default size for the collage
-    private int width = 100;
-    private int height = 100;
+    private int width;
+    private int height;
     
     private CollageModel()
     {
-        updateListeners = new LinkedList<CollageUpdateListener>();
+        collageListeners = new LinkedList<CollageUpdateListener>();
+        libraryListeners = new LinkedList<LibraryUpdateListener>();
         
         libraryPaths = new LinkedList<LibraryElementData>();
         collageEntries = new LinkedList<CollageEntry>();
         imageCache = new SimpleCache<Bitmap, Integer>(MAX_CACHE_SIZE);
         
+        // TODO: for now, we'll just have the collage ALWAYS be 2000 by 2000 pixels
+        setWidthAndHeight(2000, 2000);
+        
         currentImage = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+        updateImage();
     }
     
     // TODO: remove? Not req.
@@ -186,21 +206,19 @@ public class CollageModel
     public synchronized void addImageToLibrary(String path)
     {
         // do not insert if path already included
-        if (libraryPaths.contains(path))
-            return;
+        for (LibraryElementData libData : libraryPaths)
+            if (libData.path == path)
+                return;
 
-        File f = new File(path);
         
-        Date lastModified = new Date(f.lastModified());
-        // TODO: something smart in case file doesn't exist
-        // TODO: reconsider opening image to get thumbnail
-        // TODO: MAYBE cache this (don't really want to, though tbh)
-        Bitmap img = BitmapFactory.decodeFile(path);
-        int width = img.getWidth();
-        int height = img.getHeight();
-        Bitmap thumbnail = Bitmap.createScaledBitmap(img, THUMB_WIDTH, THUMB_HEIGHT, true);
-        libraryPaths.add(new LibraryElementData(
-                libraryPaths.size(), thumbnail, width, height, lastModified, path));
+        libraryPaths.add(new LibraryElementData(path));
+        
+        // Tell library listeners that we've added something
+        for (LibraryUpdateListener listener : libraryListeners)
+        {
+            listener.libraryElementAdded();
+            listener.libraryHasChanged();
+        }
     }
     
     public synchronized String[] getPaths()
@@ -220,10 +238,15 @@ public class CollageModel
             return;
         CollageEntry entry = new CollageEntry(index);
         collageEntries.add(entry);
+        libraryPaths.get(index).inCollage = true;
         
-        for (CollageUpdateListener listener : updateListeners)
+        for (CollageUpdateListener listener : collageListeners)
         {
             listener.collageEntryAdded();
+        }
+        for (LibraryUpdateListener listener : libraryListeners)
+        {
+            listener.libraryHasChanged();
         }
         
         // update our image to accommodate for the new entry
@@ -239,7 +262,7 @@ public class CollageModel
             if (entry.imageID == index)
             {
                 collageEntries.remove(entry);
-                // TODO: note that we've removed it
+                libraryPaths.get(index).inCollage = false;
                 
                 // Adjust selected image appropriately
                 if (selectedEntry != null)
@@ -252,9 +275,13 @@ public class CollageModel
                 
                 this.updateImage();
                 
-                for (CollageUpdateListener listener : updateListeners)
+                for (CollageUpdateListener listener : collageListeners)
                 {
                     listener.collageEntryRemoved();
+                }
+                for (LibraryUpdateListener listener : libraryListeners)
+                {
+                    listener.libraryHasChanged();
                 }
                 return;
             }
@@ -367,7 +394,7 @@ public class CollageModel
             canvas.drawBitmap(bmp, entry.bounds.left, entry.bounds.top, null);
         }
         
-        for (CollageUpdateListener listener : updateListeners)
+        for (CollageUpdateListener listener : collageListeners)
         {
             listener.collageImageUpdated();
         }
@@ -380,7 +407,12 @@ public class CollageModel
     
     public synchronized void registerForCollageUpdates(CollageUpdateListener listener)
     {
-        updateListeners.add(listener);
+        collageListeners.add(listener);
+    }
+    
+    public synchronized void registerForLibraryUpdates(LibraryUpdateListener listener)
+    {
+        libraryListeners.add(listener);
     }
     
     public synchronized void setSelectedEntry(Integer libraryId)
@@ -446,5 +478,130 @@ public class CollageModel
         collageEntries.get(entryIndex).movePosition(dx, dy);
         
         updateImage();
+    }
+    
+    public synchronized void scaleEntry(Integer entryIndex, float scaleFactor)
+    {
+        if (entryIndex == null)
+            return;
+        
+        collageEntries.get(entryIndex).scale(scaleFactor);
+        
+        updateImage();
+    }
+    
+    //-------------------------------
+    // Content for saving the model:
+    //-------------------------------
+    private class CollageSerialization
+    {
+        public String librarySerial;
+        public String collageSerial;
+        public int width;
+        public int height;
+    }
+    
+    private class LibraryEntrySerialization
+    {
+        public String path;
+        public boolean inCollage;
+    }
+    
+    public synchronized void saveModel(String savePath, Context context)
+    {
+        Gson gson = new Gson();
+        CollageSerialization serial = new CollageSerialization();
+        
+        // Get paths out of libraryPaths:
+        LinkedList<LibraryEntrySerialization> libSerials = new LinkedList<LibraryEntrySerialization>();
+        for (LibraryElementData data : libraryPaths)
+        {
+            LibraryEntrySerialization libSerial = new LibraryEntrySerialization();
+            libSerial.path = data.path;
+            libSerial.inCollage = data.inCollage;
+            libSerials.add(libSerial);
+        }
+        
+        Type libraryType = new TypeToken<LinkedList<LibraryEntrySerialization>>(){}.getType();
+        Type collageType = new TypeToken<LinkedList<CollageEntry>>(){}.getType();
+        serial.librarySerial = gson.toJson(libSerials, libraryType);
+        serial.collageSerial = gson.toJson(collageEntries, collageType);
+        serial.width = width;
+        serial.height = height;
+        
+        try
+        {
+            FileOutputStream outStream = context.openFileOutput(savePath, Context.MODE_PRIVATE);
+            OutputStreamWriter writer = new OutputStreamWriter(outStream);
+            writer.write(gson.toJson(serial, CollageSerialization.class));
+            writer.close();
+        }
+        catch (IOException e)
+        {
+            e.printStackTrace();
+        }
+    }
+    
+    public static synchronized void loadModel (String openPath, Context context)
+    {
+        try
+        {
+            FileInputStream inStream = context.openFileInput(openPath);
+            
+            InputStreamReader reader = new InputStreamReader(inStream);
+            BufferedReader buff = new BufferedReader(reader);
+            String json = "";
+            
+            String str;
+            while ((str = buff.readLine()) != null)
+                json += str;
+            
+            reader.close();
+            
+            // Rewrite our instance
+            if (instance == null)
+                instance = new CollageModel();
+            
+            Gson gson = new Gson();
+            CollageSerialization serial = gson.fromJson(json, CollageSerialization.class);
+
+            // Need type tokens because generics. :\
+            Type libraryType = new TypeToken<LinkedList<LibraryEntrySerialization>>(){}.getType();
+            Type collageType = new TypeToken<LinkedList<CollageEntry>>(){}.getType();
+            LinkedList<LibraryEntrySerialization> libSerials = gson.fromJson(serial.librarySerial, libraryType);
+            
+            // Load each of the library elements based on the path
+            instance.libraryPaths = new LinkedList<LibraryElementData>();
+            for (LibraryUpdateListener listener : instance.libraryListeners)
+            {
+                listener.libraryElementRemoved();
+                listener.libraryHasChanged();
+            }
+            for (LibraryEntrySerialization libSerial : libSerials)
+            {
+                LibraryElementData libData = instance.new LibraryElementData(libSerial.path);
+                libData.inCollage = libSerial.inCollage;
+                instance.libraryPaths.add(libData);
+            }
+            for (LibraryUpdateListener listener : instance.libraryListeners)
+            {
+                listener.libraryElementAdded();
+                listener.libraryHasChanged();
+            }
+            
+            instance.collageEntries = gson.fromJson(serial.collageSerial, collageType);
+            instance.width = serial.width;
+            instance.height = serial.height;
+            
+            // Reset any other variables that should be
+            instance.selectedEntry = null;
+            
+            // Now that we've done all that, let's update our image
+            instance.updateImage();
+        }
+        catch (IOException e)
+        {
+            e.printStackTrace();
+        }
     }
 }

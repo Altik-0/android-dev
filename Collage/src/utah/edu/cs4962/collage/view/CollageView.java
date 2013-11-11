@@ -28,13 +28,11 @@ public class CollageView extends View
     @Override
     public boolean onTouchEvent(MotionEvent event)
     {
-     // First and foremost, we need to see how many touches are happening.
+        // First and foremost, we need to see how many touches are happening.
         // If there is only 1, we'll drag+drop with that pointer.
         // If there are 2 or more, we'll scale, using the first two pointers only.
         if (event.getPointerCount() == 1)
         {
-            oldTouch2 = null;
-            
             // Take the touch coordinates, and convert into coordinates for the 
             // dataSource to use
             Rect bounds = getScaledBounds();

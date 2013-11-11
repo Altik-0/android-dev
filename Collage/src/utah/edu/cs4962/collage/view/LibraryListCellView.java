@@ -55,11 +55,15 @@ public class LibraryListCellView extends ViewGroup
         timestampView.setText(DateFormat.format("MMM/dd/yyyy kk:mm:ss", timestamp));
         timestampView.setId(TIMESTAMP_ID);
         
-        ToggleButton plusMinusButton = new ToggleButton(context);
-        plusMinusButton.setTextOn("-");
-        plusMinusButton.setTextOff("+");
-        plusMinusButton.setChecked(isInCollage);
-        plusMinusButton.setFocusable(false);
+//        ToggleButton plusMinusButton = new ToggleButton(context);
+//        plusMinusButton.setTextOn("-");
+//        plusMinusButton.setTextOff("+");
+//        plusMinusButton.setChecked(isInCollage);
+//        plusMinusButton.setFocusable(false);
+//        plusMinusButton.setId(PLUS_MINUS_ID);
+        
+        ImageView plusMinusButton = new ImageView(context);
+        plusMinusButton.setImageResource(isInCollage ? R.drawable.minus : R.drawable.plus);
         plusMinusButton.setId(PLUS_MINUS_ID);
 
         addView(thumbView);
@@ -74,7 +78,7 @@ public class LibraryListCellView extends ViewGroup
         ImageView thumbView = (ImageView)findViewById(THUMB_ID);
         TextView widthHeightView = (TextView)findViewById(WIDTH_HEIGHT_ID);
         TextView timestampView = (TextView)findViewById(TIMESTAMP_ID);
-        ToggleButton plusMinusButton = (ToggleButton)findViewById(PLUS_MINUS_ID);
+        ImageView plusMinusButton = (ImageView)findViewById(PLUS_MINUS_ID);
         
         RectF bounds = new RectF(0, 0, getWidth(), getHeight());
         Log.i("Bounds:", bounds.left + ", " + bounds.top + ", " + bounds.right + ", " + bounds.bottom);
@@ -171,8 +175,11 @@ public class LibraryListCellView extends ViewGroup
     public void setIsInCollage(Boolean isInCollage)
     {
         this.isInCollage = isInCollage;
-        ToggleButton plusMinusButton = (ToggleButton)findViewById(PLUS_MINUS_ID);
-        plusMinusButton.setChecked(isInCollage);
+        //ToggleButton plusMinusButton = (ToggleButton)findViewById(PLUS_MINUS_ID);
+        //plusMinusButton.setChecked(isInCollage);
+        
+        ImageView plusMinusButton = (ImageView)findViewById(PLUS_MINUS_ID);
+        plusMinusButton.setImageResource(isInCollage ? R.drawable.minus : R.drawable.plus);
     }
     
     @Override
@@ -184,9 +191,15 @@ public class LibraryListCellView extends ViewGroup
         setMeasuredDimension(width, height);
     }
     
-    public void setPlusMinusCheckedChangeListener(OnCheckedChangeListener listener)
+//    public void setPlusMinusCheckedChangeListener(OnCheckedChangeListener listener)
+//    {
+//        ToggleButton plusMinusButton = (ToggleButton)findViewById(PLUS_MINUS_ID);
+//        plusMinusButton.setOnCheckedChangeListener(listener);
+//    }
+    
+    public void setPlusMinusClickListener(OnClickListener listener)
     {
-        ToggleButton plusMinusButton = (ToggleButton)findViewById(PLUS_MINUS_ID);
-        plusMinusButton.setOnCheckedChangeListener(listener);
+        ImageView plusMinusButton = (ImageView)findViewById(PLUS_MINUS_ID);
+        plusMinusButton.setOnClickListener(listener);
     }
 }

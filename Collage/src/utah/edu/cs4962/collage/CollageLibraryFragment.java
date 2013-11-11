@@ -1,6 +1,7 @@
 package utah.edu.cs4962.collage;
 
 import utah.edu.cs4962.collage.model.CollageModel;
+import utah.edu.cs4962.collage.model.LibraryUpdateListener;
 import utah.edu.cs4962.collage.view.LibraryListCellView;
 import android.app.Fragment;
 import android.database.DataSetObserver;
@@ -14,7 +15,7 @@ import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 
-public class CollageLibraryFragment extends Fragment implements ListAdapter
+public class CollageLibraryFragment extends Fragment implements ListAdapter, LibraryUpdateListener
 {
     private ListView libraryList;
     
@@ -29,6 +30,7 @@ public class CollageLibraryFragment extends Fragment implements ListAdapter
     {
         libraryList = new ListView(getActivity());
         libraryList.setAdapter(this);
+        CollageModel.getInstance().registerForLibraryUpdates(this);
         
         return libraryList;
     }
@@ -75,7 +77,7 @@ public class CollageLibraryFragment extends Fragment implements ListAdapter
         {
             // TODO: properly handle \pm case
             toRet = new LibraryListCellView(getActivity(),
-                    data.thumbnail, data.width, data.height, data.lastModified, false);
+                    data.thumbnail, data.width, data.height, data.lastModified, data.inCollage);
         }
         else
         {
@@ -84,22 +86,23 @@ public class CollageLibraryFragment extends Fragment implements ListAdapter
             toRet.setImgWidth(data.width);
             toRet.setImgHeight(data.height);
             toRet.setTimestamp(data.lastModified);
+            toRet.setIsInCollage(data.inCollage);
         }
         
-        toRet.setPlusMinusCheckedChangeListener(new OnCheckedChangeListener()
+        toRet.setPlusMinusClickListener(new View.OnClickListener()
         {
             @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked)
+            public void onClick(View view)
             {
-                // If it is now checked, then the action was an add
-                if (isChecked)
-                {
-                    CollageModel.getInstance().addLibraryElementToCollage(position);
-                }
-                // If it is not checked, then the action was a remove
-                else
+                // If the element is presently in the collage, remove it
+                if (CollageModel.getInstance().getDataForIndex(position).inCollage)
                 {
                     CollageModel.getInstance().removeLibraryElementFromCollage(position);
+                }
+                // If it is not, then add it
+                else
+                {
+                    CollageModel.getInstance().addLibraryElementToCollage(position);
                 }
             }
         });
@@ -152,5 +155,23 @@ public class CollageLibraryFragment extends Fragment implements ListAdapter
     {
         // TODO Auto-generated method stub
         return true;
+    }
+
+    @Override
+    public void libraryElementRemoved()
+    {
+        libraryList.invalidateViews();
+    }
+
+    @Override
+    public void libraryElementAdded()
+    {
+        libraryList.invalidateViews();
+    }
+
+    @Override
+    public void libraryHasChanged()
+    {
+        libraryList.invalidateViews();
     }
 }
