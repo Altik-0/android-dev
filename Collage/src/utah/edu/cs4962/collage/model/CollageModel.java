@@ -422,9 +422,19 @@ public class CollageModel
         collageListeners.add(listener);
     }
     
+    public synchronized void unregisterForCollageUpdates(CollageUpdateListener listener)
+    {
+        collageListeners.remove(listener);
+    }
+    
     public synchronized void registerForLibraryUpdates(LibraryUpdateListener listener)
     {
         libraryListeners.add(listener);
+    }
+    
+    public synchronized void unregisterForLibraryUpdates(LibraryUpdateListener listener)
+    {
+        libraryListeners.remove(listener);
     }
     
     public synchronized void setSelectedEntry(Integer libraryId)

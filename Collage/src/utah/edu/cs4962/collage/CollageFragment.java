@@ -33,6 +33,14 @@ public class CollageFragment extends Fragment implements CollageViewDataSource, 
         collageView = new CollageView(getActivity(), this);
         return collageView;
     }
+    
+    @Override
+    public void onPause()
+    {
+        CollageModel.getInstance().unregisterForCollageUpdates(this);
+        
+        super.onPause();
+    }
 
     @Override
     public Bitmap getCollage()

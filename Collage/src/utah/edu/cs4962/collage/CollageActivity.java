@@ -83,6 +83,9 @@ public class CollageActivity extends Activity
         // If tmp.json exists, we'll load that existing file
         if (getBaseContext().getFileStreamPath("tmp.json").exists())
             CollageModel.loadModel("tmp.json", this);
+
+        collageFragment = new CollageFragment();
+        libraryFragment = new CollageLibraryFragment();
         
         setContentView(splitView);
     }
@@ -90,8 +93,6 @@ public class CollageActivity extends Activity
     @Override
     protected void onResume()
     {
-        collageFragment = new CollageFragment();
-        libraryFragment = new CollageLibraryFragment();
         FragmentTransaction trans = getFragmentManager().beginTransaction();
         trans.add(collageFrame.getId(), collageFragment);
         trans.add(libraryFrame.getId(), libraryFragment);

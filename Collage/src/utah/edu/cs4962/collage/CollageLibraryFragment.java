@@ -40,10 +40,22 @@ public class CollageLibraryFragment extends Fragment implements ListAdapter,
         return libraryList;
     }
     
+    @Override
+    public void onPause()
+    {
+        CollageModel.getInstance().unregisterForLibraryUpdates(this);
+        
+        super.onPause();
+    }
+    
     public void addPathToLibrary(String path)
     {
         CollageModel.getInstance().addImageToLibrary(path);
-        libraryList.invalidateViews();
+
+        // Hack: sometimes this gets called while the view wasn't created. Don't want to
+        // access this list while it's null
+        if (libraryList != null)
+            libraryList.invalidateViews();
     }
     
     @Override
