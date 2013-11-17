@@ -120,15 +120,15 @@ public class CollageModel
         }
         
         // TODO: scale cenetered at position
-        public void scale(float scalar)
+        public void scale(Point center, float scalar)
         {
-            int widthChange  = (int)(bounds.width()  * scalar) - bounds.width();
-            int heightChange = (int)(bounds.height() * scalar) - bounds.height();
+            int oldWidth  = bounds.width();
+            int oldHeight = bounds.height();
             
-            bounds.left += (widthChange / 2);
-            bounds.right = bounds.left + (int)(bounds.width() * scalar);
-            bounds.top += (heightChange / 2);
-            bounds.bottom = bounds.top + (int)(bounds.height() * scalar);
+            bounds.left   = (int)(center.x + ((bounds.left - center.x) * scalar));
+            bounds.top    = (int)(center.y + ((bounds.top  - center.y) * scalar));
+            bounds.right  = bounds.left + (int)(oldWidth * scalar);
+            bounds.bottom = bounds.top + (int)(oldHeight * scalar);
         }
         
         public int getX()
@@ -482,6 +482,11 @@ public class CollageModel
         return collageEntries.get(selectedEntry);
     }
     
+    public synchronized Integer getSelectedIndex()
+    {
+        return selectedEntry;
+    }
+    
     public synchronized Integer findAndSelectEntryAtPoint(Point p)
     {
         // Check selected entry first
@@ -519,12 +524,12 @@ public class CollageModel
         updateImage();
     }
     
-    public synchronized void scaleEntry(Integer entryIndex, float scaleFactor)
+    public synchronized void scaleEntry(Integer entryIndex, Point center, float scaleFactor)
     {
         if (entryIndex == null)
             return;
         
-        collageEntries.get(entryIndex).scale(scaleFactor);
+        collageEntries.get(entryIndex).scale(center, scaleFactor);
         
         updateImage();
     }

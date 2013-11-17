@@ -28,18 +28,19 @@ public class CollageView extends View
     @Override
     public boolean onTouchEvent(MotionEvent event)
     {
+        // Take the touch coordinates, and convert into coordinates for the 
+        // dataSource to use
+        Rect bounds = getScaledBounds();
+        float scalar = (float)dataSource.getWidth() / (float)bounds.width();
+        
         // First and foremost, we need to see how many touches are happening.
         // If there is only 1, we'll drag+drop with that pointer.
         // If there are 2 or more, we'll scale, using the first two pointers only.
         if (event.getPointerCount() == 1)
         {
-            // Take the touch coordinates, and convert into coordinates for the 
-            // dataSource to use
-            Rect bounds = getScaledBounds();
-            float scalar = (float)dataSource.getWidth() / (float)bounds.width();
-            Point touch = new Point((int)((event.getX() - bounds.left) * scalar),
-                                    (int)((event.getY() - bounds.top) * scalar));
-            
+            Point touch = new Point((int)((event.getX(0) - bounds.left) * scalar),
+                                    (int)((event.getY(0) - bounds.top) * scalar));
+
             // If the touch is out of bounds, ignore it:
             if (touch.x < 0 || touch.x > dataSource.getWidth() ||
                 touch.y < 0 || touch.y > dataSource.getHeight())
@@ -60,6 +61,9 @@ public class CollageView extends View
             }
             else if (event.getAction() == MotionEvent.ACTION_MOVE)
             {
+                if (oldTouch1 == null)
+                    return false;
+                
                 // Compute change:
                 Point change = new Point(touch.x - oldTouch1.x,
                                          touch.y - oldTouch1.y);
@@ -79,7 +83,64 @@ public class CollageView extends View
         }
         else
         {
-            // TODO
+            Point touch = new Point((int)((event.getX(1) - bounds.left) * scalar),
+                                    (int)((event.getY(1) - bounds.top) * scalar));
+
+            // If the touch is out of bounds, ignore it:
+            if (touch.x < 0 || touch.x > dataSource.getWidth() ||
+                touch.y < 0 || touch.y > dataSource.getHeight())
+            {
+                return false;
+            }
+            
+            if (event.getActionMasked() == MotionEvent.ACTION_POINTER_DOWN)
+            {
+                oldTouch2 = touch;
+                return true;
+            }
+            else if (event.getActionMasked() == MotionEvent.ACTION_MOVE)
+            {
+                if (oldTouch1 == null || oldTouch2 == null)
+                    return false;
+                
+                // Get distance between old touches:
+                float oldDist = (float)Math.sqrt(((oldTouch1.x - oldTouch2.x) * 
+                                                  (oldTouch1.x - oldTouch2.x)) +
+                                                 ((oldTouch1.y - oldTouch2.y) *
+                                                  (oldTouch1.y - oldTouch2.y)));
+                
+                // Acquire present touches, and distance between them:
+                Point curTouch1 = new Point((int)((event.getX(0) - bounds.left) * scalar),
+                                            (int)((event.getY(0) - bounds.top) * scalar));
+                Point curTouch2 = new Point((int)((event.getX(1) - bounds.left) * scalar),
+                                            (int)((event.getY(1) - bounds.top) * scalar));
+                
+                float newDist = (float)Math.sqrt(((curTouch1.x - curTouch2.x) * 
+                                                  (curTouch1.x - curTouch2.x)) +
+                                                 ((curTouch1.y - curTouch2.y) *
+                                                  (curTouch1.y - curTouch2.y)));
+                
+                // Scale factor is the scalar necessary to convert oldDist to newDist:
+                float scaleFactor = newDist / oldDist;
+                
+                // Get scale center
+                Point center = new Point(oldTouch1.x + ((oldTouch2.x - oldTouch1.x) / 2),
+                                         oldTouch1.y + ((oldTouch2.y - oldTouch1.y) / 2));
+                
+                // Tell the data source we'd like to scale
+                dataSource.tryScaleBy(center, scaleFactor);
+                
+                // Reset old points:
+                oldTouch1 = curTouch1;
+                oldTouch2 = curTouch2;
+                
+                return true;
+            }
+            else
+            {
+                oldTouch2 = null;
+                return false;
+            }
         }
         
         return true;

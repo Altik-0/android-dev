@@ -116,12 +116,12 @@ public class CollageFragment extends Fragment implements CollageViewDataSource, 
     }
     
     @Override
-    public Boolean tryScaleBy(float scaleFactor)
+    public Boolean tryScaleBy(Point center, float scaleFactor)
     {
         if (entryToMod == null)
             return false;
         
-        CollageModel.getInstance().scaleEntry(entryToMod, scaleFactor);
+        CollageModel.getInstance().scaleEntry(entryToMod, center, scaleFactor);
         return true;
     }
 

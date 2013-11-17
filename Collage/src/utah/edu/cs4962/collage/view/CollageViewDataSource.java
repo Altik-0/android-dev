@@ -15,5 +15,5 @@ public interface CollageViewDataSource
     // View --> DataSource
     public Boolean tryTouchPoint(Point p);
     public Boolean tryMove(Point change);
-    public Boolean tryScaleBy(float scaleFactor);
+    public Boolean tryScaleBy(Point center, float scaleFactor);
 }
