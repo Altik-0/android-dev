@@ -1,0 +1,311 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    tools:context=".AdvancedSearchActivity" >
+
+    <TextView
+        android:id="@+id/commaTagText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:textStyle="italic"
+        android:text="(Separate different tags by commas)" />
+    
+    <EditText
+        android:id = "@+id/nameTextBox"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/commaTagText"
+        android:inputType="text" />
+    
+    <TextView 
+        android:id="@+id/nameText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/nameTextBox"
+        android:layout_alignParentLeft="true"
+        android:text="Card Name" />
+    
+    <EditText
+        android:id = "@+id/expansionTextBox"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/nameText"
+        android:inputType="text" />
+    
+    <TextView 
+        android:id="@+id/expansionText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/expansionTextBox"
+        android:layout_alignParentLeft="true"
+        android:text="Expansion" />
+    
+    <EditText
+        android:id = "@+id/cardTextTextBox"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/expansionText"
+        android:inputType="textMultiLine" />
+    
+    <TextView 
+        android:id="@+id/cardTextText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/cardTextTextBox"
+        android:layout_alignParentLeft="true"
+        android:text="Card Text" />
+    
+    <TableLayout
+        android:id="@+id/rarityLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/cardTextText"
+        android:orientation="horizontal" >
+        
+        <TableRow
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+            
+	        <CheckBox
+	            android:id="@+id/commonCheckBox"
+		        android:layout_width="wrap_content"
+		        android:layout_height="wrap_content"
+	            android:layout_weight="1" />
+	        
+	        <CheckBox
+	            android:id="@+id/uncommonCheckBox"
+		        android:layout_width="wrap_content"
+		        android:layout_height="wrap_content"
+	            android:layout_weight="1" />
+	        
+	        <CheckBox
+	            android:id="@+id/rareCheckBox"
+		        android:layout_width="wrap_content"
+		        android:layout_height="wrap_content"
+	            android:layout_weight="1" />
+	        
+	        <CheckBox
+	            android:id="@+id/mythicCheckBox"
+		        android:layout_width="wrap_content"
+		        android:layout_height="wrap_content"
+	            android:layout_weight="1" />
+	   	
+        </TableRow>
+        
+       	<TableRow
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+	        
+	       <TextView 
+		        android:id="@+id/commonText"
+		        android:layout_width="wrap_content"
+		        android:layout_height="wrap_content"
+		        android:layout_weight="3"
+		        android:textStyle="italic"
+		        android:text="Common" />
+	       
+	       <TextView 
+		        android:id="@+id/uncommonText"
+		        android:layout_width="wrap_content"
+		        android:layout_height="wrap_content"
+		        android:layout_weight="3"
+		        android:textStyle="italic"
+		        android:text="Uncommon" />
+	       
+	       <TextView 
+		        android:id="@+id/rareText"
+		        android:layout_width="wrap_content"
+		        android:layout_height="wrap_content"
+		        android:layout_weight="3"
+		        android:textStyle="italic"
+		        android:text="Rare" />
+	       
+	       <TextView 
+		        android:id="@+id/mythicText"
+		        android:layout_width="wrap_content"
+		        android:layout_height="wrap_content"
+		        android:layout_weight="3"
+		        android:textStyle="italic"
+		        android:text="Mythic" />
+		       
+       </TableRow>
+        
+    </TableLayout>
+    
+    <TextView
+        android:id="@+id/rarityText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/rarityLayout"
+        android:text="Rarity" />
+    
+    <TableLayout
+        android:id="@+id/colorLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/rarityText"
+        android:orientation="horizontal" >
+        
+        <TableRow
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+            
+	        <CheckBox
+	            android:id="@+id/whiteCheckBox"
+		        android:layout_width="wrap_content"
+		        android:layout_height="wrap_content"
+	            android:layout_weight="1" />
+	        
+	        <CheckBox
+	            android:id="@+id/blueCheckBox"
+		        android:layout_width="wrap_content"
+		        android:layout_height="wrap_content"
+	            android:layout_weight="1" />
+	        
+	        <CheckBox
+	            android:id="@+id/blackCheckBox"
+		        android:layout_width="wrap_content"
+		        android:layout_height="wrap_content"
+	            android:layout_weight="1" />
+	        
+	        <CheckBox
+	            android:id="@+id/redCheckBox"
+		        android:layout_width="wrap_content"
+		        android:layout_height="wrap_content"
+	            android:layout_weight="1" />
+	        
+	        <CheckBox
+	            android:id="@+id/greenCheckBox"
+		        android:layout_width="wrap_content"
+		        android:layout_height="wrap_content"
+	            android:layout_weight="1" />
+	        
+	        <CheckBox
+	            android:id="@+id/colorlessCheckBox"
+		        android:layout_width="wrap_content"
+		        android:layout_height="wrap_content"
+	            android:layout_weight="1" />
+	   	
+        </TableRow>
+        
+       	<TableRow
+           android:layout_width="match_parent"
+           android:layout_height="wrap_content">
+	       
+	       <TextView 
+		        android:id="@+id/whiteText"
+		        android:layout_width="wrap_content"
+		        android:layout_height="wrap_content"
+		        android:layout_weight="1"
+		        android:textStyle="italic"
+		        android:text="White" />
+	       
+	       <TextView 
+		        android:id="@+id/blueText"
+		        android:layout_width="wrap_content"
+		        android:layout_height="wrap_content"
+		        android:layout_weight="1"
+		        android:textStyle="italic"
+		        android:text="Blue" />
+	       
+	       <TextView 
+		        android:id="@+id/blackText"
+		        android:layout_width="wrap_content"
+		        android:layout_height="wrap_content"
+		        android:layout_weight="1"
+		        android:textStyle="italic"
+		        android:text="Black" />
+	       
+	       <TextView 
+		        android:id="@+id/redText"
+		        android:layout_width="wrap_content"
+		        android:layout_height="wrap_content"
+		        android:layout_weight="1"
+		        android:textStyle="italic"
+		        android:text="Red" />
+	       
+	       <TextView 
+		        android:id="@+id/greenText"
+		        android:layout_width="wrap_content"
+		        android:layout_height="wrap_content"
+		        android:layout_weight="1"
+		        android:textStyle="italic"
+		        android:text="Green" />
+	       
+	       <TextView 
+		        android:id="@+id/colorlessText"
+		        android:layout_width="wrap_content"
+		        android:layout_height="wrap_content"
+		        android:layout_weight="1"
+		        android:textStyle="italic"
+		        android:text="Colorless" />
+		       
+       </TableRow>
+       
+       <TableRow
+           android:layout_width="match_parent"
+           android:layout_height="wrap_content">
+    
+		    <CheckBox 
+		        android:id="@+id/excludeUnselectedBox"
+		        android:layout_width="wrap_content"
+		        android:layout_height="wrap_content"
+		        android:layout_weight="1"
+		        android:layout_span="3" />
+		    
+		    <CheckBox 
+		        android:id="@+id/forceMulticolorBox"
+		        android:layout_width="wrap_content"
+		        android:layout_height="wrap_content"
+		        android:layout_weight="1"
+		        android:layout_span="3" />
+		    
+	    </TableRow>
+	    
+        <TableRow
+           android:layout_width="match_parent"
+           android:layout_height="wrap_content">
+		    
+		    <TextView 
+		        android:id="@+id/excludeUnselectedText"
+		        android:layout_width="wrap_content"
+		        android:layout_height="wrap_content"
+		        android:layout_weight="1"
+		        android:layout_span="3"
+		        android:textStyle="italic"
+		        android:text="Exclude Unselected" />
+		    
+		    <TextView 
+		        android:id="@+id/forceMulticolorText"
+		        android:layout_width="wrap_content"
+		        android:layout_height="wrap_content"
+		        android:layout_weight="1"
+		        android:layout_span="3"
+		        android:textStyle="italic"
+		        android:text="Require Multicolor" />
+           
+       </TableRow>
+        
+    </TableLayout>
+    
+    <TextView
+        android:id="@+id/colorText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/colorLayout"
+        android:text="Color" />
+
+    <Button 
+        android:id="@+id/advancedSearchButton" 
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:text="Search" />
+    
+</RelativeLayout>

@@ -4,5 +4,10 @@
     <string name="app_name">MagicTheOrganizing</string>
     <string name="action_settings">Settings</string>
     <string name="hello_world">Hello world!</string>
+    <string name="title_activity_main_menu">MainMenuActivity</string>
+    <string name="title_activity_advanced_search">AdvancedSearchActivity</string>
+    <string name="title_card_list">Cards</string>
+    <string name="title_card_detail">Card Detail</string>
+    <string name="title_activity_collection_management">CollectionManagementActivity</string>
 
 </resources>

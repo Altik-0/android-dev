@@ -1,0 +1,112 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/card_detail"
+    style="?android:attr/textAppearanceLarge"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="16dp"
+    android:textIsSelectable="true"
+    android:orientation="vertical"
+    tools:context=".CardDetailFragment" >
+    
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:orientation="horizontal"
+        android:layout_weight="1" >
+    
+	    <!-- Display Card -->
+
+        <altik0.mtg.magictheorganizing.views.CardView
+            android:id="@+id/cardDetail"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1" />
+	    
+	    <!-- Main Card Details
+	    		- Name
+	    		- Types
+	    		- Cost
+	    		- P/T if applicable
+	    		- ??? -->
+	    
+	    <LinearLayout 
+	        android:id = "@+id/mainDetailsLayout"
+	        android:layout_width="0dp"
+	        android:layout_height="wrap_content"
+	        android:layout_weight="1"
+	        android:orientation="vertical" >
+	        
+	        <TextView
+	            android:id = "@+id/nameDetailText"
+	            android:layout_width="match_parent"
+	            android:layout_height="wrap_content"
+	            android:text="Name: " />
+	        
+	        <TextView
+	            android:id = "@+id/typeDetailText"
+	            android:layout_width="match_parent"
+	            android:layout_height="wrap_content"
+	            android:text="Type: " />
+	        
+	        <TextView
+	            android:id = "@+id/costDetailText"
+	            android:layout_width="match_parent"
+	            android:layout_height="wrap_content"
+	            android:text="Cost: " />
+	        
+	        <TextView
+	            android:id = "@+id/ptDetailText"
+	            android:layout_width="match_parent"
+	            android:layout_height="wrap_content"
+	            android:text="P/T: " />
+	        
+	    </LinearLayout>
+    
+    </LinearLayout>
+    		
+  	<!-- Other Card Details
+  			- Card Text
+  			- Expansion
+  			- Artist (?)
+  			- Extra Tags in scroll view
+  			 -->
+  	
+  	<RelativeLayout
+  	    android:layout_width="match_parent"
+  	    android:layout_height="0dp"
+  	    android:layout_weight="1" >
+	    
+  	    <TextView 
+  	        android:id="@+id/cardTextText"
+  	        android:layout_width="wrap_content"
+  	        android:layout_height="wrap_content"
+  	        android:layout_alignParentLeft="true"
+  	        android:layout_alignParentTop="true"
+  	        android:text="TODO lorem ipsum text blah blah this is a long text card name bplar" />
+	    
+  	    <TextView 
+  	        android:id="@+id/expansionText"
+  	        android:layout_width="wrap_content"
+  	        android:layout_height="wrap_content"
+  	        android:layout_toRightOf="@id/cardTextText"
+  	        android:layout_alignParentTop="true"
+  	        android:text="TODO" />
+  	    
+  	    <TextView 
+  	        android:id="@+id/artistText"
+  	        android:layout_width="wrap_content"
+  	        android:layout_height="wrap_content"
+  	        android:layout_toRightOf="@id/cardTextText"
+  	        android:layout_below="@id/expansionText"
+  	        android:text="TODO" />
+  	    
+  	    <ListView
+  	        android:id="@+id/otherTagList"
+  	        android:layout_width="match_parent"
+  	        android:layout_height="wrap_content"
+  	        android:layout_below="@id/cardTextText" />
+
+	</RelativeLayout>
+    
+</LinearLayout>

@@ -151,7 +151,7 @@ public class MtgActivity extends Activity
         CardData card1 = new CardData();
         card1.setName("Nylea, God of the Hunt");
         card1.addColor(CardColor.Green);
-        card1.addType(CardType.Legendary);
+        card1.addSupertype(CardSupertype.Legendary);
         card1.addType(CardType.Enchantment);
         card1.addType(CardType.Creature);
         card1.addSubtype("God");
@@ -184,7 +184,7 @@ public class MtgActivity extends Activity
         cards[3] = card3;
         cards[4] = card4;
 		
-        CardListAdapter cl = new CardListAdapter(this, cards);
+        CardListAdapter cl = new CardListAdapter(this);
         
         ListView lv = new ListView(this);
         lv.setAdapter(cl);

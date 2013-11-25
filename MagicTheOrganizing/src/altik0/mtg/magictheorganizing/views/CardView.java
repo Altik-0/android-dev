@@ -16,6 +16,7 @@ import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.Typeface;
 import android.graphics.Paint.Align;
+import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
 
@@ -45,9 +46,15 @@ public class CardView extends View
 	public final static float BORDER_WIDTH = 3.0f;
 	public final static float CORNER_RADIUS = 2.0f;
 	
-	private CardData card;
+	// We'll give this a default card to use just in case
+	private CardData card = new CardData();
 	
-	// Constructor that assumes you are using a creature
+	public CardView(Context context, AttributeSet attributes)
+	{
+	    super(context, attributes);
+	}
+	
+	// Constructor in which you can pre-emptively pass card
 	public CardView(Context context, CardData _card)
 	{
 		super(context);
@@ -230,13 +237,70 @@ public class CardView extends View
 	{
 	    return card;
 	}
-	
+
 	@Override
 	protected void onMeasure (int widthMeasureSpec, int heightMeasureSpec)
 	{
-	    int width = 1000, height = 1000;
+	    int width;
+	    int height;
+	    int desiredWidth = MeasureSpec.getSize(widthMeasureSpec);
+	    int desiredHeight = MeasureSpec.getSize(heightMeasureSpec);
+	    int widthSpec = MeasureSpec.getMode(widthMeasureSpec);
+	    int heightSpec = MeasureSpec.getMode(heightMeasureSpec);
 	    
-	    // TODO: something substantially less shitty
+	    if (widthSpec == MeasureSpec.EXACTLY)
+	    {
+            width = desiredWidth;
+            
+            // Determine height
+            if (heightSpec == MeasureSpec.EXACTLY)
+                height = desiredHeight;
+            else if (heightSpec == MeasureSpec.AT_MOST)
+                height = Math.max(desiredHeight,
+                                  desiredWidth * (int)(CARD_HEIGHT / CARD_WIDTH));
+            else
+                height = desiredWidth * (int)(CARD_HEIGHT / CARD_WIDTH);
+	    }
+        else if (widthSpec == MeasureSpec.AT_MOST)
+        {
+            if (heightSpec == MeasureSpec.EXACTLY)
+            {
+                height = desiredHeight;
+                width = Math.min(desiredWidth,
+                                 desiredHeight * (int)(CARD_WIDTH / CARD_HEIGHT));
+            }
+            else if (heightSpec == MeasureSpec.AT_MOST)
+            {
+                // TODO: maybe something smarter. For now, we'll just assume width is better
+                width = desiredWidth;
+                height = Math.min(desiredHeight,
+                                  desiredWidth * (int)(CARD_HEIGHT / CARD_WIDTH));
+            }
+            else
+            {
+                width = desiredWidth;
+                height = desiredWidth * (int)(CARD_HEIGHT / CARD_WIDTH);
+            }
+        }
+        else
+        {
+            if (heightSpec == MeasureSpec.EXACTLY)
+            {
+                height = desiredHeight;
+                width = desiredHeight * (int)(CARD_WIDTH / CARD_HEIGHT);
+            }
+            else if (heightSpec == MeasureSpec.AT_MOST)
+            {
+                height = desiredHeight;
+                width = desiredHeight * (int)(CARD_WIDTH / CARD_HEIGHT);
+            }
+            else
+            {
+                // Since we have nothing better to go on, just give minimums
+                width = (int)CARD_WIDTH;
+                height = (int)CARD_HEIGHT;
+            }
+        }
 	    
 	    setMeasuredDimension(width, height);
 	}

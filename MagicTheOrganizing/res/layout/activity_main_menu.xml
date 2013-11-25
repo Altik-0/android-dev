@@ -1,0 +1,112 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    tools:context=".MainMenuActivity" >
+
+    <TableLayout 
+    	android:layout_width="match_parent"
+    	android:layout_height="wrap_content"
+    	android:layout_weight="1" >
+
+	    <TableRow
+	        android:id = "@+id/tableRow1"
+	        android:layout_width = "match_parent"
+	        android:layout_height = "wrap_content" >
+	        
+		    <AutoCompleteTextView
+		        android:id = "@+id/quickSearch"
+		        android:layout_width="match_parent"
+		        android:layout_height="wrap_content"
+		        android:layout_span="6" 
+		        android:layout_weight="1"/>
+		    
+		    <Button 
+		        android:id = "@+id/quickSearchButton"
+		        android:text="Search" />
+		    
+	    </TableRow>
+	    
+	    <TableRow
+	        android:id = "@+id/tableRow2"
+	        android:layout_width = "match_parent"
+	        android:layout_height = "wrap_content" >
+		    
+		    <CheckBox 
+		        android:id = "@+id/quickSearchNameCheck"
+		        android:layout_width="match_parent"
+		        android:layout_height="wrap_content"
+		        android:layout_weight="1" />
+		    
+		    <TextView
+		        android:id = "@+id/quickSearchNameText"
+		        android:layout_width="match_parent"
+		        android:layout_height="wrap_content"
+		        android:text="Name"
+		        android:layout_weight="1" />
+		    
+		    <CheckBox 
+		        android:id = "@+id/quickSearchTextCheck"
+		        android:layout_width="match_parent"
+		        android:layout_height="wrap_content"
+		        android:layout_weight="1" />
+		        
+		    <TextView
+		        android:id = "@+id/quickSearchTextText"
+		        android:layout_width="match_parent"
+		        android:layout_height="wrap_content"
+		        android:text="Text"
+		        android:layout_weight="1" />
+		    
+		    <CheckBox 
+		        android:id = "@+id/quickSearchTypeCheck"
+		        android:layout_width="match_parent"
+		        android:layout_height="wrap_content"
+		        android:layout_weight="1" />
+		        
+		    <TextView
+		        android:id = "@+id/quickSearchTypeText"
+		        android:layout_width="match_parent"
+		        android:layout_height="wrap_content"
+		        android:text="Type"
+		        android:layout_weight="1" />
+		    
+		</TableRow>
+	    
+	</TableLayout>
+	
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_weight="6" >
+        
+        <Button
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:id = "@+id/searchAllCardsButton"
+            android:text="Search All Cards" />
+        
+        <Button
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:id = "@+id/searchYourCollectionsButton"
+            android:text="Search Your Collections" />
+        
+        <Button
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:id = "@+id/manageYourCollectionsButton"
+            android:text="Manage Your Collections" />
+        
+    </LinearLayout>
+    
+</LinearLayout>
