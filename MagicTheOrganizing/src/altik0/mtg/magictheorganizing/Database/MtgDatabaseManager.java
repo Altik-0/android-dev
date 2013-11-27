@@ -17,6 +17,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.LinkedList;
 
 public class MtgDatabaseManager extends SQLiteOpenHelper
 {
@@ -128,6 +129,75 @@ public class MtgDatabaseManager extends SQLiteOpenHelper
         onCreate(db);
     }
     
+    public ArrayList<CardData> SearchForCards(SearchParams params)
+    {
+        // Build dat query
+        String query = "SELECT * FROM Cards card_table " +
+                       "JOIN Sets set_table on card_table.SetID = set_table.SetID " + 
+                       "WHERE ";
+        
+        // For all the nulls, we'll use a dummy condition:
+        String textCheck = "1 = 1";
+        String expansionCheck = "1 = 1";
+        String rarityCheck = "1 = 1";
+        String nameCheck = "1 = 1";
+        String typeCheck = "1 = 1";
+        String colorCheck = "1 = 1";
+        LinkedList<String> queryParams = new LinkedList<String>();
+        
+        // For the things which aren't null, build the appropriate replacement:
+        if (params.NameSearch != null)
+        {
+            // TODO: smarter than just equivalent. String contains?
+            textCheck = "LOWER(card_table.Name) LIKE LOWER(?)";
+            queryParams.addLast("%" + params.NameSearch + "%");
+        }
+        // TODO: other search params. Let's just make sure I'm getting something working
+        
+        String[] queryArray = queryParams.toArray(new String[0]);
+        
+        // Build final query
+        query += textCheck + " AND " +
+                 expansionCheck + " AND " +
+                 rarityCheck + " AND " +
+                 nameCheck + " AND " +
+                 typeCheck + " AND " +
+                 colorCheck;
+        
+        // Get the datas
+        ArrayList<CardData> toRet = new ArrayList<CardData>();
+        
+        SQLiteDatabase db = getWritableDatabase();
+        Cursor cursor = db.rawQuery(query, queryArray);
+        
+        // Read cards
+        if (cursor.moveToFirst())
+        {
+            do
+            {
+                CardData card = new CardData();
+                card.setCardId(cursor.getInt(0));
+                card.setSetId(cursor.getInt(1));
+                card.setRarity(cursor.getString(4));
+                card.setName(cursor.getString(6));
+                card.setCmc(cursor.getInt(7));
+                card.setManaCost(cursor.getString(9));
+                card.setPower(cursor.getInt(10));
+                card.setToughness(cursor.getInt(11));
+                card.setLoyalty(cursor.getInt(12));
+                card.setSet(cursor.getString(16));
+    
+                // Add card to list
+                toRet.add(card);
+            } while(cursor.moveToNext());
+        }
+        
+        // Next, get list fields from other tables:
+        FixCardListData(toRet, db, cursor);
+        
+        return toRet;
+    }
+    
     public ArrayList<CardData> GetAllCards()
     {
         ArrayList<CardData> toRet = new ArrayList<CardData>();
@@ -159,7 +229,16 @@ public class MtgDatabaseManager extends SQLiteOpenHelper
         }
         
         // Next, get list fields from other tables:
-        for (CardData card : toRet)
+        FixCardListData(toRet, db, cursor);
+        
+        return toRet;
+    }
+    
+    // Takes cards, which are presumed to just have data from the Cards database,
+    // and appends data for various list-type fields spread across different tables
+    private static void FixCardListData(ArrayList<CardData> cards, SQLiteDatabase db, Cursor cursor)
+    {
+        for (CardData card : cards)
         {
             // Get colors
             cursor = db.rawQuery(
@@ -262,8 +341,6 @@ public class MtgDatabaseManager extends SQLiteOpenHelper
                } while(cursor.moveToNext());
            }
         }
-        
-        return toRet;
     }
 
     private static MtgDatabaseManager instance = null;

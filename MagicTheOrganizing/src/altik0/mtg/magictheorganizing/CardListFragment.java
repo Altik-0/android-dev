@@ -1,5 +1,6 @@
 package altik0.mtg.magictheorganizing;
 
+import altik0.mtg.magictheorganizing.Database.SearchParams;
 import android.app.Activity;
 import android.os.Bundle;
 import android.support.v4.app.ListFragment;
@@ -35,6 +36,10 @@ public class CardListFragment extends ListFragment
      * The current activated item position. Only used on tablets.
      */
     private int mActivatedPosition = ListView.INVALID_POSITION;
+    
+    // Used to determine which cards should be obtained from the database
+    private SearchParams params;
+    private CardListAdapter listAdapter;
     
     /**
      * A callback interface that all activities containing this fragment must
@@ -79,7 +84,9 @@ public class CardListFragment extends ListFragment
         //        android.R.layout.simple_list_item_activated_1,
         //        android.R.id.text1, DummyContent.ITEMS));
         
-        
+        params = new SearchParams();
+        listAdapter = new CardListAdapter(getActivity(), params);
+        setListAdapter(listAdapter);
     }
     
     @Override
@@ -167,5 +174,11 @@ public class CardListFragment extends ListFragment
         }
         
         mActivatedPosition = position;
+    }
+    
+    public void setSearchParams(SearchParams _params)
+    {
+        params = _params;
+        listAdapter.setSearchParams(_params);
     }
 }

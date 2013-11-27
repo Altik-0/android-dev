@@ -3,6 +3,7 @@ package altik0.mtg.magictheorganizing;
 import java.util.ArrayList;
 
 import altik0.mtg.magictheorganizing.Database.MtgDatabaseManager;
+import altik0.mtg.magictheorganizing.Database.SearchParams;
 import altik0.mtg.magictheorganizing.MtgDataTypes.CardData;
 import altik0.mtg.magictheorganizing.views.CardView;
 import android.content.Context;
@@ -16,11 +17,17 @@ public class CardListAdapter implements ListAdapter
     private ArrayList<CardData> data;
     private Context context;
 
-    public CardListAdapter(Context _context)
+    public CardListAdapter(Context _context, SearchParams _params)
     {
         context = _context;
+        MtgDatabaseManager db = MtgDatabaseManager.getInstance(_context);
+        data = db.SearchForCards(_params);
+    }
+    
+    public void setSearchParams(SearchParams params)
+    {
         MtgDatabaseManager db = MtgDatabaseManager.getInstance(context);
-        data = db.GetAllCards();
+        data = db.SearchForCards(params);
     }
     
     @Override

@@ -4,10 +4,13 @@ import altik0.mtg.magictheorganizing.Database.SearchParams;
 import android.os.Bundle;
 import android.app.Activity;
 import android.content.Intent;
+import android.util.Log;
 import android.view.Menu;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.widget.AutoCompleteTextView;
 import android.widget.Button;
+import android.widget.CheckBox;
 
 public class MainMenuActivity extends Activity
 {
@@ -39,8 +42,20 @@ public class MainMenuActivity extends Activity
             {
                 // launch straight to SearchResultsActivity, using a search intent
                 // filled out based on the quick-search data
-                // TODO: build params properly
+                
+                // Build search params - based on checked boxes
+                String quickSearchVal = null;
+                AutoCompleteTextView quickSearchBox = (AutoCompleteTextView)findViewById(R.id.quickSearch);
+                if (!(quickSearchBox.getText().toString().equals("")))
+                    quickSearchVal = quickSearchBox.getText().toString();
+                
+                Log.i("quicksearchbox: ", " " + quickSearchBox.getText().toString());
+                
                 SearchParams params = new SearchParams();
+                CheckBox nameCheck = (CheckBox)findViewById(R.id.quickSearchNameCheck);
+                if (nameCheck.isChecked())
+                    params.NameSearch = quickSearchVal;
+                
                 Intent searchIntent = CardListActivity.buildSearchIntent(MainMenuActivity.this, params);
                 startActivity(searchIntent);
             }
@@ -61,6 +76,9 @@ public class MainMenuActivity extends Activity
         
         Button manageYourCollectionsButton = (Button)findViewById(R.id.manageYourCollectionsButton);
         manageYourCollectionsButton.setOnClickListener(mainMenuListener);
+        
+        Button quickSearchButton = (Button)findViewById(R.id.quickSearchButton);
+        quickSearchButton.setOnClickListener(mainMenuListener);
     }
     
     @Override

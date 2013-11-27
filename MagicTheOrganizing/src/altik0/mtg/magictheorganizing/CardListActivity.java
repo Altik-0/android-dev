@@ -24,10 +24,12 @@ import android.support.v4.app.FragmentActivity;
 public class CardListActivity extends FragmentActivity implements
         CardListFragment.Callbacks
 {
+    public static final String SEARCH_PARAMS_KEY = "Search";
     public static Intent buildSearchIntent(Context requester, SearchParams params)
     {
         Intent toRet = new Intent(requester, CardListActivity.class);
-        toRet.putExtra("Search", params);
+        toRet.putExtra(SEARCH_PARAMS_KEY, params);
+        return toRet;
     }
     
     
@@ -43,6 +45,11 @@ public class CardListActivity extends FragmentActivity implements
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_card_list);
         
+        SearchParams params = (SearchParams)getIntent().getExtras().getSerializable(SEARCH_PARAMS_KEY);
+        
+        CardListFragment listFrag = (CardListFragment)getSupportFragmentManager().findFragmentById(R.id.card_list);
+        listFrag.setSearchParams(params);
+        
         if (findViewById(R.id.card_detail_container) != null)
         {
             // The detail container view will be present only in the
@@ -53,8 +60,7 @@ public class CardListActivity extends FragmentActivity implements
             
             // In two-pane mode, list items should be given the
             // 'activated' state when touched.
-            ((CardListFragment) getSupportFragmentManager().findFragmentById(
-                    R.id.card_list)).setActivateOnItemClick(true);
+            listFrag.setActivateOnItemClick(true);
         }
         
         // TODO: If exposing deep links into your app, handle intents here.

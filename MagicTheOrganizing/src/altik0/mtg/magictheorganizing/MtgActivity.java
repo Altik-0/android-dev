@@ -184,7 +184,7 @@ public class MtgActivity extends Activity
         cards[3] = card3;
         cards[4] = card4;
 		
-        CardListAdapter cl = new CardListAdapter(this);
+        CardListAdapter cl = new CardListAdapter(this, null);
         
         ListView lv = new ListView(this);
         lv.setAdapter(cl);
