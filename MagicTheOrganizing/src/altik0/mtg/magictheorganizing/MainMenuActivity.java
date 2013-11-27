@@ -53,8 +53,14 @@ public class MainMenuActivity extends Activity
                 
                 SearchParams params = new SearchParams();
                 CheckBox nameCheck = (CheckBox)findViewById(R.id.quickSearchNameCheck);
+                CheckBox textCheck = (CheckBox)findViewById(R.id.quickSearchTextCheck);
+                CheckBox typeCheck = (CheckBox)findViewById(R.id.quickSearchTypeCheck);
                 if (nameCheck.isChecked())
                     params.NameSearch = quickSearchVal;
+                if (textCheck.isChecked())
+                    params.TextSearch = quickSearchVal;
+                if (typeCheck.isChecked())
+                    params.TypeSearch = quickSearchVal;
                 
                 Intent searchIntent = CardListActivity.buildSearchIntent(MainMenuActivity.this, params);
                 startActivity(searchIntent);

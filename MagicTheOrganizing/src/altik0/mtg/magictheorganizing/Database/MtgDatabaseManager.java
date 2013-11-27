@@ -149,19 +149,68 @@ public class MtgDatabaseManager extends SQLiteOpenHelper
         if (params.NameSearch != null)
         {
             // TODO: smarter than just equivalent. String contains?
-            textCheck = "LOWER(card_table.Name) LIKE LOWER(?)";
+            nameCheck = "LOWER(card_table.Name) LIKE LOWER(?)";
             queryParams.addLast("%" + params.NameSearch + "%");
         }
-        // TODO: other search params. Let's just make sure I'm getting something working
+        if (params.TextSearch != null)
+        {
+            textCheck = "LOWER(card_table.Text) LIKE LOWER(?)";
+            queryParams.addLast("%" + params.TextSearch + "%");
+        }
+        if (params.ExpansionSearch != null)
+        {
+            expansionCheck = "LOWER(set_table.Name) LIKE LOWER(?)";
+            queryParams.addLast("%" + params.ExpansionSearch + "%");
+        }
+        if (params.TypeSearch != null)
+        {
+            typeCheck = "LOWER(card_table.Type) LIKE LOWER(?)";
+            queryParams.addLast("%" + params.TypeSearch + "%");
+        }
+        if (params.RarityFilter != null)
+        {
+            // Treat multiple boxes as ors:
+            String commonCheck = "1 = 1";
+            String uncommonCheck = "1 = 1";
+            String rareCheck = "1 = 1";
+            String mythicCheck = "1 = 1";
+            if ((params.RarityFilter & SearchParams.COMMON_FLAG) != 0)
+            {
+                commonCheck = "LOWER(card_list.Rarity) = 'common'";
+            }
+            if ((params.RarityFilter & SearchParams.UNCOMMON_FLAG) != 0)
+            {
+                uncommonCheck = "LOWER(card_list.Rarity) = 'uncommon'";
+            }
+            if ((params.RarityFilter & SearchParams.RARE_FLAG) != 0)
+            {
+                rareCheck = "LOWER(card_list.Rarity) = 'rare'";
+            }
+            if ((params.RarityFilter & SearchParams.MYTHIC_FLAG) != 0)
+            {
+                mythicCheck = "LOWER(card_list.Rarity) = 'mythic'";
+            }
+            rarityCheck = "(" +
+                          commonCheck + " OR " +
+                          uncommonCheck + " OR " +
+                          rareCheck + " OR " +
+                          mythicCheck + ")";
+        }
+        
+        // TODO: add cached content for colors so I can search on them. Bloats
+        // data a bit, but not badly enough that it really matters. Besides, I
+        // could just eliminate those tables if I did that, which probably trims
+        // much more data than it would eat up. Anyway, that requires refactoring
+        // the database, which is more time consuming than I can address right now.
         
         String[] queryArray = queryParams.toArray(new String[0]);
         
         // Build final query
-        query += textCheck + " AND " +
+        query += nameCheck + " AND " +
+                 textCheck + " AND " +
                  expansionCheck + " AND " +
-                 rarityCheck + " AND " +
-                 nameCheck + " AND " +
                  typeCheck + " AND " +
+                 rarityCheck + " AND " +
                  colorCheck;
         
         // Get the datas
