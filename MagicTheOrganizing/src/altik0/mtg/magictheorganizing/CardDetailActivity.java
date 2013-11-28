@@ -40,8 +40,9 @@ public class CardDetailActivity extends FragmentActivity
             // Create the detail fragment and add it to the activity
             // using a fragment transaction.
             Bundle arguments = new Bundle();
-            arguments.putString(CardDetailFragment.ARG_ITEM_ID, getIntent()
-                    .getStringExtra(CardDetailFragment.ARG_ITEM_ID));
+            String idStr = getIntent().getStringExtra(CardDetailFragment.ARG_ITEM_ID);
+            int id = Integer.parseInt(idStr);
+            arguments.putInt(CardDetailFragment.ARG_ITEM_ID, id);
             CardDetailFragment fragment = new CardDetailFragment();
             fragment.setArguments(arguments);
             getSupportFragmentManager().beginTransaction()

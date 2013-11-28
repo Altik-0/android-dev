@@ -7,7 +7,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import altik0.mtg.magictheorganizing.Database.MtgDatabaseManager;
 import altik0.mtg.magictheorganizing.MtgDataTypes.CardData;
+import altik0.mtg.magictheorganizing.views.CardView;
 
 /**
  * A fragment representing a single Card detail screen. This fragment is either
@@ -25,7 +27,7 @@ public class CardDetailFragment extends Fragment
     /**
      * The dummy content this fragment is presenting.
      */
-    private CardData mItem;
+    private CardData card;
     
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
@@ -42,8 +44,8 @@ public class CardDetailFragment extends Fragment
         
         if (getArguments().containsKey(ARG_ITEM_ID))
         {
-            // TODO: load CardData to display
-            // mItem = ... get card somehow?
+            int id = getArguments().getInt(ARG_ITEM_ID);
+            card = MtgDatabaseManager.getInstance(getActivity()).GetCardWithId(id);
         }
     }
     
@@ -55,10 +57,22 @@ public class CardDetailFragment extends Fragment
                 container, false);
         
         // Show the dummy content as text in a TextView.
-        if (mItem != null)
+        if (card != null)
         {
-            // TODO: replace below appropriately
-            //((TextView) rootView.findViewById(R.id.card_detail)).setText(mItem.content);
+            CardView cardDetail = (CardView)rootView.findViewById(R.id.cardDetail);
+            TextView nameText = (TextView)rootView.findViewById(R.id.nameDetailText);
+            TextView typeText = (TextView)rootView.findViewById(R.id.typeDetailText);
+            TextView costText = (TextView)rootView.findViewById(R.id.costDetailText);
+            //TextView textText = (TextView)rootView.findViewById(R.id.cardTextText);
+            
+            // TODO:
+            //  1) replace static strings with R values (for localization and whatnot)
+            //  2) make mana costs not text
+            //  3) All the fields durp
+            cardDetail.setCardData(card);
+            nameText.setText("Name: " + card.getName());
+            typeText.setText("Type: " + card.getTypeString());
+            costText.setText("Cost: " + card.getManaCost());
         }
         
         return rootView;

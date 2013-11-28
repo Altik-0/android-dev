@@ -1,6 +1,7 @@
 package altik0.mtg.magictheorganizing;
 
 import altik0.mtg.magictheorganizing.Database.SearchParams;
+import altik0.mtg.magictheorganizing.MtgDataTypes.CardData;
 import android.app.Activity;
 import android.os.Bundle;
 import android.support.v4.app.ListFragment;
@@ -51,7 +52,7 @@ public class CardListFragment extends ListFragment
         /**
          * Callback for when an item has been selected.
          */
-        public void onItemSelected(String id);
+        public void onItemSelected(int card_id);
     }
     
     /**
@@ -61,7 +62,7 @@ public class CardListFragment extends ListFragment
     private static Callbacks sDummyCallbacks = new Callbacks()
     {
         @Override
-        public void onItemSelected(String id)
+        public void onItemSelected(int card_id)
         {
         }
     };
@@ -136,7 +137,8 @@ public class CardListFragment extends ListFragment
         // TODO: figure out how to do this?
         // Notify the active callbacks interface (the activity, if the
         // fragment is attached to one) that an item has been selected.
-        //mCallbacks.onItemSelected(DummyContent.ITEMS.get(position).id);
+        CardData card = (CardData)listAdapter.getItem(position);
+        mCallbacks.onItemSelected(card.getCardId());
     }
     
     @Override

@@ -129,6 +129,48 @@ public class MtgDatabaseManager extends SQLiteOpenHelper
         onCreate(db);
     }
     
+    public CardData GetCardWithId(int id)
+    {
+        ArrayList<CardData> toRet = new ArrayList<CardData>();
+        
+        SQLiteDatabase db = getWritableDatabase();
+        Cursor cursor = db.rawQuery("SELECT * FROM Cards card_table JOIN Sets set_table " +
+                                    "ON card_table.SetID = set_table.SetID " +
+                                    "WHERE card_table.CardID = ?",
+                                    new String[]{Integer.toString(id)});
+        
+        // Read cards
+        if (cursor.moveToFirst())
+        {
+            do
+            {
+                CardData card = new CardData();
+                card.setCardId(cursor.getInt(0));
+                card.setSetId(cursor.getInt(1));
+                card.setRarity(cursor.getString(4));
+                card.setName(cursor.getString(6));
+                card.setCmc(cursor.getInt(7));
+                card.setManaCost(cursor.getString(9));
+                card.setPower(cursor.getInt(10));
+                card.setToughness(cursor.getInt(11));
+                card.setLoyalty(cursor.getInt(12));
+                card.setSet(cursor.getString(16));
+    
+                // Add card to list
+                toRet.add(card);
+            } while(cursor.moveToNext());
+        }
+        
+        // Next, get list fields from other tables:
+        FixCardListData(toRet, db, cursor);
+        
+        // We only used an array list because all the functions take that contract
+        // In reality, it's just going to be one item. If there weren't any, I suppose
+        // that would be a problem, but we can address that later.
+        // I guess TODO and whatnot.
+        return toRet.get(0);
+    }
+    
     public ArrayList<CardData> SearchForCards(SearchParams params)
     {
         // Build dat query
@@ -170,25 +212,25 @@ public class MtgDatabaseManager extends SQLiteOpenHelper
         if (params.RarityFilter != null)
         {
             // Treat multiple boxes as ors:
-            String commonCheck = "1 = 1";
-            String uncommonCheck = "1 = 1";
-            String rareCheck = "1 = 1";
-            String mythicCheck = "1 = 1";
+            String commonCheck = "0 = 1";
+            String uncommonCheck = "0 = 1";
+            String rareCheck = "0 = 1";
+            String mythicCheck = "0 = 1";
             if ((params.RarityFilter & SearchParams.COMMON_FLAG) != 0)
             {
-                commonCheck = "LOWER(card_list.Rarity) = 'common'";
+                commonCheck = "LOWER(card_table.Rarity) = 'common'";
             }
             if ((params.RarityFilter & SearchParams.UNCOMMON_FLAG) != 0)
             {
-                uncommonCheck = "LOWER(card_list.Rarity) = 'uncommon'";
+                uncommonCheck = "LOWER(card_table.Rarity) = 'uncommon'";
             }
             if ((params.RarityFilter & SearchParams.RARE_FLAG) != 0)
             {
-                rareCheck = "LOWER(card_list.Rarity) = 'rare'";
+                rareCheck = "LOWER(card_table.Rarity) = 'rare'";
             }
             if ((params.RarityFilter & SearchParams.MYTHIC_FLAG) != 0)
             {
-                mythicCheck = "LOWER(card_list.Rarity) = 'mythic'";
+                mythicCheck = "LOWER(card_table.Rarity) = 'mythic'";
             }
             rarityCheck = "(" +
                           commonCheck + " OR " +

@@ -71,7 +71,7 @@ public class CardListActivity extends FragmentActivity implements
      * the item with the given ID was selected.
      */
     @Override
-    public void onItemSelected(String id)
+    public void onItemSelected(int card_id)
     {
         if (mTwoPane)
         {
@@ -79,7 +79,7 @@ public class CardListActivity extends FragmentActivity implements
             // adding or replacing the detail fragment using a
             // fragment transaction.
             Bundle arguments = new Bundle();
-            arguments.putString(CardDetailFragment.ARG_ITEM_ID, id);
+            arguments.putInt(CardDetailFragment.ARG_ITEM_ID, card_id);
             CardDetailFragment fragment = new CardDetailFragment();
             fragment.setArguments(arguments);
             getSupportFragmentManager().beginTransaction()
@@ -90,7 +90,7 @@ public class CardListActivity extends FragmentActivity implements
             // In single-pane mode, simply start the detail activity
             // for the selected item ID.
             Intent detailIntent = new Intent(this, CardDetailActivity.class);
-            detailIntent.putExtra(CardDetailFragment.ARG_ITEM_ID, id);
+            detailIntent.putExtra(CardDetailFragment.ARG_ITEM_ID, Integer.toString(card_id));
             startActivity(detailIntent);
         }
     }

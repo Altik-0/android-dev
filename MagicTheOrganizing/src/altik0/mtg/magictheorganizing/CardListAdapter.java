@@ -107,13 +107,13 @@ public class CardListAdapter implements ListAdapter
     public boolean areAllItemsEnabled()
     {
         // TODO Auto-generated method stub
-        return false;
+        return true;
     }
 
     @Override
     public boolean isEnabled(int arg0)
     {
         // TODO Auto-generated method stub
-        return false;
+        return true;
     }
 }
