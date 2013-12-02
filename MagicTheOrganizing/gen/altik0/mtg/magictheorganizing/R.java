@@ -24,7 +24,7 @@ public final class R {
         public static final int ic_launcher=0x7f020000;
     }
     public static final class id {
-        public static final int action_settings=0x7f090040;
+        public static final int action_settings=0x7f090041;
         public static final int advancedSearchButton=0x7f090025;
         public static final int artistText=0x7f09003e;
         public static final int blackCheckBox=0x7f090016;
@@ -32,6 +32,7 @@ public final class R {
         public static final int blueCheckBox=0x7f090015;
         public static final int blueText=0x7f09001b;
         public static final int cardDetail=0x7f090038;
+        public static final int cardFlavorTextText=0x7f09003f;
         public static final int cardTextText=0x7f090008;
         public static final int cardTextTextBox=0x7f090007;
         public static final int cardTypeText=0x7f090006;
@@ -64,7 +65,7 @@ public final class R {
         public static final int nameDetailText=0x7f09003a;
         public static final int nameText=0x7f090002;
         public static final int nameTextBox=0x7f090001;
-        public static final int otherTagList=0x7f09003f;
+        public static final int otherTagList=0x7f090040;
         public static final int ptDetailText=0x7f09003d;
         public static final int quickSearch=0x7f09002b;
         public static final int quickSearchButton=0x7f09002c;

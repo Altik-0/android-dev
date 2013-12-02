@@ -63,7 +63,10 @@ public class CardDetailFragment extends Fragment
             TextView nameText = (TextView)rootView.findViewById(R.id.nameDetailText);
             TextView typeText = (TextView)rootView.findViewById(R.id.typeDetailText);
             TextView costText = (TextView)rootView.findViewById(R.id.costDetailText);
-            //TextView textText = (TextView)rootView.findViewById(R.id.cardTextText);
+            TextView textText = (TextView)rootView.findViewById(R.id.cardTextText);
+            TextView flavorTextText = (TextView)rootView.findViewById(R.id.cardFlavorTextText);
+            TextView expansionText = (TextView)rootView.findViewById(R.id.expansionText);
+            TextView artistText = (TextView)rootView.findViewById(R.id.artistText);
             
             // TODO:
             //  1) replace static strings with R values (for localization and whatnot)
@@ -73,6 +76,9 @@ public class CardDetailFragment extends Fragment
             nameText.setText("Name: " + card.getName());
             typeText.setText("Type: " + card.getTypeString());
             costText.setText("Cost: " + card.getManaCost());
+            textText.setText("Card Text: " + card.getText());
+            expansionText.setText("Expansions: " + card.getSets().get(0));
+            flavorTextText.setText("Flavor Text: " + card.getFlavorText());
         }
         
         return rootView;

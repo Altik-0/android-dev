@@ -1,12 +1,20 @@
 package altik0.mtg.magictheorganizing.MtgDataTypes;
 
 import java.util.ArrayList;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class CardData
 {
+    // Consts used for various codes:
+    public static final int WHITE_CODE = 0x1;
+    public static final int BLUE_CODE  = 0x2;
+    public static final int BLACK_CODE = 0x4;
+    public static final int RED_CODE   = 0x8;
+    public static final int GREEN_CODE = 0x10;
+    
     // Database indicator things
     private int cardId;
-    private int setId;
     
     // Cached values
     private int cmc;
@@ -15,25 +23,32 @@ public class CardData
     // if we haven't initialized data.
 	private String name = "NULL";
 	private String manaCost = "NULL";
-	private Integer power = null;
-	private Integer toughness = null;
-	private Integer loyalty = null;
+	private String text = "";
+	private String flavorText = "";
+
+    private String power = null;
+	private String toughness = null;
+	private Integer loyalty = null;     // Pretty sure loyalty will be an integer always,
+	                                    // but not necessarily true long term. This needs
+	                                    // to change, but that's another database fix which
+	                                    // I don't want to do
 	private String rarity;
-	private String set;
 	
 	private ArrayList<CardColor> colors;
-	private ArrayList<CardSupertype> supertypes;
-	private ArrayList<CardType> types;
+    private ArrayList<String> sets;
+	private ArrayList<String> supertypes;
+	private ArrayList<String> types;
 	private ArrayList<String> subtypes;
 	
-	// TODO: artist, art
+	// TODO: artist, art (seeing as this card represents multiple versions)
 	
 	public CardData()
 	{
-		colors = new ArrayList<CardColor>();
-		types  = new ArrayList<CardType>();
-		supertypes = new ArrayList<CardSupertype>();
-		subtypes = new ArrayList<String>();
+	    colors = new ArrayList<CardColor>();
+        types = new ArrayList<String>();
+        supertypes = new ArrayList<String>();
+        subtypes = new ArrayList<String>();
+        sets = new ArrayList<String>();
 	}
 	
 	public CardData(CardData _old)
@@ -43,22 +58,23 @@ public class CardData
 		power = _old.power;
 		toughness = _old.toughness;
 		cardId = _old.cardId;
-	    setId = _old.setId;
 	    cmc = _old.cmc;
 	    loyalty = _old.loyalty;
 	    rarity = _old.rarity;
-	    set = _old.set;
+	    flavorText = _old.flavorText;
+	    text = _old.text;
 		
 		colors = new ArrayList<CardColor>();
-		types = new ArrayList<CardType>();
-		supertypes = new ArrayList<CardSupertype>();
+		types = new ArrayList<String>();
+		supertypes = new ArrayList<String>();
 		subtypes = new ArrayList<String>();
+        sets = new ArrayList<String>();
 		
 		for (CardColor color : _old.colors)
 			colors.add(color);
-		for (CardType type : _old.types)
+		for (String type : _old.types)
 			types.add(type);
-		for (CardSupertype supertype : _old.supertypes)
+		for (String supertype : _old.supertypes)
 		    supertypes.add(supertype);
 		for (String subtype : _old.subtypes)
 			subtypes.add(subtype);
@@ -72,7 +88,7 @@ public class CardData
 		colors.add(newColor);
 	}
 	
-	public void addType(CardType newType)
+	public void addType(String newType)
 	{
 		// Don't add duplicate types
 		if (types.contains(newType))
@@ -80,7 +96,69 @@ public class CardData
 		types.add(newType);
 	}
 	
-	public void addSupertype(CardSupertype supertype)
+	public void setColorsFromCode(int colorCode)
+	{
+	    colors = new ArrayList<CardColor>();
+        if ((colorCode & WHITE_CODE) != 0)
+            colors.add(CardColor.White);
+        if ((colorCode & BLUE_CODE) != 0)
+            colors.add(CardColor.Blue);
+        if ((colorCode & BLACK_CODE) != 0)
+            colors.add(CardColor.Black);
+        if ((colorCode & RED_CODE) != 0)
+            colors.add(CardColor.Red);
+        if ((colorCode & GREEN_CODE) != 0)
+            colors.add(CardColor.Green);
+	}
+	
+	public void setTypesFromCode(String typeString)
+	{
+	    String[] typeSplit = typeString.split("--");
+	    // Subtypes:
+	    if (typeSplit.length == 2)
+	    {
+	        String subtypeString = typeSplit[1].trim();
+	        String otherTypeString = typeSplit[0].trim();
+	        
+	        String[] subtypes = subtypeString.split(" ");
+	        String[] otherTypes = otherTypeString.split(" ");
+	        
+	        this.subtypes = new ArrayList<String>();
+	        for (String subtype : subtypes)
+	            this.subtypes.add(subtype);
+	        
+	        this.supertypes = new ArrayList<String>();
+	        this.types = new ArrayList<String>();
+	        for (String otherType : otherTypes)
+	        {
+	            if (otherType.toUpperCase().equals("LEGENDARY") ||
+	                otherType.toUpperCase().equals("BASIC") ||
+	                otherType.toUpperCase().equals("WORLD") ||
+	                otherType.toUpperCase().equals("SNOW"))
+	            {
+	                this.supertypes.add(otherType);
+	            }
+	            else
+	                this.types.add(otherType);
+	        }
+	    }
+	    // No subtypes:
+	    else
+	    {
+            String otherTypeString = typeSplit[0].trim();
+	    }
+	}
+	
+	public void setSetsFromCode(String setCode)
+	{
+	    Pattern p = Pattern.compile("\\[[^\\[\\]]*\\]");
+        Matcher m = p.matcher(setCode);
+        // Whenever we find a set, trim its brackets and put it in our list
+        while (m.find())
+            sets.add(m.group().substring(1, m.group().length() - 1));
+	}
+	
+	public void addSupertype(String supertype)
 	{
 	    // Don't add duplicate types
 	    if (supertypes.contains(supertype))
@@ -101,14 +179,14 @@ public class CardData
 		String toRet = "";
 		// TODO: separate these steps, sort nicely, etc.
 		// Scan for super types:
-		for(CardSupertype supertype : supertypes)
+		for(String supertype : supertypes)
 		{
-		    toRet += supertype.toString() + " ";
+		    toRet += supertype + " ";
 		}
 		// Scan for normal types:
-		for(CardType type : types)
+		for(String type : types)
 		{
-			toRet += type.toString() + " ";
+			toRet += type + " ";
 		}
 		// -- Scan for subtypes
 		if (subtypes.size() > 0)
@@ -127,22 +205,22 @@ public class CardData
 	
 	public String getPowerToughnessString()
 	{		
-		return Integer.toString(power) + "/" + Integer.toString(toughness);
+		return power + "/" + toughness;
 	}
 
-	public Integer getToughness() {
+	public String getToughness() {
 		return toughness;
 	}
 
-	public void setToughness(Integer toughness) {
+	public void setToughness(String toughness) {
 		this.toughness = toughness;
 	}
 
-	public Integer getPower() {
+	public String getPower() {
 		return power;
 	}
 
-	public void setPower(Integer power) {
+	public void setPower(String power) {
 		this.power = power;
 	}
 
@@ -167,18 +245,23 @@ public class CardData
 		return colors;
 	}
 	
-	public ArrayList<CardType> getTypes()
+	public ArrayList<String> getTypes()
 	{
 		return types;
 	}
 	
-	public ArrayList<CardSupertype> getSupertypes()
+	public ArrayList<String> getSupertypes()
 	{
 	    return supertypes;
 	}
 
 	public ArrayList<String> getSubtypes() {
 		return subtypes;
+	}
+	
+	public ArrayList<String> getSets()
+	{
+	    return sets;
 	}
 
     public String getRarity()
@@ -201,16 +284,6 @@ public class CardData
         this.cardId = cardId;
     }
 
-    public int getSetId()
-    {
-        return setId;
-    }
-
-    public void setSetId(int setId)
-    {
-        this.setId = setId;
-    }
-
     public int getCmc()
     {
         return cmc;
@@ -219,16 +292,6 @@ public class CardData
     public void setCmc(int cmc)
     {
         this.cmc = cmc;
-    }
-
-    public String getSet()
-    {
-        return set;
-    }
-
-    public void setSet(String set)
-    {
-        this.set = set;
     }
     
     public Integer getLoyalty()
@@ -239,5 +302,25 @@ public class CardData
     public void setLoyalty(Integer loyalty)
     {
         this.loyalty = loyalty;
+    }
+    
+    public String getText()
+    {
+        return text;
+    }
+    
+    public void setText(String _Text)
+    {
+        text = _Text;
+    }
+    
+    public String getFlavorText()
+    {
+        return flavorText;
+    }
+    
+    public void setFlavorText(String _FlavorText)
+    {
+        flavorText = _FlavorText;
     }
 }

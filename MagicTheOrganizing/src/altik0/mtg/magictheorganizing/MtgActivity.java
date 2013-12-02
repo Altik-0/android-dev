@@ -145,36 +145,36 @@ public class MtgActivity extends Activity
         card0.addColor(CardColor.Red);
         card0.addColor(CardColor.Blue);
         card0.addColor(CardColor.Black);
-        card0.addType(CardType.Sorcery);
+        card0.addType("Sorcery");
         card0.setManaCost("{U}{U}{B}{B}{B}{R}{R}");
         
         CardData card1 = new CardData();
         card1.setName("Nylea, God of the Hunt");
         card1.addColor(CardColor.Green);
-        card1.addSupertype(CardSupertype.Legendary);
-        card1.addType(CardType.Enchantment);
-        card1.addType(CardType.Creature);
+        card1.addSupertype("Legendary");
+        card1.addType("Enchantment");
+        card1.addType("Creature");
         card1.addSubtype("God");
         card1.setManaCost("{3}{G}");
-        card1.setPower(5);
-        card1.setToughness(6);
+        card1.setPower("5");
+        card1.setToughness("6");
         
         CardData card2 = new CardData();
         card2.setName("Greed");
         card2.addColor(CardColor.Black);
-        card2.addType(CardType.Enchantment);
+        card2.addType("Enchantment");
         card2.setManaCost("{3}{B}");
         
         CardData card3 = new CardData();
         card3.setName("Phyrexian Metamorph");
         card3.addColor(CardColor.Blue);
-        card3.addType(CardType.Artifact);
-        card3.addType(CardType.Creature);
+        card3.addType("Artifact");
+        card3.addType("Creature");
         card3.setManaCost("{3}{P/U}");
         
         CardData card4 = new CardData();
         card4.setName("Tropical Island");
-        card4.addType(CardType.Land);
+        card4.addType("Land");
         card4.addSubtype("Island");
         card4.addSubtype("Forest");
 

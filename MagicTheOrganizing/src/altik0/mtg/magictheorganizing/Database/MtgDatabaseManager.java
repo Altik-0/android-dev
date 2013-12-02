@@ -11,6 +11,7 @@ import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.util.Log;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -46,15 +47,30 @@ public class MtgDatabaseManager extends SQLiteOpenHelper
         String command = "";
         try
         {
+            int i = 0;
             while ((line = buf.readLine()) != null)
             {
+                i++;
                 command += line;
                 if (command.endsWith(";"))
                 {
-                    db.execSQL(command);
-                    command = "";
+                    try
+                    {
+                        db.execSQL(command);
+                        command = "";
+                    }
+                    catch (SQLException e)
+                    {
+                        // Nothing: this is a hack.
+                        // Short version: sometimes lines end in ';' when
+                        // still reading flavor text or something. Point is,
+                        // if the line we read wasn't enough to issue the
+                        // command, we'll just keep reading and pretend it
+                        // didn't happen.
+                    }
                 }
             }
+            Log.i("Command Cnt", ""+i);
             
             /*
             while ((line = buf.readLine()) != null)
@@ -134,8 +150,7 @@ public class MtgDatabaseManager extends SQLiteOpenHelper
         ArrayList<CardData> toRet = new ArrayList<CardData>();
         
         SQLiteDatabase db = getWritableDatabase();
-        Cursor cursor = db.rawQuery("SELECT * FROM Cards card_table JOIN Sets set_table " +
-                                    "ON card_table.SetID = set_table.SetID " +
+        Cursor cursor = db.rawQuery("SELECT * FROM Cards card_table " +
                                     "WHERE card_table.CardID = ?",
                                     new String[]{Integer.toString(id)});
         
@@ -146,23 +161,28 @@ public class MtgDatabaseManager extends SQLiteOpenHelper
             {
                 CardData card = new CardData();
                 card.setCardId(cursor.getInt(0));
-                card.setSetId(cursor.getInt(1));
                 card.setRarity(cursor.getString(4));
                 card.setName(cursor.getString(6));
                 card.setCmc(cursor.getInt(7));
                 card.setManaCost(cursor.getString(9));
-                card.setPower(cursor.getInt(10));
-                card.setToughness(cursor.getInt(11));
-                card.setLoyalty(cursor.getInt(12));
-                card.setSet(cursor.getString(16));
+                card.setPower(cursor.getString(11));
+                card.setToughness(cursor.getString(12));
+                card.setLoyalty(cursor.getInt(13));
+                card.setText(cursor.getString(14));
+                card.setFlavorText(cursor.getString(15));
+                
+                int colorCode = cursor.getInt(10);
+                String typeCode = cursor.getString(5);
+                String setCode = cursor.getString(2);
+                
+                card.setColorsFromCode(colorCode);
+                card.setTypesFromCode(typeCode);
+                card.setSetsFromCode(setCode);
     
                 // Add card to list
                 toRet.add(card);
             } while(cursor.moveToNext());
         }
-        
-        // Next, get list fields from other tables:
-        FixCardListData(toRet, db, cursor);
         
         // We only used an array list because all the functions take that contract
         // In reality, it's just going to be one item. If there weren't any, I suppose
@@ -174,9 +194,7 @@ public class MtgDatabaseManager extends SQLiteOpenHelper
     public ArrayList<CardData> SearchForCards(SearchParams params)
     {
         // Build dat query
-        String query = "SELECT * FROM Cards card_table " +
-                       "JOIN Sets set_table on card_table.SetID = set_table.SetID " + 
-                       "WHERE ";
+        String query = "SELECT * FROM Cards card_table WHERE ";
         
         // For all the nulls, we'll use a dummy condition:
         String textCheck = "1 = 1";
@@ -201,7 +219,7 @@ public class MtgDatabaseManager extends SQLiteOpenHelper
         }
         if (params.ExpansionSearch != null)
         {
-            expansionCheck = "LOWER(set_table.Name) LIKE LOWER(?)";
+            expansionCheck = "LOWER(card_table.Sets) LIKE LOWER(?)";
             queryParams.addLast("%" + params.ExpansionSearch + "%");
         }
         if (params.TypeSearch != null)
@@ -238,12 +256,44 @@ public class MtgDatabaseManager extends SQLiteOpenHelper
                           rareCheck + " OR " +
                           mythicCheck + ")";
         }
-        
-        // TODO: add cached content for colors so I can search on them. Bloats
-        // data a bit, but not badly enough that it really matters. Besides, I
-        // could just eliminate those tables if I did that, which probably trims
-        // much more data than it would eat up. Anyway, that requires refactoring
-        // the database, which is more time consuming than I can address right now.
+        if (params.ColorFilter != null)
+        {
+            // TODO: req. multicolor and exc. unselected
+            String whiteCheck = "0 = 1";
+            String blueCheck = "0 = 1";
+            String blackCheck = "0 = 1";
+            String redCheck = "0 = 1";
+            String greenCheck = "0 = 1";
+            
+            int filter = params.ColorFilter;
+            if ((filter & SearchParams.WHITE_FLAG) != 0)
+            {
+                whiteCheck = "(card_table.Colors & 1) != 0";
+            }
+            if ((filter & SearchParams.BLUE_FLAG) != 0)
+            {
+                blueCheck = "(card_table.Colors & 2) != 0";
+            }
+            if ((filter & SearchParams.BLACK_FLAG) != 0)
+            {
+                blackCheck = "(card_table.Colors & 4) != 0";
+            }
+            if ((filter & SearchParams.RED_FLAG) != 0)
+            {
+                redCheck = "(card_table.Colors & 8) != 0";
+            }
+            if ((filter & SearchParams.GREEN_FLAG) != 0)
+            {
+                greenCheck = "(card_table.Colors & 16) != 0";
+            }
+            
+            colorCheck = "(" +
+                    whiteCheck + " OR " +
+                    blueCheck + " OR " +
+                    blackCheck + " OR " +
+                    redCheck + " OR " +
+                    greenCheck + ")";
+        }
         
         String[] queryArray = queryParams.toArray(new String[0]);
         
@@ -268,23 +318,28 @@ public class MtgDatabaseManager extends SQLiteOpenHelper
             {
                 CardData card = new CardData();
                 card.setCardId(cursor.getInt(0));
-                card.setSetId(cursor.getInt(1));
                 card.setRarity(cursor.getString(4));
                 card.setName(cursor.getString(6));
                 card.setCmc(cursor.getInt(7));
                 card.setManaCost(cursor.getString(9));
-                card.setPower(cursor.getInt(10));
-                card.setToughness(cursor.getInt(11));
-                card.setLoyalty(cursor.getInt(12));
-                card.setSet(cursor.getString(16));
+                card.setPower(cursor.getString(11));
+                card.setToughness(cursor.getString(12));
+                card.setLoyalty(cursor.getInt(13));
+                card.setText(cursor.getString(14));
+                card.setFlavorText(cursor.getString(15));
+                
+                int colorCode = cursor.getInt(10);
+                String typeCode = cursor.getString(5);
+                String setCode = cursor.getString(2);
+                
+                card.setColorsFromCode(colorCode);
+                card.setTypesFromCode(typeCode);
+                card.setSetsFromCode(setCode);
     
                 // Add card to list
                 toRet.add(card);
             } while(cursor.moveToNext());
         }
-        
-        // Next, get list fields from other tables:
-        FixCardListData(toRet, db, cursor);
         
         return toRet;
     }
@@ -294,8 +349,7 @@ public class MtgDatabaseManager extends SQLiteOpenHelper
         ArrayList<CardData> toRet = new ArrayList<CardData>();
         
         SQLiteDatabase db = getWritableDatabase();
-        Cursor cursor = db.rawQuery("SELECT * FROM Cards card_table JOIN Sets set_table " +
-                                    "ON card_table.SetID = set_table.SetID", null);
+        Cursor cursor = db.rawQuery("SELECT * FROM Cards card_table", null);
         
         // Read cards
         if (cursor.moveToFirst())
@@ -304,27 +358,35 @@ public class MtgDatabaseManager extends SQLiteOpenHelper
             {
                 CardData card = new CardData();
                 card.setCardId(cursor.getInt(0));
-                card.setSetId(cursor.getInt(1));
                 card.setRarity(cursor.getString(4));
                 card.setName(cursor.getString(6));
                 card.setCmc(cursor.getInt(7));
                 card.setManaCost(cursor.getString(9));
-                card.setPower(cursor.getInt(10));
-                card.setToughness(cursor.getInt(11));
-                card.setLoyalty(cursor.getInt(12));
-                card.setSet(cursor.getString(16));
+                card.setPower(cursor.getString(11));
+                card.setToughness(cursor.getString(12));
+                card.setLoyalty(cursor.getInt(13));
+                card.setText(cursor.getString(14));
+                card.setFlavorText(cursor.getString(15));
+                
+                int colorCode = cursor.getInt(10);
+                String typeCode = cursor.getString(5);
+                String setCode = cursor.getString(2);
+                
+                card.setColorsFromCode(colorCode);
+                card.setTypesFromCode(typeCode);
+                card.setSetsFromCode(setCode);
     
                 // Add card to list
                 toRet.add(card);
             } while(cursor.moveToNext());
         }
         
-        // Next, get list fields from other tables:
-        FixCardListData(toRet, db, cursor);
-        
         return toRet;
     }
     
+    
+    // Held onto for documentation purposes, but ultimately not used anymore
+    /*
     // Takes cards, which are presumed to just have data from the Cards database,
     // and appends data for various list-type fields spread across different tables
     private static void FixCardListData(ArrayList<CardData> cards, SQLiteDatabase db, Cursor cursor)
@@ -433,6 +495,7 @@ public class MtgDatabaseManager extends SQLiteOpenHelper
            }
         }
     }
+    */
 
     private static MtgDatabaseManager instance = null;
     public static synchronized MtgDatabaseManager getInstance(Context _context)
