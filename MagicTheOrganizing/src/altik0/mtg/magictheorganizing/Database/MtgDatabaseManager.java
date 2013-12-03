@@ -3,8 +3,6 @@ package altik0.mtg.magictheorganizing.Database;
 import altik0.mtg.magictheorganizing.R;
 import altik0.mtg.magictheorganizing.MtgDataTypes.CardColor;
 import altik0.mtg.magictheorganizing.MtgDataTypes.CardData;
-import altik0.mtg.magictheorganizing.MtgDataTypes.CardSupertype;
-import altik0.mtg.magictheorganizing.MtgDataTypes.CardType;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.database.Cursor;

@@ -2058,6 +2058,7 @@ INSERT INTO "CardSets" VALUES(2051,6,20275);
 INSERT INTO "CardSets" VALUES(2052,6,20276);
 INSERT INTO "CardSets" VALUES(2053,6,20277);
 INSERT INTO "CardSets" VALUES(2054,6,20278);
+INSERT INTO "CardSets" VALUES(2055,7,20279);
 DROP TABLE IF EXISTS "Cards";
 CREATE TABLE [Cards] (
 [CardID] INTEGER  PRIMARY KEY AUTOINCREMENT NOT NULL,
@@ -6486,6 +6487,13 @@ INSERT INTO "Cards" VALUES(20276,147379,'[Shadowmoor]','normal','Rare','Legendar
 Each red or green instant or sorcery spell you cast has conspire. (As you cast the spell, you may tap two untapped creatures you control that share a color with it. When you do, copy it and you may choose new targets for the copy.)',NULL);
 INSERT INTO "Cards" VALUES(20277,146762,'[Shadowmoor]','normal','Rare','Enchantment','Wound Reflection',6,'Terese Nielsen & Ron Spencer','{5}{B}',4,NULL,NULL,NULL,'At the beginning of each end step, each opponent loses life equal to the life he or she lost this turn. (Damage causes loss of life.)','The mission of the Nighthearth, Illulia''s cult of murderous cinders, is to intensify every pain suffered in Shadowmoor.');
 INSERT INTO "Cards" VALUES(20278,142028,'[Shadowmoor]','normal','Common','Creature -- Kithkin Soldier','Zealous Guardian',1,'Steven Belledin','{W/U}',3,'1','1',NULL,'Flash','Parapet watchers patrol the outer edges of the doun, signaling to others who wait patiently in shadow.');
+INSERT INTO "Cards" VALUES(20279,8008135,'[Theros]','normal','Mythic','Legendary Enchantment Creature -- God','Nylea, God of the Hunt',4,'','{3}{G}',16,'5','6','NULL','Indestructible
+
+As long as your devotion to green is less than 5, Nylea isn''t a creature. (Each {G} in mana costs of permanents you control counts towards your devotion to green.)
+
+Other creatures you control have trample.
+
+{3}{G}: Target creature gets +2/+2 until end of turn.','NULL');
 DROP TABLE IF EXISTS "CollectedCards";
 CREATE TABLE [CollectedCards] (
 [CollectedID] INTEGER  NOT NULL PRIMARY KEY AUTOINCREMENT,
@@ -6520,3 +6528,4 @@ INSERT INTO "Sets" VALUES(3,'Coldsnap','black','CSP','Ice Age','2006-07-21');
 INSERT INTO "Sets" VALUES(4,'Eventide','black','EVE','Shadowmoor','2008-07-25');
 INSERT INTO "Sets" VALUES(5,'New Phyrexia','black','NPH','Scars of Mirrodin','2011-05-13');
 INSERT INTO "Sets" VALUES(6,'Shadowmoor','black','SHM','Shadowmoor','2008-05-02');
+INSERT INTO "Sets" VALUES(7,'Theros','''black''','THO','Theros','2013-10-03');

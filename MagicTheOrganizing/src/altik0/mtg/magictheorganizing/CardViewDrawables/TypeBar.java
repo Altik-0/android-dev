@@ -17,6 +17,7 @@ public class TypeBar
     public final static float TYPE_BAR_WIDTH = 55.0f;
     public final static float TYPE_TEXT_POS_X = 5.5f;
     public final static float TYPE_TEXT_POS_Y = 52.9f;
+    public final static float TYPE_TEXT_WIDTH = TYPE_BAR_WIDTH - 10.0f;  // TODO: measure better
     public final static float TYPE_TEXT_FONT_SIZE = 2.7f;
     public final static float STROKE_WIDTH = 1.0f;
     
@@ -43,8 +44,7 @@ public class TypeBar
         canvas.drawRoundRect(nameBar, TYPE_BAR_RADIUS_X * scalar, TYPE_BAR_RADIUS_Y * scalar, nameBarPaint);
         canvas.drawRoundRect(nameBar, TYPE_BAR_RADIUS_X * scalar, TYPE_BAR_RADIUS_Y * scalar, strokePaint);
         
-        // Step 2: draw text
-        // TODO: dynamic sizing of text (within reason). This may be difficult
+        // Step 2: setup text
         Paint textPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         textPaint.setTextSize(TYPE_TEXT_FONT_SIZE * scalar);
         textPaint.setColor(Color.BLACK);
@@ -52,7 +52,22 @@ public class TypeBar
         Typeface tf = Typeface.create("Times New Roman", Typeface.BOLD);
         textPaint.setTypeface(tf);
         
-        canvas.drawText(card.getTypeString(),
+        // Step 2.5: Confirm width of text. If too wide, trim and put in '...'
+        String typeString = card.getTypeString();
+        int charWidth = textPaint.breakText(typeString,
+                                            true,
+                                            TYPE_TEXT_WIDTH * scalar,
+                                            null);
+        if (charWidth < typeString.length())
+        {
+            typeString = typeString.substring(0, charWidth);
+            String replaceText = "...";
+            float replaceWidth = textPaint.measureText(replaceText);
+            int trimChars = textPaint.breakText(typeString, false, replaceWidth, null);
+            typeString = typeString.substring(0, typeString.length() - trimChars) + replaceText;
+        }
+        
+        canvas.drawText(typeString,
                 bounds.left + (TYPE_TEXT_POS_X * scalar),
                 bounds.top + (TYPE_TEXT_POS_Y * scalar),
                 textPaint);

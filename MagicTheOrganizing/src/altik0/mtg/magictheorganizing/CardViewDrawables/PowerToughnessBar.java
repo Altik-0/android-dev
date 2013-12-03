@@ -48,7 +48,12 @@ public class PowerToughnessBar
         canvas.drawRoundRect(ptBar, PT_BOX_RADIUS_X * scalar, PT_BOX_RADIUS_Y * scalar, ptBarPaint);
         canvas.drawRoundRect(ptBar, PT_BOX_RADIUS_X * scalar, PT_BOX_RADIUS_Y * scalar, strokePaint);
         
-        textPaint.setTextSize(PT_TEXT_FONT_SIZE * scalar);
+        float fontSize = PT_TEXT_FONT_SIZE * scalar;
+        // HACK: if the string is too long, lower font size manually:
+        if (card.getPowerToughnessString().length() > 5)
+            fontSize = 3.3f * scalar;
+        textPaint.setTextSize(fontSize);
+        
         textPaint.setTextAlign(Align.CENTER);
         canvas.drawText(card.getPowerToughnessString(),
                         bounds.left + (PT_TEXT_POS_X * scalar),

@@ -123,7 +123,7 @@ public class CardView extends View
 		TypeBar.draw(canvas, card, bounds, strokeColor, scalar);
 
 		// Draw PT only if a creature
-		if (card.getTypes().contains(CardType.Creature))
+		if (card.getTypes().contains("Creature"))
 		{
 			PowerToughnessBar.draw(canvas, card, bounds, strokeColor, scalar);
 		}
@@ -135,10 +135,10 @@ public class CardView extends View
 	private int getBackgroundColor()
 	{
 		// Land always brown:
-		if (card.getTypes().contains(CardType.Land))
+		if (card.getTypes().contains("Land"))
 			return 0xFF662a0e;
 		// Artifacts always grey:
-		else if (card.getTypes().contains(CardType.Artifact))
+		else if (card.getTypes().contains("Artifact"))
 			return Color.GRAY;
 		// Eldrazi / other colorless options
 		else if (card.getColors().size() == 0)
@@ -173,12 +173,12 @@ public class CardView extends View
 	private int getOutlineColor()
 	{
 		// Land always brown:
-		if (card.getTypes().contains(CardType.Land))
+		if (card.getTypes().contains("Land"))
 			return 0xFF421B09;			// Dark brown
 		// Colorless options, based on type:
 		else if (card.getColors().size() == 0)
 		{
-			if (card.getTypes().contains(CardType.Artifact))
+			if (card.getTypes().contains("Artifact"))
 				return 0xFFbbbbbb;
 			else
 				return Color.GRAY;		// ??? Eldrazi and friends are just going to be dark grey for now
@@ -187,7 +187,7 @@ public class CardView extends View
 		if (card.getColors().size() == 1)
 		{
 			// If a colored artifact, do a greyed tint color:
-			if (card.getTypes().contains(CardType.Artifact))
+			if (card.getTypes().contains("Artifact"))
 			{
 				switch(card.getColors().get(0))
 				{

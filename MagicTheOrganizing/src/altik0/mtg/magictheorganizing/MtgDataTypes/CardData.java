@@ -146,6 +146,23 @@ public class CardData
 	    else
 	    {
             String otherTypeString = typeSplit[0].trim();
+            String[] otherTypes = otherTypeString.split(" ");
+            
+            this.subtypes = new ArrayList<String>();
+            this.supertypes = new ArrayList<String>();
+            this.types = new ArrayList<String>();
+            for (String otherType : otherTypes)
+            {
+                if (otherType.toUpperCase().equals("LEGENDARY") ||
+                    otherType.toUpperCase().equals("BASIC") ||
+                    otherType.toUpperCase().equals("WORLD") ||
+                    otherType.toUpperCase().equals("SNOW"))
+                {
+                    this.supertypes.add(otherType);
+                }
+                else
+                    this.types.add(otherType);
+            }
 	    }
 	}
 	
