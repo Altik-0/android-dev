@@ -434,6 +434,33 @@ public class MtgDatabaseManager extends SQLiteOpenHelper
         }
     }
     
+ // TODO: refactor to use id instead of name
+    public void RenameLocation(String oldName, String newName)
+    {
+        SQLiteDatabase db = getWritableDatabase();
+        db.execSQL("UPDATE Locations SET Name=? WHERE Name=?",
+                new String[] {newName, oldName});
+    }
+    
+    // TODO: refactor to use id instead of name
+    public void AddCollectionToLocation(String locationName, String collectionName)
+    {
+        // First, get location ID
+        SQLiteDatabase db = getWritableDatabase();
+        Cursor cursor = db.rawQuery("SELECT LocationID FROM Locations WHERE Name = ?",
+                new String[] {locationName});
+        
+        int locID = 0;
+        if (cursor.moveToFirst())
+            locID = cursor.getInt(0);
+        else
+            throw new SQLException("Location name not found.");
+        
+        // Now add the collection
+        db.execSQL("INSERT INTO Collections (Name, LocationID) " +
+                   "VALUES (?, ?)", new String[]{collectionName, Integer.toString(locID)});
+    }
+    
     public HashMap<String, ArrayList<String>> GetLocationsWithCollections()
     {
         HashMap<String, ArrayList<String>> toRet = new HashMap<String, ArrayList<String>>();

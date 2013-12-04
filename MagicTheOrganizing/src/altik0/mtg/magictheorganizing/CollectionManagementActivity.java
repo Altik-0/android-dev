@@ -4,11 +4,14 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import altik0.mtg.magictheorganizing.Database.MtgDatabaseManager;
+import altik0.mtg.magictheorganizing.dialogFragments.*;
 import android.os.Bundle;
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.Fragment;
 import android.content.DialogInterface;
 import android.database.DataSetObserver;
+import android.app.FragmentTransaction;
 import android.view.Menu;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -31,8 +34,10 @@ import android.widget.TextView;
 //  because in practice I need to keep track of location and collection
 //  ids for proper identification in the database
 
-public class CollectionManagementActivity extends Activity implements ListAdapter
+public class CollectionManagementActivity extends Activity implements ListAdapter, editLocationDialogFragment.EditLocationHolder
 {
+    private static final String DIALOG_TAG = "dialog";
+    
     // Used to track whether we're displaying edit data or not.
     private enum ActivityState
     {
@@ -48,49 +53,30 @@ public class CollectionManagementActivity extends Activity implements ListAdapte
         public void onClick(View arg0)
         {
             if (state == ActivityState.normal)
-            {
-                Button addLocButton = new Button(CollectionManagementActivity.this);
-                // TODO: give this button's text something from resources
-                addLocButton.setText("Add Location...");
-                addLocButton.setOnClickListener(addLocationListener);
-                addLocationButtonBox.addView(addLocButton);
-                addLocationButtonBox.setLayoutParams(
-                        new ListView.LayoutParams(ListView.LayoutParams.MATCH_PARENT,
-                                                  ListView.LayoutParams.WRAP_CONTENT));
-                ListView collectionList = (ListView)findViewById(R.id.contentManagementList);
-                collectionList.setOnItemClickListener(editSelectedListener);
-                state = ActivityState.editing;
-            }
+                CollectionManagementActivity.this.setState(ActivityState.editing);
             else
-            {
-                addLocationButtonBox.setLayoutParams(
-                        new ListView.LayoutParams(ListView.LayoutParams.MATCH_PARENT,
-                                                  0));
-                addLocationButtonBox.removeAllViews();
-                ListView collectionList = (ListView)findViewById(R.id.contentManagementList);
-                collectionList.setOnItemClickListener(normalSelectedListener);
-                state = ActivityState.normal;
-            }
+                CollectionManagementActivity.this.setState(ActivityState.normal);
             
             ListView lv = (ListView)findViewById(R.id.contentManagementList);
             lv.invalidateViews();
         }
     };
-    
+
+    // EditText used by various dialog boxes:
+    private EditText dialogTextPrompt;
     private OnClickListener addLocationListener = new OnClickListener()
     {
-        private EditText locationName;
         @Override
         public void onClick(View arg0)
         {
             // Put a new location in!
             // So, that means prompting the user...
             // blech...
-            locationName = new EditText(CollectionManagementActivity.this);
+            dialogTextPrompt = new EditText(CollectionManagementActivity.this);
             AlertDialog.Builder addLocDialog = new AlertDialog.Builder(CollectionManagementActivity.this);
             // TODO: use strings in resources
             addLocDialog.setTitle("Add Location");
-            addLocDialog.setView(locationName);
+            addLocDialog.setView(dialogTextPrompt);
             addLocDialog.setMessage("Name of the location");
             addLocDialog.setPositiveButton("Add",
                     // Listener inside a listener! :o
@@ -101,7 +87,7 @@ public class CollectionManagementActivity extends Activity implements ListAdapte
                         {
                             MtgDatabaseManager.getInstance(
                                     CollectionManagementActivity.this).AddLocation(
-                                            locationName.getText().toString());
+                                            dialogTextPrompt.getText().toString());
                             
                             CollectionManagementActivity.this.refresh();
                         }
@@ -195,6 +181,24 @@ public class CollectionManagementActivity extends Activity implements ListAdapte
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.collection_management, menu);
         return true;
+    }
+    
+    @Override
+    protected void onSaveInstanceState(Bundle outBundle)
+    {
+        outBundle.putString("ActivityState", state.toString());
+        super.onSaveInstanceState(outBundle);
+    }
+    
+    @Override
+    protected void onRestoreInstanceState(Bundle inBundle)
+    {
+        super.onRestoreInstanceState(inBundle);
+        if (inBundle.containsKey("ActivityState") &&
+            inBundle.getString("ActivityState") == "editing")
+            setState(ActivityState.editing);
+        else
+            setState(ActivityState.normal);
     }
 
     @Override
@@ -353,42 +357,45 @@ public class CollectionManagementActivity extends Activity implements ListAdapte
     
     private void displayEditLocationPopup(final String locationName)
     {
-        AlertDialog.Builder editLocDialog = new AlertDialog.Builder(CollectionManagementActivity.this);
+        FragmentTransaction trans = getFragmentManager().beginTransaction();
+        Fragment oldDialog = getFragmentManager().findFragmentByTag(DIALOG_TAG);
+        if (oldDialog != null)
+            trans.remove(oldDialog);
+        
+        trans.addToBackStack(null);
+        
+        editLocationDialogFragment newDialog = new editLocationDialogFragment();
+        Bundle args = new Bundle();
+        args.putString(editLocationDialogFragment.LOCATION_NAME_KEY, locationName);
+        newDialog.setArguments(args);
+        newDialog.setEditLocationHolder(this);
+        
+        newDialog.show(trans, DIALOG_TAG);
+    }
+    
+    private void displayRenameLocationPopup(final String locationName)
+    {
+        AlertDialog.Builder renameLocDialog = new AlertDialog.Builder(CollectionManagementActivity.this);
+
+        dialogTextPrompt = new EditText(CollectionManagementActivity.this);
         // TODO: use strings in resources
-        editLocDialog.setTitle("Edit Location");
-        final RadioGroup v = (RadioGroup)View.inflate(this,
-                                                      R.layout.edit_location_popup_view,
-                                                      null);
-        editLocDialog.setView(v);
-        editLocDialog.setPositiveButton("Select",
+        renameLocDialog.setTitle("Rename Location");
+        renameLocDialog.setView(dialogTextPrompt);
+        renameLocDialog.setMessage("New name for the location");
+        renameLocDialog.setPositiveButton("Rename",
                 // Listener inside a listener! :o
                 new DialogInterface.OnClickListener()
                 {
                     @Override
                     public void onClick(DialogInterface dialog, int whichButton)
                     {
-                        // Figure out which is checked:
-                        switch(v.getCheckedRadioButtonId())
-                        {
-                            case R.id.deleteLocationRadio:
-                                // TODO: prompt again, probably. For now, just fuck
-                                // the user and delete their shit with no regard for
-                                // their feelings of accidents
-                                MtgDatabaseManager.getInstance(CollectionManagementActivity.this)
-                                        .DeleteLocation(locationName);
-                                CollectionManagementActivity.this.refresh();
-                                break;
-                            case R.id.renameLocationRadio:
-                                // TODO: another popup with text box to prompt for new name
-                                break;
-                            case R.id.addCollectionRadio:
-                            default:
-                                // TODO: another popup with text box to prompt for name
-                                break;
-                        }
+                        String newName = dialogTextPrompt.getText().toString();
+                        MtgDatabaseManager.getInstance(CollectionManagementActivity.this)
+                            .RenameLocation(locationName, newName);
+                        CollectionManagementActivity.this.refresh();
                     }
                 });
-        editLocDialog.setNegativeButton("Cancel",
+        renameLocDialog.setNegativeButton("Cancel",
                 // Listener inside a listener! :o
                 new DialogInterface.OnClickListener()
                 {
@@ -399,6 +406,98 @@ public class CollectionManagementActivity extends Activity implements ListAdapte
                     }
                 });
         
-        editLocDialog.show();
+        renameLocDialog.show();
+    }
+    
+    private void displayAddCollectionPopup(final String locationName)
+    {
+        AlertDialog.Builder addColDialog = new AlertDialog.Builder(CollectionManagementActivity.this);
+
+        dialogTextPrompt = new EditText(CollectionManagementActivity.this);
+        // TODO: use strings in resources
+        addColDialog.setTitle("Add Collection");
+        addColDialog.setView(dialogTextPrompt);
+        addColDialog.setMessage("Name for the collection");
+        addColDialog.setPositiveButton("Add",
+                // Listener inside a listener! :o
+                new DialogInterface.OnClickListener()
+                {
+                    @Override
+                    public void onClick(DialogInterface dialog, int whichButton)
+                    {
+                        String newName = dialogTextPrompt.getText().toString();
+                        MtgDatabaseManager.getInstance(CollectionManagementActivity.this)
+                            .AddCollectionToLocation(locationName, newName);
+                        CollectionManagementActivity.this.refresh();
+                    }
+                });
+        addColDialog.setNegativeButton("Cancel",
+                // Listener inside a listener! :o
+                new DialogInterface.OnClickListener()
+                {
+                    @Override
+                    public void onClick(DialogInterface dialog, int whichButton)
+                    {
+                        // Do nothing - they're cancelling
+                    }
+                });
+        
+        addColDialog.show();
+    }
+    
+    private void setState(ActivityState newState)
+    {
+        // If the new state is the same, ignore our change
+        if (newState == state)
+            return;
+        
+        if (newState == ActivityState.editing)
+        {
+            Button addLocButton = new Button(CollectionManagementActivity.this);
+            // TODO: give this button's text something from resources
+            addLocButton.setText("Add Location...");
+            addLocButton.setOnClickListener(addLocationListener);
+            addLocationButtonBox.addView(addLocButton);
+            addLocationButtonBox.setLayoutParams(
+                    new ListView.LayoutParams(ListView.LayoutParams.MATCH_PARENT,
+                                              ListView.LayoutParams.WRAP_CONTENT));
+            ListView collectionList = (ListView)findViewById(R.id.contentManagementList);
+            collectionList.setOnItemClickListener(editSelectedListener);
+            state = ActivityState.editing;
+        }
+        else
+        {
+            addLocationButtonBox.setLayoutParams(
+                    new ListView.LayoutParams(ListView.LayoutParams.MATCH_PARENT,
+                                              0));
+            addLocationButtonBox.removeAllViews();
+            ListView collectionList = (ListView)findViewById(R.id.contentManagementList);
+            collectionList.setOnItemClickListener(normalSelectedListener);
+            state = ActivityState.normal;
+        }
+    }
+
+    @Override
+    public void deleteLocation(String locationName)
+    {
+        // TODO: prompt again, probably. For now, just fuck
+        // the user and delete their shit with no regard for
+        // their feelings of accidents
+        MtgDatabaseManager.getInstance(this).DeleteLocation(locationName);
+        CollectionManagementActivity.this.refresh();
+    }
+
+    @Override
+    public void renameLocation(String locationName)
+    {
+        // TODO: just move that code in here
+        displayRenameLocationPopup(locationName);
+    }
+
+    @Override
+    public void addCollection(String locationName)
+    {
+        // TODO: just move that code in here
+        displayAddCollectionPopup(locationName);
     }
 }
