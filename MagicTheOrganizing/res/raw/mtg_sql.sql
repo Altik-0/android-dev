@@ -6489,7 +6489,7 @@ INSERT INTO "Cards" VALUES(20277,146762,'[Shadowmoor]','normal','Rare','Enchantm
 INSERT INTO "Cards" VALUES(20278,142028,'[Shadowmoor]','normal','Common','Creature -- Kithkin Soldier','Zealous Guardian',1,'Steven Belledin','{W/U}',3,'1','1',NULL,'Flash','Parapet watchers patrol the outer edges of the doun, signaling to others who wait patiently in shadow.');
 INSERT INTO "Cards" VALUES(20279,8008135,'[Theros]','normal','Mythic','Legendary Enchantment Creature -- God','Nylea, God of the Hunt',4,'','{3}{G}',16,'5','6','NULL','Indestructible
 
-As long as your devotion to green is less than 5, Nylea isn''t a creature. (Each {G} in mana costs of permanents you control counts towards your devotion to green.)
+As long as your devotion to green is less than 5, Nylea isn''''t a creature. (Each {G} in mana costs of permanents you control counts towards your devotion to green.)
 
 Other creatures you control have trample.
 
@@ -6508,11 +6508,29 @@ CREATE TABLE [Collections] (
 [Name] VARCHAR(30) DEFAULT 'Collection' NOT NULL,
 [LocationID] INTEGER DEFAULT '0' NOT NULL
 );
+INSERT INTO "Collections" VALUES(1,'Binder',0);
+INSERT INTO "Collections" VALUES(2,'Modern: Melira Pod',0);
+INSERT INTO "Collections" VALUES(3,'EDH: Talrand',0);
+INSERT INTO "Collections" VALUES(4,'Creatures Box',1);
+INSERT INTO "Collections" VALUES(5,'Enchantments / Instants / Sorceries Box',1);
+INSERT INTO "Collections" VALUES(6,'Artifacts / NonBasics / Multicolors Box',1);
+INSERT INTO "Collections" VALUES(7,'That one place',3);
+INSERT INTO "Collections" VALUES(8,'Another place',4);
+INSERT INTO "Collections" VALUES(9,'Battle of Wits!',4);
+INSERT INTO "Collections" VALUES(10,'EDH: Animar',0);
+INSERT INTO "Collections" VALUES(11,'EDH: Karn',0);
+INSERT INTO "Collections" VALUES(12,'The Blue Binder',1);
 DROP TABLE IF EXISTS "Locations";
 CREATE TABLE [Locations] (
 [LocationID] INTEGER  NOT NULL PRIMARY KEY AUTOINCREMENT,
 [Name] VARCHAR(30) DEFAULT '"Location"' NOT NULL
 );
+INSERT INTO "Locations" VALUES(0,'Backpack');
+INSERT INTO "Locations" VALUES(1,'Room');
+INSERT INTO "Locations" VALUES(2,'Location1');
+INSERT INTO "Locations" VALUES(3,'Another Location');
+INSERT INTO "Locations" VALUES(4,'The Moon');
+INSERT INTO "Locations" VALUES(5,'Korendor');
 DROP TABLE IF EXISTS "Sets";
 CREATE TABLE [Sets] (
 [SetID] INTEGER  PRIMARY KEY AUTOINCREMENT NOT NULL,

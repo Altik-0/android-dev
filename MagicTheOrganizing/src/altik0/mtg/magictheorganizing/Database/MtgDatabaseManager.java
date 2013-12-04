@@ -16,6 +16,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.Dictionary;
+import java.util.HashMap;
 import java.util.LinkedList;
 
 public class MtgDatabaseManager extends SQLiteOpenHelper
@@ -382,6 +384,92 @@ public class MtgDatabaseManager extends SQLiteOpenHelper
         return toRet;
     }
     
+    public void AddLocation(String locationName)
+    {
+        SQLiteDatabase db = getWritableDatabase();
+        db.execSQL("INSERT INTO Locations(Name) VALUES(?)", new String[] {locationName});
+    }
+    
+    // TODO: refactor to use location ID rather than Name
+    public void DeleteLocation(String locationName)
+    {
+        // First, get location's id:
+        SQLiteDatabase db = getWritableDatabase();
+        Cursor cursor = db.rawQuery("SELECT LocationID FROM Locations WHERE Name = ?",
+                                new String[] {locationName});
+        int locID = 0;
+        if (cursor.moveToFirst())
+            locID = cursor.getInt(0);
+        // If no entry was found for this name, delete is done!
+        else
+            return;
+        
+        // Next, delete from Locations table:
+        db.execSQL("DELETE FROM Locations WHERE Name = ?",
+                new String[] {locationName});
+        
+        // Now, get list of collection IDs attached to this location
+        ArrayList<Integer> collectionIds = new ArrayList<Integer>();
+        cursor = db.rawQuery("SELECT CollectionID FROM Collections WHERE LocationID = ?",
+                new String[] {Integer.toString(locID)});
+        
+        if (cursor.moveToFirst())
+            do
+            {
+                collectionIds.add(cursor.getInt(0));
+            } while(cursor.moveToNext());
+        // If no entry was found, delete is done!
+        else
+            return;
+        
+        // Delete the collections previously grabbed
+        db.execSQL("DELETE FROM Collections WHERE LocationID = ?",
+                new String[] {Integer.toString(locID)});
+        
+        // Finally, delete CollectedCards in these collections
+        for (int id : collectionIds)
+        {
+            db.execSQL("DELETE FROM CollectedCards WHERE CollectionID = ?",
+                    new String[] {Integer.toString(id)});
+        }
+    }
+    
+    public HashMap<String, ArrayList<String>> GetLocationsWithCollections()
+    {
+        HashMap<String, ArrayList<String>> toRet = new HashMap<String, ArrayList<String>>();
+        
+        SQLiteDatabase db = getWritableDatabase();
+        Cursor cursor = db.rawQuery("SELECT * FROM Locations", null);
+        
+        if (cursor.moveToFirst())
+        {
+            do
+            {
+                toRet.put(cursor.getString(1), new ArrayList<String>());
+            } while(cursor.moveToNext());
+        }
+        
+        // Now fill in with collections:
+        cursor = db.rawQuery("SELECT * FROM Collections collection_table " +
+                             "JOIN Locations location_table " +
+                             "ON location_table.LocationID = collection_table.LocationID", null);
+        
+        if (cursor.moveToFirst())
+        {
+            do
+            {
+                String locationName = cursor.getString(4);
+                String collectionName = cursor.getString(1);
+                
+                // These should always be contained, but just to be safe:
+                if (!toRet.containsKey(locationName))
+                    toRet.put(locationName, new ArrayList<String>());
+                toRet.get(locationName).add(collectionName);
+            } while(cursor.moveToNext());
+        }
+        
+        return toRet;
+    }
     
     // Held onto for documentation purposes, but ultimately not used anymore
     /*
