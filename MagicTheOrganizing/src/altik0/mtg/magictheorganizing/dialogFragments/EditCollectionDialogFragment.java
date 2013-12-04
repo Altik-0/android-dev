@@ -1,8 +1,7 @@
 package altik0.mtg.magictheorganizing.dialogFragments;
 
-import altik0.mtg.magictheorganizing.CollectionManagementActivity;
 import altik0.mtg.magictheorganizing.R;
-import altik0.mtg.magictheorganizing.Database.MtgDatabaseManager;
+import altik0.mtg.magictheorganizing.dialogFragments.EditLocationDialogFragment.EditLocationHolder;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;
@@ -11,20 +10,21 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.RadioGroup;
 
-public class EditLocationDialogFragment extends DialogFragment
+public class EditCollectionDialogFragment extends DialogFragment
 {
-    public static final String LOCATION_NAME_KEY = "locationName";
+public static final String COLLECTION_NAME_KEY = "collectionName";
     
     // Used to track callback functions
-    public interface EditLocationHolder
+    public interface EditCollectionHolder
     {
-        public void deleteLocation(String locationName);
-        public void renameLocation(String locationName);
-        public void addCollection(String locationName);
+        public void deleteCollection(String collectionName);
+        public void renameCollection(String collectionName);
+        public void copyCollection(String collectionName);
+        public void moveCollection(String collectionName);
     }
     
-    private EditLocationHolder locHolder;
-    public void setEditLocationHolder (EditLocationHolder _locHolder)
+    private EditCollectionHolder locHolder;
+    public void setEditCollectionHolder (EditCollectionHolder _locHolder)
     {
         locHolder = _locHolder;
     }
@@ -32,16 +32,16 @@ public class EditLocationDialogFragment extends DialogFragment
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState)
     {
-        if (!getArguments().containsKey(LOCATION_NAME_KEY))
-            throw new IllegalArgumentException("This dialog needs a location name!");
+        if (!getArguments().containsKey(COLLECTION_NAME_KEY))
+            throw new IllegalArgumentException("This dialog needs a collection name!");
         
-        final String locationName = getArguments().getString(LOCATION_NAME_KEY);
+        final String collectionName = getArguments().getString(COLLECTION_NAME_KEY);
         
         AlertDialog.Builder editLocDialog = new AlertDialog.Builder(getActivity());
         // TODO: use strings in resources
-        editLocDialog.setTitle("Edit Location");
+        editLocDialog.setTitle("Edit Collection");
         final RadioGroup v = (RadioGroup)View.inflate(getActivity(),
-                                                      R.layout.edit_location_popup_view,
+                                                      R.layout.edit_collection_popup_view,
                                                       null);
         editLocDialog.setView(v);
         editLocDialog.setPositiveButton("Select",
@@ -58,15 +58,18 @@ public class EditLocationDialogFragment extends DialogFragment
                         // Figure out which is checked:
                         switch(v.getCheckedRadioButtonId())
                         {
-                            case R.id.deleteLocationRadio:
-                                locHolder.deleteLocation(locationName);
+                            case R.id.deleteCollectionRadio:
+                                locHolder.deleteCollection(collectionName);
                                 break;
-                            case R.id.renameLocationRadio:
-                                locHolder.renameLocation(locationName);
+                            case R.id.renameCollectionRadio:
+                                locHolder.renameCollection(collectionName);
                                 break;
-                            case R.id.addCollectionRadio:
+                            case R.id.copyCollectionRadio:
+                                locHolder.copyCollection(collectionName);
+                                break;
+                            case R.id.moveCollectionRadio:
                             default:
-                                locHolder.addCollection(locationName);
+                                locHolder.moveCollection(collectionName);
                                 break;
                         }
                     }

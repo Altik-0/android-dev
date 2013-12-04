@@ -4,6 +4,7 @@ import altik0.mtg.magictheorganizing.R;
 import altik0.mtg.magictheorganizing.MtgDataTypes.CardColor;
 import altik0.mtg.magictheorganizing.MtgDataTypes.CardData;
 import android.annotation.SuppressLint;
+import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.SQLException;
@@ -434,11 +435,43 @@ public class MtgDatabaseManager extends SQLiteOpenHelper
         }
     }
     
- // TODO: refactor to use id instead of name
+    // TODO: refactor to use id instead of name
+    public void DeleteCollection(String collectionName)
+    {
+        // First, collection ID attached to this location
+        SQLiteDatabase db = getWritableDatabase();
+        Cursor cursor = db.rawQuery("SELECT CollectionID FROM Collections WHERE Name = ?",
+                new String[] {collectionName});
+        
+        int colID = 0;
+        if (cursor.moveToFirst())
+            colID = cursor.getInt(0);
+        // If no entry was found, delete is done!
+        else
+            return;
+        
+        // Delete the collections previously grabbed
+        db.execSQL("DELETE FROM Collections WHERE CollectionID = ?",
+                new String[] {Integer.toString(colID)});
+        
+        // Finally, delete CollectedCards in these collections
+        db.execSQL("DELETE FROM CollectedCards WHERE CollectionID = ?",
+            new String[] {Integer.toString(colID)});
+    }
+    
+    // TODO: refactor to use id instead of name
     public void RenameLocation(String oldName, String newName)
     {
         SQLiteDatabase db = getWritableDatabase();
         db.execSQL("UPDATE Locations SET Name=? WHERE Name=?",
+                new String[] {newName, oldName});
+    }
+    
+    // TODO: refactor to use id instead of name
+    public void RenameCollection(String oldName, String newName)
+    {
+        SQLiteDatabase db = getWritableDatabase();
+        db.execSQL("UPDATE Collections SET Name=? WHERE Name=?",
                 new String[] {newName, oldName});
     }
     
@@ -459,6 +492,44 @@ public class MtgDatabaseManager extends SQLiteOpenHelper
         // Now add the collection
         db.execSQL("INSERT INTO Collections (Name, LocationID) " +
                    "VALUES (?, ?)", new String[]{collectionName, Integer.toString(locID)});
+    }
+    
+    // TODO: update to use id rather than name
+    public void CopyCollection(String oldName, String newName)
+    {
+        // First, get data we weren't given:
+        String locName;
+        int locID;
+        int colID1;
+        int colID2;
+        
+        SQLiteDatabase db = getWritableDatabase();
+        Cursor cursor = db.rawQuery("SELECT * FROM Collections col_table JOIN Locations loc_table " +
+                                    "ON col_table.LocationID = loc_table.LocationID " +
+                                    "WHERE col_table.Name = ?",
+                                    new String[] {oldName});
+        
+        if (cursor.moveToFirst())
+        {
+            locName = cursor.getString(4);
+            locID = cursor.getInt(2);
+            colID1 = cursor.getInt(0);
+        }
+        // If we didn't find the collection, can't copy it!
+        else
+            return;
+        
+        // Now, insert new collection
+        ContentValues values = new ContentValues();
+        values.put("Name", newName);
+        values.put("LocationID", locID);
+        colID2 = (int)db.insert("Collections", null, values);
+        
+        // Finally, copy all the cards! :o
+        db.execSQL("INSERT INTO CollectedCards(CardID, CollectionID, Count, Tags) " +
+                   "SELECT CardID, ?, Count, Tags FROM CollectedCards " +
+                   "WHERE CollectionID = ?",
+                   new String[] {Integer.toString(colID2), Integer.toString(colID1)});
     }
     
     public HashMap<String, ArrayList<String>> GetLocationsWithCollections()

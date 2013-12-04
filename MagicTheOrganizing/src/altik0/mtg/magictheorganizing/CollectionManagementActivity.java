@@ -5,6 +5,12 @@ import java.util.HashMap;
 
 import altik0.mtg.magictheorganizing.Database.MtgDatabaseManager;
 import altik0.mtg.magictheorganizing.dialogFragments.*;
+import altik0.mtg.magictheorganizing.dialogFragments.AddCollectionDialogFragment.AddCollectionHolder;
+import altik0.mtg.magictheorganizing.dialogFragments.AddLocationDialogFragment.AddLocationHolder;
+import altik0.mtg.magictheorganizing.dialogFragments.EditCollectionDialogFragment.EditCollectionHolder;
+import altik0.mtg.magictheorganizing.dialogFragments.RenameCollectionDialogFragment.RenameCollectionHolder;
+import altik0.mtg.magictheorganizing.dialogFragments.RenameLocationDialogFragment.RenameLocationHolder;
+import altik0.mtg.magictheorganizing.dialogFragments.EditLocationDialogFragment.EditLocationHolder;
 import android.os.Bundle;
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -18,14 +24,11 @@ import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
-import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.EditText;
-import android.widget.LinearLayout.LayoutParams;
 import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.ListAdapter;
 import android.widget.ListView;
-import android.widget.RadioGroup;
 import android.widget.TextView;
 
 
@@ -34,7 +37,13 @@ import android.widget.TextView;
 //  because in practice I need to keep track of location and collection
 //  ids for proper identification in the database
 
-public class CollectionManagementActivity extends Activity implements ListAdapter, editLocationDialogFragment.EditLocationHolder
+public class CollectionManagementActivity extends Activity implements ListAdapter,
+                                                                      EditLocationHolder,
+                                                                      AddLocationHolder,
+                                                                      RenameLocationHolder,
+                                                                      AddCollectionHolder,
+                                                                      EditCollectionHolder,
+                                                                      RenameCollectionHolder
 {
     private static final String DIALOG_TAG = "dialog";
     
@@ -69,41 +78,7 @@ public class CollectionManagementActivity extends Activity implements ListAdapte
         @Override
         public void onClick(View arg0)
         {
-            // Put a new location in!
-            // So, that means prompting the user...
-            // blech...
-            dialogTextPrompt = new EditText(CollectionManagementActivity.this);
-            AlertDialog.Builder addLocDialog = new AlertDialog.Builder(CollectionManagementActivity.this);
-            // TODO: use strings in resources
-            addLocDialog.setTitle("Add Location");
-            addLocDialog.setView(dialogTextPrompt);
-            addLocDialog.setMessage("Name of the location");
-            addLocDialog.setPositiveButton("Add",
-                    // Listener inside a listener! :o
-                    new DialogInterface.OnClickListener()
-                    {
-                        @Override
-                        public void onClick(DialogInterface dialog, int whichButton)
-                        {
-                            MtgDatabaseManager.getInstance(
-                                    CollectionManagementActivity.this).AddLocation(
-                                            dialogTextPrompt.getText().toString());
-                            
-                            CollectionManagementActivity.this.refresh();
-                        }
-                    });
-            addLocDialog.setNegativeButton("Cancel",
-                    // Listener inside a listener! :o
-                    new DialogInterface.OnClickListener()
-                    {
-                        @Override
-                        public void onClick(DialogInterface dialog, int whichButton)
-                        {
-                            // Do nothing - they're cancelling
-                        }
-                    });
-            
-            addLocDialog.show();
+            CollectionManagementActivity.this.displayAddLocationPopup();
         }  
     };
     
@@ -119,16 +94,11 @@ public class CollectionManagementActivity extends Activity implements ListAdapte
             {
                 // Location:
                 case 0:
-                    displayEditLocationPopup(
-                            (String)CollectionManagementActivity.this.getItem(index));
+                    displayEditLocationPopup(content);
                     break;
                 // Collection:
                 case 1:
-                    // Options:
-                    //   - delete
-                    //   - rename
-                    //   - copy
-                    //   - move
+                    displayEditCollectionPopup(content);
                     break;
                 // Add Location button:
                 case 2:
@@ -362,87 +332,54 @@ public class CollectionManagementActivity extends Activity implements ListAdapte
         if (oldDialog != null)
             trans.remove(oldDialog);
         
-        trans.addToBackStack(null);
+        //trans.addToBackStack(null);
         
-        editLocationDialogFragment newDialog = new editLocationDialogFragment();
+        EditLocationDialogFragment newDialog = new EditLocationDialogFragment();
         Bundle args = new Bundle();
-        args.putString(editLocationDialogFragment.LOCATION_NAME_KEY, locationName);
+        args.putString(EditLocationDialogFragment.LOCATION_NAME_KEY, locationName);
         newDialog.setArguments(args);
         newDialog.setEditLocationHolder(this);
         
         newDialog.show(trans, DIALOG_TAG);
     }
     
-    private void displayRenameLocationPopup(final String locationName)
+    private void displayAddLocationPopup()
     {
-        AlertDialog.Builder renameLocDialog = new AlertDialog.Builder(CollectionManagementActivity.this);
-
-        dialogTextPrompt = new EditText(CollectionManagementActivity.this);
-        // TODO: use strings in resources
-        renameLocDialog.setTitle("Rename Location");
-        renameLocDialog.setView(dialogTextPrompt);
-        renameLocDialog.setMessage("New name for the location");
-        renameLocDialog.setPositiveButton("Rename",
-                // Listener inside a listener! :o
-                new DialogInterface.OnClickListener()
-                {
-                    @Override
-                    public void onClick(DialogInterface dialog, int whichButton)
-                    {
-                        String newName = dialogTextPrompt.getText().toString();
-                        MtgDatabaseManager.getInstance(CollectionManagementActivity.this)
-                            .RenameLocation(locationName, newName);
-                        CollectionManagementActivity.this.refresh();
-                    }
-                });
-        renameLocDialog.setNegativeButton("Cancel",
-                // Listener inside a listener! :o
-                new DialogInterface.OnClickListener()
-                {
-                    @Override
-                    public void onClick(DialogInterface dialog, int whichButton)
-                    {
-                        // Do nothing - they're cancelling
-                    }
-                });
+        FragmentTransaction trans = getFragmentManager().beginTransaction();
+        Fragment oldDialog = getFragmentManager().findFragmentByTag(DIALOG_TAG);
+        if (oldDialog != null)
+            trans.remove(oldDialog);
         
-        renameLocDialog.show();
+        // TODO: do I want this? not sure. Taking it out seemed to fix errors... ?
+        //trans.addToBackStack(null);
+        
+        AddLocationDialogFragment newDialog = new AddLocationDialogFragment();
+        newDialog.setAddLocationHolder(this);
+        
+        newDialog.show(trans, DIALOG_TAG);
     }
     
-    private void displayAddCollectionPopup(final String locationName)
+    private void displayEditCollectionPopup(final String collectionName)
     {
-        AlertDialog.Builder addColDialog = new AlertDialog.Builder(CollectionManagementActivity.this);
-
-        dialogTextPrompt = new EditText(CollectionManagementActivity.this);
-        // TODO: use strings in resources
-        addColDialog.setTitle("Add Collection");
-        addColDialog.setView(dialogTextPrompt);
-        addColDialog.setMessage("Name for the collection");
-        addColDialog.setPositiveButton("Add",
-                // Listener inside a listener! :o
-                new DialogInterface.OnClickListener()
-                {
-                    @Override
-                    public void onClick(DialogInterface dialog, int whichButton)
-                    {
-                        String newName = dialogTextPrompt.getText().toString();
-                        MtgDatabaseManager.getInstance(CollectionManagementActivity.this)
-                            .AddCollectionToLocation(locationName, newName);
-                        CollectionManagementActivity.this.refresh();
-                    }
-                });
-        addColDialog.setNegativeButton("Cancel",
-                // Listener inside a listener! :o
-                new DialogInterface.OnClickListener()
-                {
-                    @Override
-                    public void onClick(DialogInterface dialog, int whichButton)
-                    {
-                        // Do nothing - they're cancelling
-                    }
-                });
+     // Options:
+        //   - delete
+        //   - rename
+        //   - copy
+        //   - move
+        FragmentTransaction trans = getFragmentManager().beginTransaction();
+        Fragment oldDialog = getFragmentManager().findFragmentByTag(DIALOG_TAG);
+        if (oldDialog != null)
+            trans.remove(oldDialog);
         
-        addColDialog.show();
+        //trans.addToBackStack(null);
+        
+        EditCollectionDialogFragment newDialog = new EditCollectionDialogFragment();
+        Bundle args = new Bundle();
+        args.putString(EditCollectionDialogFragment.COLLECTION_NAME_KEY, collectionName);
+        newDialog.setArguments(args);
+        newDialog.setEditCollectionHolder(this);
+        
+        newDialog.show(trans, DIALOG_TAG);
     }
     
     private void setState(ActivityState newState)
@@ -484,20 +421,113 @@ public class CollectionManagementActivity extends Activity implements ListAdapte
         // the user and delete their shit with no regard for
         // their feelings of accidents
         MtgDatabaseManager.getInstance(this).DeleteLocation(locationName);
-        CollectionManagementActivity.this.refresh();
+        refresh();
     }
 
     @Override
     public void renameLocation(String locationName)
     {
-        // TODO: just move that code in here
-        displayRenameLocationPopup(locationName);
+        FragmentTransaction trans = getFragmentManager().beginTransaction();
+        Fragment oldDialog = getFragmentManager().findFragmentByTag(DIALOG_TAG);
+        if (oldDialog != null)
+            trans.remove(oldDialog);
+        
+        //trans.addToBackStack(null);
+        
+        RenameLocationDialogFragment newDialog = new RenameLocationDialogFragment();
+        Bundle args = new Bundle();
+        args.putString(RenameLocationDialogFragment.LOCATION_NAME_KEY, locationName);
+        newDialog.setArguments(args);
+        newDialog.setRenameLocationHolder(this);
+        
+        newDialog.show(trans, DIALOG_TAG);
     }
 
     @Override
     public void addCollection(String locationName)
     {
-        // TODO: just move that code in here
-        displayAddCollectionPopup(locationName);
+        FragmentTransaction trans = getFragmentManager().beginTransaction();
+        Fragment oldDialog = getFragmentManager().findFragmentByTag(DIALOG_TAG);
+        if (oldDialog != null)
+            trans.remove(oldDialog);
+        
+        //trans.addToBackStack(null);
+        
+        AddCollectionDialogFragment newDialog = new AddCollectionDialogFragment();
+        Bundle args = new Bundle();
+        args.putString(AddCollectionDialogFragment.LOCATION_NAME_KEY, locationName);
+        newDialog.setArguments(args);
+        newDialog.setAddCollectionHolder(this);
+        
+        newDialog.show(trans, DIALOG_TAG);
+    }
+
+    @Override
+    public void addLocation(String newName)
+    {
+        MtgDatabaseManager.getInstance(this).AddLocation(newName);
+        refresh();
+    }
+
+    @Override
+    public void renameLocationWithName(String oldName, String newName)
+    {
+        MtgDatabaseManager.getInstance(this).RenameLocation(oldName, newName);
+        refresh();
+    }
+
+    @Override
+    public void addCollectionWithName(String locationName, String newName)
+    {
+        MtgDatabaseManager.getInstance(this).AddCollectionToLocation(locationName, newName);
+        refresh();
+    }
+
+    @Override
+    public void deleteCollection(String collectionName)
+    {
+        // TODO probably want to prompt user that they're sure
+        // for now, just do it
+        MtgDatabaseManager.getInstance(this).DeleteCollection(collectionName);
+        refresh();
+    }
+
+    @Override
+    public void renameCollection(String collectionName)
+    {
+        FragmentTransaction trans = getFragmentManager().beginTransaction();
+        Fragment oldDialog = getFragmentManager().findFragmentByTag(DIALOG_TAG);
+        if (oldDialog != null)
+            trans.remove(oldDialog);
+        
+        //trans.addToBackStack(null);
+        
+        RenameCollectionDialogFragment newDialog = new RenameCollectionDialogFragment();
+        Bundle args = new Bundle();
+        args.putString(RenameCollectionDialogFragment.COLLECTION_NAME_KEY, collectionName);
+        newDialog.setArguments(args);
+        newDialog.setRenameCollectionHolder(this);
+        
+        newDialog.show(trans, DIALOG_TAG);
+    }
+
+    @Override
+    public void copyCollection(String collectionName)
+    {
+        MtgDatabaseManager.getInstance(this).CopyCollection(collectionName, "Copy of " + collectionName);
+        refresh();
+    }
+
+    @Override
+    public void moveCollection(String collectionName)
+    {
+        // TODO: this is a silly feature that will take too long to implement probably
+    }
+
+    @Override
+    public void renameCollectionWithName(String oldName, String newName)
+    {
+        MtgDatabaseManager.getInstance(this).RenameCollection(oldName, newName);
+        refresh();
     }
 }
