@@ -1,10 +1,15 @@
 package altik0.mtg.magictheorganizing;
 
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
+import android.app.Activity;
+import android.app.Fragment;
+import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import altik0.mtg.magictheorganizing.Database.MtgDatabaseManager;
@@ -18,6 +23,10 @@ import altik0.mtg.magictheorganizing.views.CardView;
  */
 public class CardDetailFragment extends Fragment
 {
+    public static final String RETURNED_CARD_KEY = "returnedCard";
+    // Tracks if we're supposed to return a card upon a button press
+    private boolean doWantReturnFoSho = false;
+
     /**
      * The fragment argument representing the item ID that this fragment
      * represents.
@@ -28,6 +37,19 @@ public class CardDetailFragment extends Fragment
      * The dummy content this fragment is presenting.
      */
     private CardData card;
+    
+    private OnClickListener selectListener = new OnClickListener()
+    {
+        @Override
+        public void onClick(View arg0)
+        {
+            // TODO - return shit!
+            Intent cardReturn = new Intent();
+            cardReturn.putExtra(RETURNED_CARD_KEY, card);
+            getActivity().setResult(Activity.RESULT_OK, cardReturn);
+            getActivity().finish();
+        }
+    };
     
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
@@ -42,6 +64,8 @@ public class CardDetailFragment extends Fragment
     {
         super.onCreate(savedInstanceState);
         
+        doWantReturnFoSho = getArguments().getBoolean(RETURNED_CARD_KEY, false);
+        
         if (getArguments().containsKey(ARG_ITEM_ID))
         {
             int id = getArguments().getInt(ARG_ITEM_ID);
@@ -53,8 +77,19 @@ public class CardDetailFragment extends Fragment
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
             Bundle savedInstanceState)
     {
-        View rootView = inflater.inflate(R.layout.fragment_card_detail,
-                container, false);
+        LinearLayout rootView = (LinearLayout)inflater.inflate(R.layout.fragment_card_detail,
+                                        container, false);
+        
+        // Handle the differences between 
+        Button selectButton = (Button)getActivity().findViewById(R.id.selectCardButton);
+        if (doWantReturnFoSho)
+        {
+            selectButton.setOnClickListener(selectListener);
+        }
+        else
+        {
+            rootView.removeView(selectButton); 
+        }
         
         // Show the dummy content as text in a TextView.
         if (card != null)

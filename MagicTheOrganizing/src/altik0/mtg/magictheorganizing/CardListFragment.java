@@ -3,10 +3,16 @@ package altik0.mtg.magictheorganizing;
 import altik0.mtg.magictheorganizing.Database.SearchParams;
 import altik0.mtg.magictheorganizing.MtgDataTypes.CardData;
 import android.app.Activity;
+import android.app.ListFragment;
+import android.content.Intent;
 import android.os.Bundle;
-import android.support.v4.app.ListFragment;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.View.OnClickListener;
+import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 
 /**
@@ -20,6 +26,10 @@ import android.widget.ListView;
  */
 public class CardListFragment extends ListFragment
 {
+    public static final String SEARCH_PARAMS_KEY = "Search";
+    public static final String COLLECTION_ID_KEY = "CollectionId";
+    public static final String COLLECTION_MODE = "CollectionMode";
+    public static final int SEARCH_FOR_CARD_CODE = 0x666;
     
     /**
      * The serialization (saved instance state) Bundle key representing the
@@ -67,6 +77,20 @@ public class CardListFragment extends ListFragment
         }
     };
     
+    private OnClickListener addCardListener = new OnClickListener()
+    {
+        @Override
+        public void onClick(View arg0)
+        {
+            Intent searchToAddIntent = AdvancedSearchActivity.buildAddIntent(getActivity());
+            startActivityForResult(searchToAddIntent, SEARCH_FOR_CARD_CODE);
+        }
+    };
+    
+    // If this fragment is being used in COLLECTION_MODE, this will not be null,
+    // and has the ID for the collection we're displaying.
+    private Integer collectionId = null;
+    
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
      * fragment (e.g. upon screen orientation changes).
@@ -80,14 +104,32 @@ public class CardListFragment extends ListFragment
     {
         super.onCreate(savedInstanceState);
         
-        // TODO: replace with a real list adapter.
-        //setListAdapter(new ArrayAdapter<DummyContent.DummyItem>(getActivity(),
-        //        android.R.layout.simple_list_item_activated_1,
-        //        android.R.id.text1, DummyContent.ITEMS));
+        // Check if we were given a collectionId (meaning we're searching a collection,
+        // rather than all cards)
+        if (getArguments() != null &&
+            getArguments().containsKey(COLLECTION_ID_KEY))
+            collectionId = getArguments().getInt(COLLECTION_ID_KEY);
         
         params = new SearchParams();
-        listAdapter = new CardListAdapter(getActivity(), params);
+        listAdapter = new CardListAdapter(getActivity(), params, collectionId);
         setListAdapter(listAdapter);
+    }
+    
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+            Bundle savedInstanceState)
+    {
+        LinearLayout v = (LinearLayout)inflater.inflate(R.layout.fragment_card_list, container, false);
+        Button addCard = (Button)v.findViewById(R.id.addCard);
+        addCard.setOnClickListener(addCardListener);
+        
+        // Remove the button if we are not in a collection:
+        if (getArguments() != null &&
+            getArguments().containsKey(COLLECTION_MODE) &&
+            getArguments().getBoolean(COLLECTION_MODE))
+            v.removeView(addCard);
+        
+        return v;
     }
     
     @Override
@@ -126,6 +168,28 @@ public class CardListFragment extends ListFragment
         
         // Reset the active callbacks interface to the dummy implementation.
         mCallbacks = sDummyCallbacks;
+    }
+    
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data)
+    {
+        if (requestCode == SEARCH_FOR_CARD_CODE)
+        {
+            // If the resultCode was cancel, guess we don't do anything. :(
+            if (resultCode == Activity.RESULT_CANCELED)
+                return;
+            
+            // One more sanity check: the data needs to actually be in the intent,
+            // or we still can't do anything. D:
+            if (data.hasExtra(AdvancedSearchActivity.RETURNED_CARD_KEY))
+            {
+                CardData card = (CardData)data.getSerializableExtra(AdvancedSearchActivity.RETURNED_CARD_KEY);
+                listAdapter.addCardToCollection(collectionId, card);
+            }
+        }
+        
+        // Anything else and we didn't make the request - assume the super class did it
+        super.onActivityResult(requestCode, resultCode, data);
     }
     
     @Override
@@ -176,11 +240,5 @@ public class CardListFragment extends ListFragment
         }
         
         mActivatedPosition = position;
-    }
-    
-    public void setSearchParams(SearchParams _params)
-    {
-        params = _params;
-        listAdapter.setSearchParams(_params);
     }
 }

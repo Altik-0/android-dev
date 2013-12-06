@@ -24,7 +24,8 @@ public final class R {
         public static final int ic_launcher=0x7f020000;
     }
     public static final class id {
-        public static final int action_settings=0x7f090048;
+        public static final int action_settings=0x7f09004a;
+        public static final int addCard=0x7f090049;
         public static final int addCollectionRadio=0x7f09003d;
         public static final int advancedSearchButton=0x7f090025;
         public static final int artistText=0x7f090045;
@@ -90,6 +91,7 @@ public final class R {
         public static final int renameLocationRadio=0x7f09003c;
         public static final int searchAllCardsButton=0x7f090034;
         public static final int searchYourCollectionsButton=0x7f090035;
+        public static final int selectCardButton=0x7f090048;
         public static final int tableRow1=0x7f09002a;
         public static final int tableRow2=0x7f09002d;
         public static final int typeDetailText=0x7f090042;
@@ -124,6 +126,7 @@ public final class R {
         public static final int edit_collection_popup_view=0x7f030007;
         public static final int edit_location_popup_view=0x7f030008;
         public static final int fragment_card_detail=0x7f030009;
+        public static final int fragment_card_list=0x7f03000a;
     }
     public static final class menu {
         public static final int advanced_search=0x7f080000;

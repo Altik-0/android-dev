@@ -1,10 +1,10 @@
 package altik0.mtg.magictheorganizing;
 
 import altik0.mtg.magictheorganizing.Database.SearchParams;
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v4.app.FragmentActivity;
 
 /**
  * An activity representing a list of Cards. This activity has different
@@ -21,17 +21,44 @@ import android.support.v4.app.FragmentActivity;
  * This activity also implements the required {@link CardListFragment.Callbacks}
  * interface to listen for item selections.
  */
-public class CardListActivity extends FragmentActivity implements
+public class CardListActivity extends Activity implements
         CardListFragment.Callbacks
 {
-    public static final String SEARCH_PARAMS_KEY = "Search";
+    public static final String RETURNED_CARD_KEY = CardDetailFragment.RETURNED_CARD_KEY;
+    public static final String WANT_RETURN_VALUE_KEY = "pleaseReturnMeSomethingSir";
+    public static final int DETAIL_REQUEST_CODE = 0x1337;
+    
+    // Tracks whether we want to return a card from executing this activity or not
+    private boolean doWantReturnPlz = false;
+    
     public static Intent buildSearchIntent(Context requester, SearchParams params)
     {
         Intent toRet = new Intent(requester, CardListActivity.class);
-        toRet.putExtra(SEARCH_PARAMS_KEY, params);
+        toRet.putExtra(CardListFragment.SEARCH_PARAMS_KEY, params);
         return toRet;
     }
     
+    public static Intent buildSearchIntent(Context requester, Integer collectionId,
+                                           boolean collectionMode, SearchParams params)
+    {
+        Intent toRet = new Intent(requester, CardListActivity.class);
+        toRet.putExtra(CardListFragment.SEARCH_PARAMS_KEY, params);
+        if (collectionId != null)
+            toRet.putExtra(CardListFragment.COLLECTION_ID_KEY, collectionId);
+        toRet.putExtra(CardListFragment.COLLECTION_MODE, collectionMode);
+        
+        return toRet;
+    }
+    
+    public static Intent buildSearchWithReurnIntent(Context requester, SearchParams params,
+                                                    boolean doWantReturnThx)
+    {
+        Intent toRet = new Intent(requester, CardListActivity.class);
+        toRet.putExtra(CardListFragment.SEARCH_PARAMS_KEY, params);
+        toRet.putExtra(WANT_RETURN_VALUE_KEY, doWantReturnThx);
+        
+        return toRet;
+    }
     
     /**
      * Whether or not the activity is in two-pane mode, i.e. running on a tablet
@@ -45,10 +72,23 @@ public class CardListActivity extends FragmentActivity implements
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_card_list);
         
-        SearchParams params = (SearchParams)getIntent().getExtras().getSerializable(SEARCH_PARAMS_KEY);
+        SearchParams params = (SearchParams)getIntent()
+                .getExtras().getSerializable(CardListFragment.SEARCH_PARAMS_KEY);
         
-        CardListFragment listFrag = (CardListFragment)getSupportFragmentManager().findFragmentById(R.id.card_list);
-        listFrag.setSearchParams(params);
+        Intent extras = getIntent();
+        doWantReturnPlz = extras.getBooleanExtra(RETURNED_CARD_KEY, false);
+        boolean colMode = extras.getBooleanExtra(CardListFragment.COLLECTION_MODE, false);
+        Integer collectionId = null;
+        if (extras.hasExtra(CardListFragment.COLLECTION_ID_KEY))
+            collectionId = extras.getIntExtra(CardListFragment.COLLECTION_ID_KEY, 0);
+
+        Bundle listFragArgs = new Bundle();
+        listFragArgs.putSerializable(CardListFragment.SEARCH_PARAMS_KEY, params);
+        listFragArgs.putInt(CardListFragment.COLLECTION_ID_KEY, collectionId);
+        listFragArgs.putBoolean(CardListFragment.COLLECTION_MODE, colMode);
+        CardListFragment listFrag = (CardListFragment)getFragmentManager()
+                .findFragmentById(R.id.card_list);
+        listFrag.setArguments(listFragArgs);
         
         if (findViewById(R.id.card_detail_container) != null)
         {
@@ -80,9 +120,10 @@ public class CardListActivity extends FragmentActivity implements
             // fragment transaction.
             Bundle arguments = new Bundle();
             arguments.putInt(CardDetailFragment.ARG_ITEM_ID, card_id);
+            arguments.putBoolean(CardDetailFragment.RETURNED_CARD_KEY, doWantReturnPlz);
             CardDetailFragment fragment = new CardDetailFragment();
             fragment.setArguments(arguments);
-            getSupportFragmentManager().beginTransaction()
+            getFragmentManager().beginTransaction()
                     .replace(R.id.card_detail_container, fragment).commit();
             
         } else
@@ -91,7 +132,30 @@ public class CardListActivity extends FragmentActivity implements
             // for the selected item ID.
             Intent detailIntent = new Intent(this, CardDetailActivity.class);
             detailIntent.putExtra(CardDetailFragment.ARG_ITEM_ID, Integer.toString(card_id));
-            startActivity(detailIntent);
+            detailIntent.putExtra(CardDetailActivity.RETRNED_CARD_KEY, doWantReturnPlz);
+            
+            // If we've been called to return a result, call for result:
+            if (doWantReturnPlz)
+                startActivityForResult(detailIntent, DETAIL_REQUEST_CODE);
+            else
+                startActivity(detailIntent);
         }
+    }
+    
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data)
+    {
+        if (requestCode == DETAIL_REQUEST_CODE)
+        {
+            // If we got an a-ok on the data, we're done and we'll pass it on!
+            if (resultCode == RESULT_OK)
+            {
+                setResult(resultCode, data);
+                finish();
+            }
+        }
+        
+        // If it wasn't the above, we'll assume the super class did it:
+        super.onActivityResult(requestCode, resultCode, data);
     }
 }

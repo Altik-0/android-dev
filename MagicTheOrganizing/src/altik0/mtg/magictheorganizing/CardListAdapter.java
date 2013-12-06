@@ -10,24 +10,49 @@ import android.content.Context;
 import android.database.DataSetObserver;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.BaseAdapter;
 import android.widget.ListAdapter;
 
-public class CardListAdapter implements ListAdapter
+// Needs to be a BaseAdapter over a ListAdapter so notifyDataSetChanged gets put in
+public class CardListAdapter extends BaseAdapter
 {
     private ArrayList<CardData> data;
     private Context context;
+    private Integer collectionId;
 
     public CardListAdapter(Context _context, SearchParams _params)
     {
+        this(_context, _params, null);
+    }
+    
+    public CardListAdapter(Context _context, SearchParams _params, Integer _collectionId)
+    {
         context = _context;
+        collectionId = _collectionId;
         MtgDatabaseManager db = MtgDatabaseManager.getInstance(_context);
-        data = db.SearchForCards(_params);
+        
+        // If we're given a collectionId, we're searching over collections.
+        // Otherwise, we're searching over all cards.
+        if (collectionId == null)
+            data = db.SearchForCards(_params);
+        else
+            data = db.SearchForCardsInCollection(_params, collectionId);
+    }
+    
+    public void addCardToCollection(Integer collectionId, CardData card)
+    {
+        // For now, we assume that collectionId == null just means skip adding
+        // to the database, and we'll just refresh
+        if (collectionId != null)
+            MtgDatabaseManager.getInstance(context).AddCardToCollection(collectionId, card);
+        notifyDataSetChanged();
     }
     
     public void setSearchParams(SearchParams params)
     {
         MtgDatabaseManager db = MtgDatabaseManager.getInstance(context);
         data = db.SearchForCards(params);
+        notifyDataSetChanged();
     }
     
     @Override

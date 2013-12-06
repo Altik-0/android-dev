@@ -1,10 +1,11 @@
 package altik0.mtg.magictheorganizing.MtgDataTypes;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class CardData
+public class CardData implements Serializable
 {
     // Consts used for various codes:
     public static final int WHITE_CODE = 0x1;
@@ -18,6 +19,10 @@ public class CardData
     
     // Cached values
     private int cmc;
+    
+    // Values associated to cards in collections:
+    // TODO: tags
+    private int count;
 
     // We'll put something in by default, so there isn't a crash
     // if we haven't initialized data.
@@ -339,5 +344,15 @@ public class CardData
     public void setFlavorText(String _FlavorText)
     {
         flavorText = _FlavorText;
+    }
+
+    public int getCount()
+    {
+        return count;
+    }
+
+    public void setCount(int count)
+    {
+        this.count = count;
     }
 }

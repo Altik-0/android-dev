@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import altik0.mtg.magictheorganizing.Database.MtgDatabaseManager;
+import altik0.mtg.magictheorganizing.Database.SearchParams;
 import altik0.mtg.magictheorganizing.dialogFragments.*;
 import altik0.mtg.magictheorganizing.dialogFragments.AddCollectionDialogFragment.AddCollectionHolder;
 import altik0.mtg.magictheorganizing.dialogFragments.AddLocationDialogFragment.AddLocationHolder;
@@ -16,6 +17,7 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Fragment;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.database.DataSetObserver;
 import android.app.FragmentTransaction;
 import android.view.Menu;
@@ -71,8 +73,6 @@ public class CollectionManagementActivity extends Activity implements ListAdapte
         }
     };
 
-    // EditText used by various dialog boxes:
-    private EditText dialogTextPrompt;
     private OnClickListener addLocationListener = new OnClickListener()
     {
         @Override
@@ -103,7 +103,8 @@ public class CollectionManagementActivity extends Activity implements ListAdapte
                 // Add Location button:
                 case 2:
                 default:
-                    // Add location
+                    // Add location, but this happens in a button click
+                    // so don't really do anything here
                     break;
             }
         }
@@ -115,8 +116,13 @@ public class CollectionManagementActivity extends Activity implements ListAdapte
         public void onItemClick(AdapterView<?> arg0, View arg1, int arg2,
                 long arg3)
         {
-            // TODO Auto-generated method stub
-            
+            // In case of normal state, we only have one type of view
+            // active to select: the collections. So, go into the 
+            // master/detail view for that collection:
+            SearchParams params = new SearchParams();
+            Intent collectionViewIntent = CardListActivity.buildSearchIntent(
+                       CollectionManagementActivity.this, /*TODO*/1, true, params);
+            startActivity(collectionViewIntent);
         }
     };
     
@@ -312,10 +318,28 @@ public class CollectionManagementActivity extends Activity implements ListAdapte
     }
 
     @Override
-    public boolean isEnabled(int arg0)
+    public boolean isEnabled(int index)
     {
-        // TODO
-        return state == ActivityState.editing;
+        if (state == ActivityState.editing)
+            return true;
+        
+        // Iterate through. We may end on a header, or we may end on a
+        // collection - just depends.
+        int pos = index;
+        for (String key : collectionMap.keySet())
+        {
+            if (pos == 0)
+                return false;
+            pos--;
+            
+            ArrayList<String> collections = collectionMap.get(key);
+            if (pos < collections.size())
+                return true;
+            pos -= collections.size();
+        }
+        
+        // We should never get here, but since java doesn't believe me:
+        return false;
     }
     
     private void refresh()

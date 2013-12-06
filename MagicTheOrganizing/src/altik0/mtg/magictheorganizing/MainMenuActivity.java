@@ -62,7 +62,8 @@ public class MainMenuActivity extends Activity
                 if (typeCheck.isChecked())
                     params.TypeSearch = quickSearchVal;
                 
-                Intent searchIntent = CardListActivity.buildSearchIntent(MainMenuActivity.this, params);
+                Intent searchIntent = CardListActivity.buildSearchIntent(
+                        MainMenuActivity.this, params);
                 startActivity(searchIntent);
             }
         }

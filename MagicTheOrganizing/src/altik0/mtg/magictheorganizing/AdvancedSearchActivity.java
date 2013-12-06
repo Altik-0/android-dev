@@ -3,6 +3,7 @@ package altik0.mtg.magictheorganizing;
 import altik0.mtg.magictheorganizing.Database.SearchParams;
 import android.os.Bundle;
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.view.Menu;
 import android.view.View;
@@ -13,6 +14,21 @@ import android.widget.EditText;
 
 public class AdvancedSearchActivity extends Activity
 {
+    public static final String RETURNED_CARD_KEY = CardListActivity.RETURNED_CARD_KEY;
+    public static final int LIST_SELECTION_CODE = 0x800b1e5;
+    public static final String RETURN_SELECTED_CARD_KEY = "searchToAdd";
+    
+    // This class may be called by another activity with startActivityForResult()
+    // with the intent that this activity ultimately returns a single CardData that
+    // was selected from the search. This bool tracks that intent
+    private boolean isSearchToAdd = false;
+    public static Intent buildAddIntent(Context requester)
+    {
+        Intent toRet = new Intent(requester, AdvancedSearchActivity.class);
+        toRet.putExtra(RETURN_SELECTED_CARD_KEY, true);
+        return toRet;
+    }
+    
     OnClickListener searchListener = new OnClickListener()
     {
         @Override
@@ -87,8 +103,16 @@ public class AdvancedSearchActivity extends Activity
                 params.RarityFilter = raritySearch;
             
             // Build the intent, and launch that activity!
-            Intent searchIntent = CardListActivity.buildSearchIntent(AdvancedSearchActivity.this, params);
-            startActivity(searchIntent);
+            Intent searchIntent = CardListActivity.buildSearchWithReurnIntent(
+                    AdvancedSearchActivity.this, params, isSearchToAdd);
+            
+            // If we're searching for a result, the CardListActivity will return
+            // the selected card to us!
+            
+            if (isSearchToAdd)
+                startActivityForResult(searchIntent, LIST_SELECTION_CODE);
+            else
+                startActivity(searchIntent);
         }
     };
     
@@ -97,6 +121,9 @@ public class AdvancedSearchActivity extends Activity
     {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_advanced_search);
+        
+        Intent searchIntent = getIntent();
+        isSearchToAdd = searchIntent.getBooleanExtra(RETURN_SELECTED_CARD_KEY, false);
         
         Button searchButton = (Button)findViewById(R.id.advancedSearchButton);
         searchButton.setOnClickListener(searchListener);
@@ -110,4 +137,17 @@ public class AdvancedSearchActivity extends Activity
         return true;
     }
     
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data)
+    {
+        if (requestCode == LIST_SELECTION_CODE)
+        {
+            // We don't really care about what the data we got back was, we're
+            // just going to forward it on one way or the other
+            setResult(resultCode, data);
+            finish();
+        }
+        // Otherwise, we didn't do it so presumably super class cares instead
+        super.onActivityResult(requestCode, resultCode, data);
+    }
 }
