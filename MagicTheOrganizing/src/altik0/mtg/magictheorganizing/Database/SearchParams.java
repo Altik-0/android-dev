@@ -8,6 +8,10 @@ public class SearchParams implements Serializable
 {
     private static final long serialVersionUID = 1L;
     
+    // FIELDS SPECIFYING SEARCH OVER COLLECTION OR ALL CARDS:
+    public boolean searchOverCollection = false;
+    public Integer CollectionId = null;
+    
     // STRING FIELDS:
     public String TextSearch = null;
     public String NameSearch = null;

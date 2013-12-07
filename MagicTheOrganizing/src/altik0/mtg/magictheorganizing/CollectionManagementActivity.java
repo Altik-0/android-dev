@@ -3,6 +3,9 @@ package altik0.mtg.magictheorganizing;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import altik0.mtg.magictheorganizing.Database.CollectionModel;
+import altik0.mtg.magictheorganizing.Database.CollectionModel.Collection;
+import altik0.mtg.magictheorganizing.Database.CollectionModel.Location;
 import altik0.mtg.magictheorganizing.Database.MtgDatabaseManager;
 import altik0.mtg.magictheorganizing.dialogFragments.*;
 import altik0.mtg.magictheorganizing.dialogFragments.AddCollectionDialogFragment.AddCollectionHolder;
@@ -31,12 +34,6 @@ import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 
-
-// MASSIVE TODO:
-//  Need to refactor to use a more rigorous model than a basic HashMap,
-//  because in practice I need to keep track of location and collection
-//  ids for proper identification in the database
-
 public class CollectionManagementActivity extends Activity implements ListAdapter,
                                                                       EditLocationHolder,
                                                                       AddLocationHolder,
@@ -54,7 +51,7 @@ public class CollectionManagementActivity extends Activity implements ListAdapte
     }
     private ActivityState state = ActivityState.normal;
     
-    private HashMap<String, ArrayList<String>> collectionMap;
+    private CollectionModel collectionMap;
     
     private OnClickListener editListener = new OnClickListener()
     {
@@ -87,18 +84,18 @@ public class CollectionManagementActivity extends Activity implements ListAdapte
         @Override
         public void onItemClick(AdapterView<?> parent, View clicked, int index, long id)
         {
-            String content = (String)CollectionManagementActivity.this.getItem(index);
+            Object o = CollectionManagementActivity.this.getItem(index);
             int type = CollectionManagementActivity.this.getItemViewType(index);
             
             switch (type)
             {
                 // Location:
                 case 0:
-                    displayEditLocationPopup(content);
+                    displayEditLocationPopup((Location)o);
                     break;
                 // Collection:
                 case 1:
-                    displayEditCollectionPopup(content);
+                    displayEditCollectionPopup((Collection)o);
                     break;
                 // Add Location button:
                 case 2:
@@ -176,14 +173,7 @@ public class CollectionManagementActivity extends Activity implements ListAdapte
     {
         // Count is equal to the number of locations (for headers)
         // plus the number of total collections
-        int cnt = collectionMap.keySet().size();
-        
-        for (String key : collectionMap.keySet())
-        {
-            cnt += collectionMap.get(key).size();
-        }
-        
-        return cnt;
+        return collectionMap.LocationCount() + collectionMap.CollectionCount();
     }
 
     @Override
@@ -192,13 +182,13 @@ public class CollectionManagementActivity extends Activity implements ListAdapte
         // Iterate through. We may end on a header, or we may end on a
         // collection - just depends.
         int pos = index;
-        for (String key : collectionMap.keySet())
+        for (int l : collectionMap.collectionSet.keySet())
         {
             if (pos == 0)
-                return key;
+                return collectionMap.LocationWithId(l);
             pos--;
             
-            ArrayList<String> collections = collectionMap.get(key);
+            ArrayList<Collection> collections = collectionMap.collectionSet.get(l);
             if (pos < collections.size())
                 return collections.get(pos);
             pos -= collections.size();
@@ -221,13 +211,13 @@ public class CollectionManagementActivity extends Activity implements ListAdapte
         // Iterate through. We may end on a header, or we may end on a
         // collection - just depends.
         int pos = index;
-        for (String key : collectionMap.keySet())
+        for (int l : collectionMap.collectionSet.keySet())
         {
             if (pos == 0)
                 return 0;
             pos--;
             
-            ArrayList<String> collections = collectionMap.get(key);
+            ArrayList<Collection> collections = collectionMap.collectionSet.get(l);
             if (pos < collections.size())
                 return 1;
             pos -= collections.size();
@@ -245,12 +235,13 @@ public class CollectionManagementActivity extends Activity implements ListAdapte
             convertView = new TextView(this);
         
         TextView tv = (TextView)convertView;
-        tv.setText((String)getItem(position));
         
         // Settings based on type:
         switch (getItemViewType(position))
         {
             case 0:
+                Location l = (Location)getItem(position);
+                tv.setText(l.Name);
                 tv.setBackgroundColor(0x88000000);
                 tv.setTextColor(0xFFFFFFFF);
                 tv.setHeight(75);
@@ -259,6 +250,8 @@ public class CollectionManagementActivity extends Activity implements ListAdapte
                 break;
             case 1:
             default:
+                Collection c = (Collection)getItem(position);
+                tv.setText(c.Name);
                 tv.setBackgroundColor(0x00000000);
                 tv.setTextColor(0xFF000000);
                 tv.setHeight(150);
@@ -307,15 +300,32 @@ public class CollectionManagementActivity extends Activity implements ListAdapte
     @Override
     public boolean areAllItemsEnabled()
     {
-        // TODO
         return state == ActivityState.editing;
     }
 
     @Override
-    public boolean isEnabled(int arg0)
+    public boolean isEnabled(int index)
     {
-        // TODO
-        return state == ActivityState.editing;
+        if (state == ActivityState.editing)
+            return true;
+        
+     // Iterate through. We may end on a header, or we may end on a
+        // collection - just depends.
+        int pos = index;
+        for (int l : collectionMap.collectionSet.keySet())
+        {
+            if (pos == 0)
+                return false;
+            pos--;
+            
+            ArrayList<Collection> collections = collectionMap.collectionSet.get(l);
+            if (pos < collections.size())
+                return true;
+            pos -= collections.size();
+        }
+        
+        // We should never get here, but since java doesn't believe me:
+        return false;
     }
     
     private void refresh()
@@ -325,7 +335,7 @@ public class CollectionManagementActivity extends Activity implements ListAdapte
         lv.invalidateViews();
     }
     
-    private void displayEditLocationPopup(final String locationName)
+    private void displayEditLocationPopup(final Location l)
     {
         FragmentTransaction trans = getFragmentManager().beginTransaction();
         Fragment oldDialog = getFragmentManager().findFragmentByTag(DIALOG_TAG);
@@ -336,7 +346,7 @@ public class CollectionManagementActivity extends Activity implements ListAdapte
         
         EditLocationDialogFragment newDialog = new EditLocationDialogFragment();
         Bundle args = new Bundle();
-        args.putString(EditLocationDialogFragment.LOCATION_NAME_KEY, locationName);
+        args.putSerializable(EditLocationDialogFragment.LOCATION_KEY, l);
         newDialog.setArguments(args);
         newDialog.setEditLocationHolder(this);
         
@@ -359,7 +369,7 @@ public class CollectionManagementActivity extends Activity implements ListAdapte
         newDialog.show(trans, DIALOG_TAG);
     }
     
-    private void displayEditCollectionPopup(final String collectionName)
+    private void displayEditCollectionPopup(final Collection c)
     {
      // Options:
         //   - delete
@@ -375,7 +385,7 @@ public class CollectionManagementActivity extends Activity implements ListAdapte
         
         EditCollectionDialogFragment newDialog = new EditCollectionDialogFragment();
         Bundle args = new Bundle();
-        args.putString(EditCollectionDialogFragment.COLLECTION_NAME_KEY, collectionName);
+        args.putSerializable(EditCollectionDialogFragment.COLLECTION_KEY, c);
         newDialog.setArguments(args);
         newDialog.setEditCollectionHolder(this);
         
@@ -415,17 +425,17 @@ public class CollectionManagementActivity extends Activity implements ListAdapte
     }
 
     @Override
-    public void deleteLocation(String locationName)
+    public void deleteLocation(Location l)
     {
         // TODO: prompt again, probably. For now, just fuck
         // the user and delete their shit with no regard for
         // their feelings of accidents
-        MtgDatabaseManager.getInstance(this).DeleteLocation(locationName);
+        MtgDatabaseManager.getInstance(this).DeleteLocation(l.LocationId);
         refresh();
     }
 
     @Override
-    public void renameLocation(String locationName)
+    public void renameLocation(Location l)
     {
         FragmentTransaction trans = getFragmentManager().beginTransaction();
         Fragment oldDialog = getFragmentManager().findFragmentByTag(DIALOG_TAG);
@@ -436,7 +446,7 @@ public class CollectionManagementActivity extends Activity implements ListAdapte
         
         RenameLocationDialogFragment newDialog = new RenameLocationDialogFragment();
         Bundle args = new Bundle();
-        args.putString(RenameLocationDialogFragment.LOCATION_NAME_KEY, locationName);
+        args.putSerializable(RenameLocationDialogFragment.LOCATION_KEY, l);
         newDialog.setArguments(args);
         newDialog.setRenameLocationHolder(this);
         
@@ -444,7 +454,7 @@ public class CollectionManagementActivity extends Activity implements ListAdapte
     }
 
     @Override
-    public void addCollection(String locationName)
+    public void addCollection(Location l)
     {
         FragmentTransaction trans = getFragmentManager().beginTransaction();
         Fragment oldDialog = getFragmentManager().findFragmentByTag(DIALOG_TAG);
@@ -455,7 +465,7 @@ public class CollectionManagementActivity extends Activity implements ListAdapte
         
         AddCollectionDialogFragment newDialog = new AddCollectionDialogFragment();
         Bundle args = new Bundle();
-        args.putString(AddCollectionDialogFragment.LOCATION_NAME_KEY, locationName);
+        args.putSerializable(AddCollectionDialogFragment.LOCATION_KEY, l);
         newDialog.setArguments(args);
         newDialog.setAddCollectionHolder(this);
         
@@ -470,30 +480,30 @@ public class CollectionManagementActivity extends Activity implements ListAdapte
     }
 
     @Override
-    public void renameLocationWithName(String oldName, String newName)
+    public void renameLocationWithName(Location l, String newName)
     {
-        MtgDatabaseManager.getInstance(this).RenameLocation(oldName, newName);
+        MtgDatabaseManager.getInstance(this).RenameLocation(l.LocationId, newName);
         refresh();
     }
 
     @Override
-    public void addCollectionWithName(String locationName, String newName)
+    public void addCollectionWithName(Location l, String newName)
     {
-        MtgDatabaseManager.getInstance(this).AddCollectionToLocation(locationName, newName);
+        MtgDatabaseManager.getInstance(this).AddCollectionToLocation(l.LocationId, newName);
         refresh();
     }
 
     @Override
-    public void deleteCollection(String collectionName)
+    public void deleteCollection(Collection c)
     {
         // TODO probably want to prompt user that they're sure
         // for now, just do it
-        MtgDatabaseManager.getInstance(this).DeleteCollection(collectionName);
+        MtgDatabaseManager.getInstance(this).DeleteCollection(c.CollectionId);
         refresh();
     }
 
     @Override
-    public void renameCollection(String collectionName)
+    public void renameCollection(Collection c)
     {
         FragmentTransaction trans = getFragmentManager().beginTransaction();
         Fragment oldDialog = getFragmentManager().findFragmentByTag(DIALOG_TAG);
@@ -504,7 +514,7 @@ public class CollectionManagementActivity extends Activity implements ListAdapte
         
         RenameCollectionDialogFragment newDialog = new RenameCollectionDialogFragment();
         Bundle args = new Bundle();
-        args.putString(RenameCollectionDialogFragment.COLLECTION_NAME_KEY, collectionName);
+        args.putSerializable(RenameCollectionDialogFragment.COLLECTION_KEY, c);
         newDialog.setArguments(args);
         newDialog.setRenameCollectionHolder(this);
         
@@ -512,22 +522,22 @@ public class CollectionManagementActivity extends Activity implements ListAdapte
     }
 
     @Override
-    public void copyCollection(String collectionName)
+    public void copyCollection(Collection c)
     {
-        MtgDatabaseManager.getInstance(this).CopyCollection(collectionName, "Copy of " + collectionName);
+        MtgDatabaseManager.getInstance(this).CopyCollection(c.CollectionId, "Copy of " + c.Name);
         refresh();
     }
 
     @Override
-    public void moveCollection(String collectionName)
+    public void moveCollection(Collection c)
     {
         // TODO: this is a silly feature that will take too long to implement probably
     }
 
     @Override
-    public void renameCollectionWithName(String oldName, String newName)
+    public void renameCollectionWithName(Collection c, String newName)
     {
-        MtgDatabaseManager.getInstance(this).RenameCollection(oldName, newName);
+        MtgDatabaseManager.getInstance(this).RenameCollection(c.CollectionId, newName);
         refresh();
     }
 }

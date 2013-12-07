@@ -1,8 +1,7 @@
 package altik0.mtg.magictheorganizing.dialogFragments;
 
-import altik0.mtg.magictheorganizing.CollectionManagementActivity;
 import altik0.mtg.magictheorganizing.R;
-import altik0.mtg.magictheorganizing.Database.MtgDatabaseManager;
+import altik0.mtg.magictheorganizing.Database.CollectionModel.Location;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;
@@ -13,14 +12,14 @@ import android.widget.RadioGroup;
 
 public class EditLocationDialogFragment extends DialogFragment
 {
-    public static final String LOCATION_NAME_KEY = "locationName";
+    public static final String LOCATION_KEY = "locationName";
     
     // Used to track callback functions
     public interface EditLocationHolder
     {
-        public void deleteLocation(String locationName);
-        public void renameLocation(String locationName);
-        public void addCollection(String locationName);
+        public void deleteLocation(Location l);
+        public void renameLocation(Location l);
+        public void addCollection(Location l);
     }
     
     private EditLocationHolder locHolder;
@@ -32,10 +31,10 @@ public class EditLocationDialogFragment extends DialogFragment
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState)
     {
-        if (!getArguments().containsKey(LOCATION_NAME_KEY))
+        if (!getArguments().containsKey(LOCATION_KEY))
             throw new IllegalArgumentException("This dialog needs a location name!");
         
-        final String locationName = getArguments().getString(LOCATION_NAME_KEY);
+        final Location l = (Location)getArguments().getSerializable(LOCATION_KEY);
         
         AlertDialog.Builder editLocDialog = new AlertDialog.Builder(getActivity());
         // TODO: use strings in resources
@@ -59,14 +58,14 @@ public class EditLocationDialogFragment extends DialogFragment
                         switch(v.getCheckedRadioButtonId())
                         {
                             case R.id.deleteLocationRadio:
-                                locHolder.deleteLocation(locationName);
+                                locHolder.deleteLocation(l);
                                 break;
                             case R.id.renameLocationRadio:
-                                locHolder.renameLocation(locationName);
+                                locHolder.renameLocation(l);
                                 break;
                             case R.id.addCollectionRadio:
                             default:
-                                locHolder.addCollection(locationName);
+                                locHolder.addCollection(l);
                                 break;
                         }
                     }

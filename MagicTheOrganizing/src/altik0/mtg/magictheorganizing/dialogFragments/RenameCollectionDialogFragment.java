@@ -1,6 +1,6 @@
 package altik0.mtg.magictheorganizing.dialogFragments;
 
-import altik0.mtg.magictheorganizing.dialogFragments.RenameCollectionDialogFragment.RenameCollectionHolder;
+import altik0.mtg.magictheorganizing.Database.CollectionModel.Collection;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;
@@ -10,12 +10,12 @@ import android.widget.EditText;
 
 public class RenameCollectionDialogFragment extends DialogFragment
 {
-public static final String COLLECTION_NAME_KEY = "collectionName";
+public static final String COLLECTION_KEY = "collectionName";
     
     // Used to track callback functions
     public interface RenameCollectionHolder
     {
-        public void renameCollectionWithName(String oldName, String newName);
+        public void renameCollectionWithName(Collection c, String newName);
     }
     
     private RenameCollectionHolder locHolder;
@@ -28,10 +28,10 @@ public static final String COLLECTION_NAME_KEY = "collectionName";
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState)
     {
-        if (!getArguments().containsKey(COLLECTION_NAME_KEY))
+        if (!getArguments().containsKey(COLLECTION_KEY))
             throw new IllegalArgumentException("This dialog needs a collection name!");
         
-        final String collectionName = getArguments().getString(COLLECTION_NAME_KEY);
+        final Collection c = (Collection)getArguments().getSerializable(COLLECTION_KEY);
         
         dialogTextPrompt = new EditText(getActivity());
         AlertDialog.Builder addLocDialog = new AlertDialog.Builder(getActivity());
@@ -51,7 +51,7 @@ public static final String COLLECTION_NAME_KEY = "collectionName";
                             return;
                         
                         String newName = dialogTextPrompt.getText().toString();
-                        locHolder.renameCollectionWithName(collectionName, newName);
+                        locHolder.renameCollectionWithName(c, newName);
                     }
                 });
         addLocDialog.setNegativeButton("Cancel",

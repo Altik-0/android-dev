@@ -1,5 +1,6 @@
 package altik0.mtg.magictheorganizing.dialogFragments;
 
+import altik0.mtg.magictheorganizing.Database.CollectionModel.Location;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;
@@ -9,12 +10,12 @@ import android.widget.EditText;
 
 public class RenameLocationDialogFragment extends DialogFragment
 {
-    public static final String LOCATION_NAME_KEY = "locationName";
+    public static final String LOCATION_KEY = "locationName";
     
     // Used to track callback functions
     public interface RenameLocationHolder
     {
-        public void renameLocationWithName(String oldName, String newName);
+        public void renameLocationWithName(Location l, String newName);
     }
     
     private RenameLocationHolder locHolder;
@@ -27,10 +28,10 @@ public class RenameLocationDialogFragment extends DialogFragment
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState)
     {
-        if (!getArguments().containsKey(LOCATION_NAME_KEY))
+        if (!getArguments().containsKey(LOCATION_KEY))
             throw new IllegalArgumentException("This dialog needs a location name!");
         
-        final String locationName = getArguments().getString(LOCATION_NAME_KEY);
+        final Location l = (Location)getArguments().getSerializable(LOCATION_KEY);
         
         dialogTextPrompt = new EditText(getActivity());
         AlertDialog.Builder addLocDialog = new AlertDialog.Builder(getActivity());
@@ -50,7 +51,7 @@ public class RenameLocationDialogFragment extends DialogFragment
                             return;
                         
                         String newName = dialogTextPrompt.getText().toString();
-                        locHolder.renameLocationWithName(locationName, newName);
+                        locHolder.renameLocationWithName(l, newName);
                     }
                 });
         addLocDialog.setNegativeButton("Cancel",

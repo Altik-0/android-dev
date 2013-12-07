@@ -1,5 +1,6 @@
 package altik0.mtg.magictheorganizing.dialogFragments;
 
+import altik0.mtg.magictheorganizing.Database.CollectionModel.Location;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;
@@ -9,12 +10,12 @@ import android.widget.EditText;
 
 public class AddCollectionDialogFragment extends DialogFragment
 {
-public static final String LOCATION_NAME_KEY = "locationName";
+public static final String LOCATION_KEY = "locationName";
     
     // Used to track callback functions
     public interface AddCollectionHolder
     {
-        public void addCollectionWithName(String locationName, String newName);
+        public void addCollectionWithName(Location c, String newName);
     }
     
     private EditText dialogTextPrompt;
@@ -27,10 +28,10 @@ public static final String LOCATION_NAME_KEY = "locationName";
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState)
     {
-        if (!getArguments().containsKey(LOCATION_NAME_KEY))
-            throw new IllegalArgumentException("This dialog needs a location name!");
+        if (!getArguments().containsKey(LOCATION_KEY))
+            throw new IllegalArgumentException("This dialog needs a location!");
         
-        final String locationName = getArguments().getString(LOCATION_NAME_KEY);
+        final Location l = (Location)getArguments().getSerializable(LOCATION_KEY);
         
         dialogTextPrompt = new EditText(getActivity());
         
@@ -51,7 +52,7 @@ public static final String LOCATION_NAME_KEY = "locationName";
                             return;
                         
                         String newName = dialogTextPrompt.getText().toString();
-                        locHolder.addCollectionWithName(locationName, newName);
+                        locHolder.addCollectionWithName(l, newName);
                     }
                 });
         addColDialog.setNegativeButton("Cancel",

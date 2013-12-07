@@ -1,7 +1,7 @@
 package altik0.mtg.magictheorganizing.dialogFragments;
 
 import altik0.mtg.magictheorganizing.R;
-import altik0.mtg.magictheorganizing.dialogFragments.EditLocationDialogFragment.EditLocationHolder;
+import altik0.mtg.magictheorganizing.Database.CollectionModel.Collection;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;
@@ -12,15 +12,15 @@ import android.widget.RadioGroup;
 
 public class EditCollectionDialogFragment extends DialogFragment
 {
-public static final String COLLECTION_NAME_KEY = "collectionName";
+public static final String COLLECTION_KEY = "collectionName";
     
     // Used to track callback functions
     public interface EditCollectionHolder
     {
-        public void deleteCollection(String collectionName);
-        public void renameCollection(String collectionName);
-        public void copyCollection(String collectionName);
-        public void moveCollection(String collectionName);
+        public void deleteCollection(Collection c);
+        public void renameCollection(Collection c);
+        public void copyCollection(Collection c);
+        public void moveCollection(Collection c);
     }
     
     private EditCollectionHolder locHolder;
@@ -32,10 +32,10 @@ public static final String COLLECTION_NAME_KEY = "collectionName";
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState)
     {
-        if (!getArguments().containsKey(COLLECTION_NAME_KEY))
+        if (!getArguments().containsKey(COLLECTION_KEY))
             throw new IllegalArgumentException("This dialog needs a collection name!");
         
-        final String collectionName = getArguments().getString(COLLECTION_NAME_KEY);
+        final Collection c = (Collection)getArguments().getSerializable(COLLECTION_KEY);
         
         AlertDialog.Builder editLocDialog = new AlertDialog.Builder(getActivity());
         // TODO: use strings in resources
@@ -59,17 +59,17 @@ public static final String COLLECTION_NAME_KEY = "collectionName";
                         switch(v.getCheckedRadioButtonId())
                         {
                             case R.id.deleteCollectionRadio:
-                                locHolder.deleteCollection(collectionName);
+                                locHolder.deleteCollection(c);
                                 break;
                             case R.id.renameCollectionRadio:
-                                locHolder.renameCollection(collectionName);
+                                locHolder.renameCollection(c);
                                 break;
                             case R.id.copyCollectionRadio:
-                                locHolder.copyCollection(collectionName);
+                                locHolder.copyCollection(c);
                                 break;
                             case R.id.moveCollectionRadio:
                             default:
-                                locHolder.moveCollection(collectionName);
+                                locHolder.moveCollection(c);
                                 break;
                         }
                     }
