@@ -368,7 +368,7 @@ public class MtgDatabaseManager extends SQLiteOpenHelper
         // For the things which aren't null, build the appropriate replacement:
         if (params.CollectionId != null)
         {
-            colCheck = "col_table.CollectionId = ?";
+            colCheck = "col_cards.CollectionID = ?";
             queryParams.add(Integer.toString(params.CollectionId));
         }
         if (params.NameSearch != null)
