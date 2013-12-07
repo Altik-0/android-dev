@@ -22,14 +22,12 @@ public class MainMenuActivity extends Activity
         {
             if (arg0 == findViewById(R.id.searchAllCardsButton))
             {
-                // TODO: add intent extra specifying 'ALL CARDS'
                 Intent searchIntent = new Intent(MainMenuActivity.this, AdvancedSearchActivity.class);
                 startActivity(searchIntent);
             }
             else if (arg0 == findViewById(R.id.searchYourCollectionsButton))
             {
-                // TODO: add intent extra specifying 'YOUR COLLECTION'
-                Intent searchIntent = new Intent(MainMenuActivity.this, AdvancedSearchActivity.class);
+                Intent searchIntent = new Intent(MainMenuActivity.this, CollectionSearchActivity.class);
                 startActivity(searchIntent);
             }
             else if (arg0 == findViewById(R.id.manageYourCollectionsButton))

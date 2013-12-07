@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent" >
+	    
+    <EditText
+        android:id = "@+id/nameTextBox"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:inputType="text" />
+    
+    <TextView 
+        android:id="@+id/nameText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/nameTextBox"
+        android:layout_alignParentLeft="true"
+        android:text="Card Name" />
+    
+    <EditText
+        android:id = "@+id/expansionTextBox"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/nameText"
+        android:inputType="text" />
+    
+    <TextView 
+        android:id="@+id/expansionText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/expansionTextBox"
+        android:layout_alignParentLeft="true"
+        android:text="Expansion" />
+    
+    <EditText
+        android:id = "@+id/cardTypeTextBox"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/expansionText"
+        android:inputType="text" />
+    
+    <TextView 
+        android:id="@+id/cardTypeText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/cardTypeTextBox"
+        android:layout_alignParentLeft="true"
+        android:text="Card Types" />
+    
+    <EditText
+        android:id = "@+id/cardTextTextBox"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/cardTypeText"
+        android:inputType="textMultiLine" />
+    
+    <TextView 
+        android:id="@+id/cardTextText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/cardTextTextBox"
+        android:layout_alignParentLeft="true"
+        android:text="Card Text" />
+
+</RelativeLayout>

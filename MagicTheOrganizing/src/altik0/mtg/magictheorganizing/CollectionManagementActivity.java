@@ -7,6 +7,7 @@ import altik0.mtg.magictheorganizing.Database.CollectionModel;
 import altik0.mtg.magictheorganizing.Database.CollectionModel.Collection;
 import altik0.mtg.magictheorganizing.Database.CollectionModel.Location;
 import altik0.mtg.magictheorganizing.Database.MtgDatabaseManager;
+import altik0.mtg.magictheorganizing.Database.SearchParams;
 import altik0.mtg.magictheorganizing.dialogFragments.*;
 import altik0.mtg.magictheorganizing.dialogFragments.AddCollectionDialogFragment.AddCollectionHolder;
 import altik0.mtg.magictheorganizing.dialogFragments.AddLocationDialogFragment.AddLocationHolder;
@@ -19,6 +20,7 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Fragment;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.database.DataSetObserver;
 import android.app.FragmentTransaction;
 import android.view.Menu;
@@ -109,11 +111,18 @@ public class CollectionManagementActivity extends Activity implements ListAdapte
     private OnItemClickListener normalSelectedListener = new OnItemClickListener()
     {
         @Override
-        public void onItemClick(AdapterView<?> arg0, View arg1, int arg2,
-                long arg3)
+        public void onItemClick(AdapterView<?> parent, View view, int index,
+                long id)
         {
-            // TODO Auto-generated method stub
-            
+            // This only happens on a collection, so get the data about that
+            // Collection, so what that we can pass it on to activities that care
+            Collection c = (Collection)getItem(index);
+            SearchParams params = new SearchParams();
+            params.CollectionId = c.CollectionId;
+            params.searchOverCollection = true;
+            Intent collectionViewIntent = CardListActivity.buildSearchIntent(
+                    CollectionManagementActivity.this, params, true);
+            startActivity(collectionViewIntent);
         }
     };
     

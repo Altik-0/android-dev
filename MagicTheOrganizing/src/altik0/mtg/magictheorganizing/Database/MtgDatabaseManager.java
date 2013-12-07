@@ -347,6 +347,170 @@ public class MtgDatabaseManager extends SQLiteOpenHelper
         return toRet;
     }
     
+    public ArrayList<CardData> SearchCollectionForCards(SearchParams params)
+    {
+        // Build dat query
+        String query = "SELECT * FROM CollectedCards col_cards " +
+                       "JOIN Cards card_table " +
+                       "ON col_cards.CardID = card_table.CardID " +
+                       "WHERE ";
+        
+        // For all the nulls, we'll use a dummy condition:
+        String colCheck = "1 = 1";
+        String textCheck = "1 = 1";
+        String expansionCheck = "1 = 1";
+        String rarityCheck = "1 = 1";
+        String nameCheck = "1 = 1";
+        String typeCheck = "1 = 1";
+        String colorCheck = "1 = 1";
+        LinkedList<String> queryParams = new LinkedList<String>();
+        
+        // For the things which aren't null, build the appropriate replacement:
+        if (params.CollectionId != null)
+        {
+            colCheck = "col_table.CollectionId = ?";
+            queryParams.add(Integer.toString(params.CollectionId));
+        }
+        if (params.NameSearch != null)
+        {
+            // TODO: smarter than just equivalent. String contains?
+            nameCheck = "LOWER(card_table.Name) LIKE LOWER(?)";
+            queryParams.addLast("%" + params.NameSearch + "%");
+        }
+        if (params.TextSearch != null)
+        {
+            textCheck = "LOWER(card_table.Text) LIKE LOWER(?)";
+            queryParams.addLast("%" + params.TextSearch + "%");
+        }
+        if (params.ExpansionSearch != null)
+        {
+            expansionCheck = "LOWER(card_table.Sets) LIKE LOWER(?)";
+            queryParams.addLast("%" + params.ExpansionSearch + "%");
+        }
+        if (params.TypeSearch != null)
+        {
+            typeCheck = "LOWER(card_table.Type) LIKE LOWER(?)";
+            queryParams.addLast("%" + params.TypeSearch + "%");
+        }
+        if (params.RarityFilter != null)
+        {
+            // Treat multiple boxes as ors:
+            String commonCheck = "0 = 1";
+            String uncommonCheck = "0 = 1";
+            String rareCheck = "0 = 1";
+            String mythicCheck = "0 = 1";
+            if ((params.RarityFilter & SearchParams.COMMON_FLAG) != 0)
+            {
+                commonCheck = "LOWER(card_table.Rarity) = 'common'";
+            }
+            if ((params.RarityFilter & SearchParams.UNCOMMON_FLAG) != 0)
+            {
+                uncommonCheck = "LOWER(card_table.Rarity) = 'uncommon'";
+            }
+            if ((params.RarityFilter & SearchParams.RARE_FLAG) != 0)
+            {
+                rareCheck = "LOWER(card_table.Rarity) = 'rare'";
+            }
+            if ((params.RarityFilter & SearchParams.MYTHIC_FLAG) != 0)
+            {
+                mythicCheck = "LOWER(card_table.Rarity) = 'mythic'";
+            }
+            rarityCheck = "(" +
+                          commonCheck + " OR " +
+                          uncommonCheck + " OR " +
+                          rareCheck + " OR " +
+                          mythicCheck + ")";
+        }
+        if (params.ColorFilter != null)
+        {
+            // TODO: req. multicolor and exc. unselected
+            String whiteCheck = "0 = 1";
+            String blueCheck = "0 = 1";
+            String blackCheck = "0 = 1";
+            String redCheck = "0 = 1";
+            String greenCheck = "0 = 1";
+            
+            int filter = params.ColorFilter;
+            if ((filter & SearchParams.WHITE_FLAG) != 0)
+            {
+                whiteCheck = "(card_table.Colors & 1) != 0";
+            }
+            if ((filter & SearchParams.BLUE_FLAG) != 0)
+            {
+                blueCheck = "(card_table.Colors & 2) != 0";
+            }
+            if ((filter & SearchParams.BLACK_FLAG) != 0)
+            {
+                blackCheck = "(card_table.Colors & 4) != 0";
+            }
+            if ((filter & SearchParams.RED_FLAG) != 0)
+            {
+                redCheck = "(card_table.Colors & 8) != 0";
+            }
+            if ((filter & SearchParams.GREEN_FLAG) != 0)
+            {
+                greenCheck = "(card_table.Colors & 16) != 0";
+            }
+            
+            colorCheck = "(" +
+                    whiteCheck + " OR " +
+                    blueCheck + " OR " +
+                    blackCheck + " OR " +
+                    redCheck + " OR " +
+                    greenCheck + ")";
+        }
+        
+        String[] queryArray = queryParams.toArray(new String[0]);
+        
+        // Build final query
+        query += colCheck + " AND " +
+                 nameCheck + " AND " +
+                 textCheck + " AND " +
+                 expansionCheck + " AND " +
+                 typeCheck + " AND " +
+                 rarityCheck + " AND " +
+                 colorCheck;
+        
+        // Get the datas
+        ArrayList<CardData> toRet = new ArrayList<CardData>();
+        
+        SQLiteDatabase db = getWritableDatabase();
+        Cursor cursor = db.rawQuery(query, queryArray);
+        
+        // Read cards
+        if (cursor.moveToFirst())
+        {
+            do
+            {
+                CardData card = new CardData();
+                card.setCardId(cursor.getInt(1));
+                card.setRarity(cursor.getString(9));
+                card.setName(cursor.getString(11));
+                card.setCmc(cursor.getInt(12));
+                card.setManaCost(cursor.getString(14));
+                card.setPower(cursor.getString(16));
+                card.setToughness(cursor.getString(17));
+                card.setLoyalty(cursor.getInt(18));
+                card.setText(cursor.getString(19));
+                card.setFlavorText(cursor.getString(20));
+                // TODO: get count, tags
+                
+                int colorCode = cursor.getInt(15);
+                String typeCode = cursor.getString(10);
+                String setCode = cursor.getString(7);
+                
+                card.setColorsFromCode(colorCode);
+                card.setTypesFromCode(typeCode);
+                card.setSetsFromCode(setCode);
+    
+                // Add card to list
+                toRet.add(card);
+            } while(cursor.moveToNext());
+        }
+        
+        return toRet;
+    }
+    
     public ArrayList<CardData> GetAllCards()
     {
         ArrayList<CardData> toRet = new ArrayList<CardData>();
@@ -488,6 +652,27 @@ public class MtgDatabaseManager extends SQLiteOpenHelper
                    "SELECT CardID, ?, Count, Tags FROM CollectedCards " +
                    "WHERE CollectionID = ?",
                    new String[] {Integer.toString(newColId), Integer.toString(oldColId)});
+    }
+    
+    public ArrayList<Collection> GetCollections()
+    {
+        ArrayList<Collection> toRet = new ArrayList<Collection>();
+        
+        SQLiteDatabase db = getWritableDatabase();
+        Cursor cursor = db.rawQuery("SELECT CollectionID, Name FROM Collections", null);
+        
+        if (cursor.moveToFirst())
+        {
+            do
+            {
+                Collection c = new Collection();
+                c.CollectionId = cursor.getInt(0);
+                c.Name = cursor.getString(1);
+                toRet.add(c);
+            } while(cursor.moveToNext());
+        }
+        
+        return toRet;
     }
     
     public CollectionModel GetLocationsWithCollections()

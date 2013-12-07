@@ -2,6 +2,7 @@ package altik0.mtg.magictheorganizing;
 
 import java.util.ArrayList;
 
+import altik0.mtg.magictheorganizing.Database.CollectionModel.Collection;
 import altik0.mtg.magictheorganizing.Database.MtgDatabaseManager;
 import altik0.mtg.magictheorganizing.Database.SearchParams;
 import altik0.mtg.magictheorganizing.MtgDataTypes.CardData;
@@ -16,18 +17,35 @@ public class CardListAdapter implements ListAdapter
 {
     private ArrayList<CardData> data;
     private Context context;
+    private SearchParams params;
 
     public CardListAdapter(Context _context, SearchParams _params)
     {
         context = _context;
+        params = _params;
         MtgDatabaseManager db = MtgDatabaseManager.getInstance(_context);
-        data = db.SearchForCards(_params);
+        data = db.SearchForCards(params);
     }
     
-    public void setSearchParams(SearchParams params)
+    public CardListAdapter(Context _context, SearchParams _params, Collection _c)
     {
+        context = _context;
+        params = _params;
+        MtgDatabaseManager db = MtgDatabaseManager.getInstance(_context);
+        if (!params.searchOverCollection)
+            data = db.SearchForCards(params);
+        else
+            data = db.SearchCollectionForCards(params);
+    }
+    
+    public void setSearchParams(SearchParams _params)
+    {
+        params = _params;
         MtgDatabaseManager db = MtgDatabaseManager.getInstance(context);
-        data = db.SearchForCards(params);
+        if (!params.searchOverCollection)
+            data = db.SearchForCards(params);
+        else
+            data = db.SearchCollectionForCards(params);
     }
     
     @Override

@@ -1,12 +1,12 @@
 package altik0.mtg.magictheorganizing;
 
+import altik0.mtg.magictheorganizing.Database.CollectionModel.Collection;
 import altik0.mtg.magictheorganizing.Database.SearchParams;
 import altik0.mtg.magictheorganizing.MtgDataTypes.CardData;
 import android.app.Activity;
 import android.os.Bundle;
-import android.support.v4.app.ListFragment;
+import android.app.ListFragment;
 import android.view.View;
-import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
 /**
@@ -41,6 +41,7 @@ public class CardListFragment extends ListFragment
     // Used to determine which cards should be obtained from the database
     private SearchParams params;
     private CardListAdapter listAdapter;
+    private boolean allowAdd = false;
     
     /**
      * A callback interface that all activities containing this fragment must
@@ -182,5 +183,12 @@ public class CardListFragment extends ListFragment
     {
         params = _params;
         listAdapter.setSearchParams(_params);
+    }
+    
+    public void setCollectionMode(boolean _doesAllowAdd)
+    {
+        allowAdd = _doesAllowAdd;
+        // TODO
+        //listAdapter.setSearchParams(params);
     }
 }

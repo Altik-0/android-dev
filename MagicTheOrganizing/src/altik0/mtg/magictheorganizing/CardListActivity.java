@@ -1,10 +1,11 @@
 package altik0.mtg.magictheorganizing;
 
+import altik0.mtg.magictheorganizing.Database.CollectionModel.Collection;
 import altik0.mtg.magictheorganizing.Database.SearchParams;
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v4.app.FragmentActivity;
 
 /**
  * An activity representing a list of Cards. This activity has different
@@ -21,10 +22,11 @@ import android.support.v4.app.FragmentActivity;
  * This activity also implements the required {@link CardListFragment.Callbacks}
  * interface to listen for item selections.
  */
-public class CardListActivity extends FragmentActivity implements
+public class CardListActivity extends Activity implements
         CardListFragment.Callbacks
 {
     public static final String SEARCH_PARAMS_KEY = "Search";
+    public static final String ALLOW_ADDITION_KEY = "Allow Addition";
     public static Intent buildSearchIntent(Context requester, SearchParams params)
     {
         Intent toRet = new Intent(requester, CardListActivity.class);
@@ -32,6 +34,15 @@ public class CardListActivity extends FragmentActivity implements
         return toRet;
     }
     
+    public static Intent buildSearchIntent(Context requester, SearchParams params,
+                                           boolean allowAddition)
+    {
+        Intent toRet = new Intent(requester, CardListActivity.class);
+        toRet.putExtra(SEARCH_PARAMS_KEY, params);
+        toRet.putExtra(ALLOW_ADDITION_KEY, allowAddition);
+        
+        return toRet;
+    }
     
     /**
      * Whether or not the activity is in two-pane mode, i.e. running on a tablet
@@ -45,10 +56,13 @@ public class CardListActivity extends FragmentActivity implements
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_card_list);
         
-        SearchParams params = (SearchParams)getIntent().getExtras().getSerializable(SEARCH_PARAMS_KEY);
+        Intent intent = getIntent();
+        SearchParams params = (SearchParams)intent.getSerializableExtra(SEARCH_PARAMS_KEY);
+        boolean doesAllowAdd = intent.getBooleanExtra(ALLOW_ADDITION_KEY, false);
         
-        CardListFragment listFrag = (CardListFragment)getSupportFragmentManager().findFragmentById(R.id.card_list);
+        CardListFragment listFrag = (CardListFragment)getFragmentManager().findFragmentById(R.id.card_list);
         listFrag.setSearchParams(params);
+        listFrag.setCollectionMode(doesAllowAdd);
         
         if (findViewById(R.id.card_detail_container) != null)
         {
@@ -82,7 +96,7 @@ public class CardListActivity extends FragmentActivity implements
             arguments.putInt(CardDetailFragment.ARG_ITEM_ID, card_id);
             CardDetailFragment fragment = new CardDetailFragment();
             fragment.setArguments(arguments);
-            getSupportFragmentManager().beginTransaction()
+            getFragmentManager().beginTransaction()
                     .replace(R.id.card_detail_container, fragment).commit();
             
         } else

@@ -27,6 +27,10 @@
             android:label="@string/title_activity_advanced_search" >
         </activity>
         <activity
+            android:name="altik0.mtg.magictheorganizing.CollectionSearchActivity"
+            android:label="@string/title_activity_collection_search" >
+        </activity>
+        <activity
             android:name="altik0.mtg.magictheorganizing.CardListActivity"
             android:label="@string/title_card_list" >
         </activity>

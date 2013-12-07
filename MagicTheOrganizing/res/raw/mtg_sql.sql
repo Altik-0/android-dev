@@ -6502,6 +6502,16 @@ CREATE TABLE [CollectedCards] (
 [Count] INTEGER DEFAULT '1' NOT NULL,
 [Tags] BLOB DEFAULT 'NULL' NULL
 );
+INSERT INTO "CollectedCards" VALUES(1,18734,1,20,'"Foil"');
+INSERT INTO "CollectedCards" VALUES(2,18695,4,20,'"Foil"');
+INSERT INTO "CollectedCards" VALUES(3,18700,3,20,'"Foil"');
+INSERT INTO "CollectedCards" VALUES(4,18744,1,8,'');
+INSERT INTO "CollectedCards" VALUES(5,18694,1,3,'');
+INSERT INTO "CollectedCards" VALUES(6,18771,1,1,'Altered');
+INSERT INTO "CollectedCards" VALUES(7,18732,1,3,'Foil');
+INSERT INTO "CollectedCards" VALUES(8,18713,1,5,'Japanese');
+INSERT INTO "CollectedCards" VALUES(9,18724,1,4,'');
+INSERT INTO "CollectedCards" VALUES(10,18769,1,5,'');
 DROP TABLE IF EXISTS "Collections";
 CREATE TABLE [Collections] (
 [CollectionID] INTEGER  NOT NULL PRIMARY KEY AUTOINCREMENT,
