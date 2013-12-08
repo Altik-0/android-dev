@@ -1,10 +1,11 @@
 package altik0.mtg.magictheorganizing.MtgDataTypes;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class CardData
+public class CardData implements Serializable
 {
     // Consts used for various codes:
     public static final int WHITE_CODE = 0x1;

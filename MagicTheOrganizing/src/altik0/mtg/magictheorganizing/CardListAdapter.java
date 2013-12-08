@@ -7,13 +7,14 @@ import altik0.mtg.magictheorganizing.Database.MtgDatabaseManager;
 import altik0.mtg.magictheorganizing.Database.SearchParams;
 import altik0.mtg.magictheorganizing.MtgDataTypes.CardData;
 import altik0.mtg.magictheorganizing.views.CardView;
+import android.widget.BaseAdapter;
 import android.content.Context;
 import android.database.DataSetObserver;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListAdapter;
 
-public class CardListAdapter implements ListAdapter
+public class CardListAdapter extends BaseAdapter
 {
     private ArrayList<CardData> data;
     private Context context;
@@ -25,6 +26,7 @@ public class CardListAdapter implements ListAdapter
         params = _params;
         MtgDatabaseManager db = MtgDatabaseManager.getInstance(_context);
         data = db.SearchForCards(params);
+        notifyDataSetChanged();
     }
     
     public CardListAdapter(Context _context, SearchParams _params, Collection _c)
@@ -36,6 +38,7 @@ public class CardListAdapter implements ListAdapter
             data = db.SearchForCards(params);
         else
             data = db.SearchCollectionForCards(params);
+        notifyDataSetChanged();
     }
     
     public void setSearchParams(SearchParams _params)
@@ -46,6 +49,20 @@ public class CardListAdapter implements ListAdapter
             data = db.SearchForCards(params);
         else
             data = db.SearchCollectionForCards(params);
+        notifyDataSetChanged();
+    }
+    
+    public void addCard(CardData card)
+    {
+        // Does nothing if we don't have a collectionId to insert to:
+        if (params.CollectionId == null)
+            return;
+        
+        // Otherwise, insert
+        MtgDatabaseManager db = MtgDatabaseManager.getInstance(context);
+        db.AddCardToCollection(params.CollectionId, card);
+        data = db.SearchCollectionForCards(params);
+        notifyDataSetChanged();
     }
     
     @Override
@@ -105,20 +122,6 @@ public class CardListAdapter implements ListAdapter
     {
         // TODO Auto-generated method stub
         return data.size() > 0;
-    }
-
-    @Override
-    public void registerDataSetObserver(DataSetObserver arg0)
-    {
-        // TODO Auto-generated method stub
-        
-    }
-
-    @Override
-    public void unregisterDataSetObserver(DataSetObserver arg0)
-    {
-        // TODO Auto-generated method stub
-        
     }
 
     @Override

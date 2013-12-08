@@ -1,6 +1,8 @@
 package altik0.mtg.magictheorganizing;
 
 import altik0.mtg.magictheorganizing.Database.SearchParams;
+import altik0.mtg.magictheorganizing.MtgDataTypes.CardColor;
+import altik0.mtg.magictheorganizing.MtgDataTypes.CardData;
 import android.os.Bundle;
 import android.app.Activity;
 import android.content.Intent;
@@ -13,6 +15,9 @@ import android.widget.EditText;
 
 public class AdvancedSearchActivity extends Activity
 {
+    public static final String CARD_RETURN_KEY = CardListActivity.CARD_RETURN_KEY;
+    public static final int CARD_RETURN_REQUEST_CODE = 0x2431;
+    
     OnClickListener searchListener = new OnClickListener()
     {
         @Override
@@ -86,9 +91,12 @@ public class AdvancedSearchActivity extends Activity
             if (raritySearch != 0)
                 params.RarityFilter = raritySearch;
             
-            // Build the intent, and launch that activity!
+            // If we've been called for result, we'll call the CardList for result:
             Intent searchIntent = CardListActivity.buildSearchIntent(AdvancedSearchActivity.this, params);
-            startActivity(searchIntent);
+            if (getCallingActivity() != null)
+                startActivityForResult(searchIntent, CARD_RETURN_REQUEST_CODE);
+            else
+                startActivity(searchIntent);
         }
     };
     
@@ -110,4 +118,22 @@ public class AdvancedSearchActivity extends Activity
         return true;
     }
     
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data)
+    {
+        if (requestCode == CARD_RETURN_REQUEST_CODE)
+        {
+            // If cancelled, we're continue on our way. (User probably wanted to
+            // come back to this screen if they pushed <--). Otherwise, forward on
+            // them results!
+            if (resultCode == RESULT_CANCELED)
+                return;
+            setResult(resultCode, data);
+            finish();
+        }
+        
+        // if it wasn't our request, we'll assume the super class did it
+        else
+            super.onActivityResult(requestCode, resultCode, data);
+    }
 }

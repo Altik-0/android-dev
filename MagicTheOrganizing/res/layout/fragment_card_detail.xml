@@ -13,7 +13,7 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:orientation="horizontal"
-        android:layout_weight="1" >
+        android:layout_weight="5" >
     
 	    <!-- Display Card -->
 
@@ -87,7 +87,7 @@
   	<RelativeLayout
   	    android:layout_width="match_parent"
   	    android:layout_height="0dp"
-  	    android:layout_weight="1" >
+  	    android:layout_weight="5" >
 	    
   	    <TextView 
   	        android:id="@+id/cardTextText"
@@ -111,5 +111,12 @@
   	        android:layout_below="@id/cardFlavorTextText" />
 
 	</RelativeLayout>
+	
+  	<include
+  	    layout = "@layout/fragment_detail_button_set"
+  	    android:id = "@+id/detailButtonSet"
+  	    android:layout_width = "match_parent"
+  	    android:layout_height = "0dp"
+  	    android:layout_weight = "1" />
     
 </LinearLayout>

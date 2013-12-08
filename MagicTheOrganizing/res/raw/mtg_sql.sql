@@ -5232,7 +5232,7 @@ INSERT INTO "Cards" VALUES(19808,218081,'[New Phyrexia]','normal','Common','Inst
 
 Artillerize deals 5 damage to target creature or player.','Phyrexian or Mirran, most goblins stick to the job they know best.');
 INSERT INTO "Cards" VALUES(19809,214353,'[New Phyrexia]','normal','Uncommon','Creature -- Human Soldier','Auriok Survivors',6,'James Ryman','{5}{W}',1,'4','6',NULL,'When Auriok Survivors enters the battlefield, you may return target Equipment card from your graveyard to the battlefield. If you do, you may attach it to Auriok Survivors.','"We are Mirrodin''s children. We will reclaim her--one scrap at a time, if we have to."');
-INSERT INTO "Cards" VALUES(19810,233055,'[New Phyrexia]','normal','Mythic Rare','Artifact -- Equipment','Batterskull',5,'Mark Zug','{5}',0,NULL,NULL,NULL,'Living weapon (When this Equipment enters the battlefield, put a 0/0 black Germ creature token onto the battlefield, then attach this to it.)
+INSERT INTO "Cards" VALUES(19810,233055,'[New Phyrexia]','normal','Mythic','Artifact -- Equipment','Batterskull',5,'Mark Zug','{5}',0,NULL,NULL,NULL,'Living weapon (When this Equipment enters the battlefield, put a 0/0 black Germ creature token onto the battlefield, then attach this to it.)
 
 Equipped creature gets +4/+4 and has vigilance and lifelink.
 
@@ -5340,7 +5340,7 @@ INSERT INTO "Cards" VALUES(19839,233077,'[New Phyrexia]','normal','Uncommon','In
 Draw a card.','"A display of humility is required of those who still possess such frailties."
 
 --Elesh Norn, Grand Cenobite');
-INSERT INTO "Cards" VALUES(19840,214352,'[New Phyrexia]','normal','Mythic Rare','Legendary Creature -- Praetor','Elesh Norn, Grand Cenobite',7,'Igor Kieryluk','{5}{W}{W}',1,'4','7',NULL,'Vigilance
+INSERT INTO "Cards" VALUES(19840,214352,'[New Phyrexia]','normal','Mythic','Legendary Creature -- Praetor','Elesh Norn, Grand Cenobite',7,'Igor Kieryluk','{5}{W}{W}',1,'4','7',NULL,'Vigilance
 
 Other creatures you control get +2/+2.
 
@@ -5351,7 +5351,7 @@ You control enchanted creature.
 
 At the beginning of your upkeep, enchanted creature deals 1 damage to its owner.','Phyrexia extended its command until there was nothing left to take.');
 INSERT INTO "Cards" VALUES(19842,218023,'[New Phyrexia]','normal','Uncommon','Creature -- Cleric','Entomber Exarch',4,'Svetlin Velinov','{2}{B}{B}',4,'2','2',NULL,'When Entomber Exarch enters the battlefield, choose one -- Return target creature card from your graveyard to your hand; or target opponent reveals his or her hand, you choose a noncreature card from it, then that player discards that card.',NULL);
-INSERT INTO "Cards" VALUES(19843,217996,'[New Phyrexia]','normal','Mythic Rare','Artifact Creature -- Golem','Etched Monstrosity',5,'Steven Belledin','{5}',0,'10','10',NULL,'Etched Monstrosity enters the battlefield with five -1/-1 counters on it.
+INSERT INTO "Cards" VALUES(19843,217996,'[New Phyrexia]','normal','Mythic','Artifact Creature -- Golem','Etched Monstrosity',5,'Steven Belledin','{5}',0,'10','10',NULL,'Etched Monstrosity enters the battlefield with five -1/-1 counters on it.
 
 {W}{U}{B}{R}{G}, Remove five -1/-1 counters from Etched Monstrosity: Target player draws three cards.','Now etched only with the scars of phyresis.');
 INSERT INTO "Cards" VALUES(19844,218073,'[New Phyrexia]','normal','Common','Enchantment -- Aura','Evil Presence',1,'Scott Chou','{B}',4,NULL,NULL,NULL,'Enchant land
@@ -5440,7 +5440,7 @@ INSERT INTO "Cards" VALUES(19872,227505,'[New Phyrexia]','normal','Basic Land','
 INSERT INTO "Cards" VALUES(19873,218057,'[New Phyrexia]','normal','Uncommon','Artifact','Isolation Cell',4,'Adrian Smith','{4}',0,NULL,NULL,NULL,'Whenever an opponent casts a creature spell, that player loses 2 life unless he or she pays {2}.','"Attrition is the answer. Starve them, and let their despair be their undoing."
 
 --Sheoldred, Whispering One');
-INSERT INTO "Cards" VALUES(19874,214349,'[New Phyrexia]','normal','Mythic Rare','Legendary Creature -- Praetor','Jin-Gitaxias, Core Augur',10,'Eric Deschamps','{8}{U}{U}',2,'5','4',NULL,'Flash
+INSERT INTO "Cards" VALUES(19874,214349,'[New Phyrexia]','normal','Mythic','Legendary Creature -- Praetor','Jin-Gitaxias, Core Augur',10,'Eric Deschamps','{8}{U}{U}',2,'5','4',NULL,'Flash
 
 At the beginning of your end step, draw seven cards.
 
@@ -5448,7 +5448,7 @@ Each opponent''s maximum hand size is reduced by seven.','"It is not a goal, but
 INSERT INTO "Cards" VALUES(19875,227508,'[New Phyrexia]','normal','Rare','Legendary Creature -- Human Warrior','Jor Kadeen, the Prevailer',5,'Austin Hsu','{3}{R}{W}',9,'5','4',NULL,'First strike
 
 Metalcraft -- Creatures you control get +3/+0 as long as you control three or more artifacts.','"As long as my hand holds a blade, there''s hope for a pure Mirrodin once again."');
-INSERT INTO "Cards" VALUES(19876,214350,'[New Phyrexia]','normal','Mythic Rare','Planeswalker -- Karn','Karn Liberated',7,'Jason Chan','{7}',0,NULL,NULL,6,'+4: Target player exiles a card from his or her hand.
+INSERT INTO "Cards" VALUES(19876,214350,'[New Phyrexia]','normal','Mythic','Planeswalker -- Karn','Karn Liberated',7,'Jason Chan','{7}',0,NULL,NULL,6,'+4: Target player exiles a card from his or her hand.
 
 -3: Exile target permanent.
 
@@ -5550,7 +5550,7 @@ Phyrexian Ingester gets +X/+Y, where X is the exiled creature card''s power and 
 INSERT INTO "Cards" VALUES(19909,214375,'[New Phyrexia]','normal','Rare','Artifact Creature -- Shapeshifter','Phyrexian Metamorph',4,'Jana Schirmer & Johannes Voss','{3}{P/U}',2,'0','0',NULL,'({P/U} can be paid with either {U} or 2 life.)
 
 You may have Phyrexian Metamorph enter the battlefield as a copy of any artifact or creature on the battlefield, except it''s an artifact in addition to its other types.',NULL);
-INSERT INTO "Cards" VALUES(19910,214386,'[New Phyrexia]','normal','Mythic Rare','Creature -- Horror','Phyrexian Obliterator',4,'Todd Lockwood','{B}{B}{B}{B}',4,'5','5',NULL,'Trample
+INSERT INTO "Cards" VALUES(19910,214386,'[New Phyrexia]','normal','Mythic','Creature -- Horror','Phyrexian Obliterator',4,'Todd Lockwood','{B}{B}{B}{B}',4,'5','5',NULL,'Trample
 
 Whenever a source deals damage to Phyrexian Obliterator, that source''s controller sacrifices that many permanents.','"Behold blessed perfection."
 
@@ -5613,7 +5613,7 @@ Golem creatures you control have vigilance.',NULL);
 INSERT INTO "Cards" VALUES(19932,233059,'[New Phyrexia]','normal','Uncommon','Creature -- Angel','Shattered Angel',5,'Kev Walker','{3}{W}{W}',1,'3','3',NULL,'Flying
 
 Whenever a land enters the battlefield under an opponent''s control, you may gain 3 life.','She preaches the blessings of the Machine Orthodoxy.');
-INSERT INTO "Cards" VALUES(19933,214382,'[New Phyrexia]','normal','Mythic Rare','Legendary Creature -- Praetor','Sheoldred, Whispering One',7,'Jana Schirmer & Johannes Voss','{5}{B}{B}',4,'6','6',NULL,'Swampwalk
+INSERT INTO "Cards" VALUES(19933,214382,'[New Phyrexia]','normal','Mythic','Legendary Creature -- Praetor','Sheoldred, Whispering One',7,'Jana Schirmer & Johannes Voss','{5}{B}{B}',4,'6','6',NULL,'Swampwalk
 
 At the beginning of your upkeep, return target creature card from your graveyard to the battlefield.
 
@@ -5677,7 +5677,7 @@ INSERT INTO "Cards" VALUES(19950,217981,'[New Phyrexia]','normal','Common','Crea
 Whenever a creature enters the battlefield under an opponent''s control, you may have that player lose 1 life.',NULL);
 INSERT INTO "Cards" VALUES(19951,227519,'[New Phyrexia]','normal','Basic Land','Basic Land -- Swamp','Swamp',0,'Lars Grant-West',NULL,0,NULL,NULL,NULL,'B',NULL);
 INSERT INTO "Cards" VALUES(19952,227521,'[New Phyrexia]','normal','Basic Land','Basic Land -- Swamp','Swamp',0,'Lars Grant-West',NULL,0,NULL,NULL,NULL,'B',NULL);
-INSERT INTO "Cards" VALUES(19953,214368,'[New Phyrexia]','normal','Mythic Rare','Artifact -- Equipment','Sword of War and Peace',3,'Chris Rahn','{3}',0,NULL,NULL,NULL,'Equipped creature gets +2/+2 and has protection from red and from white.
+INSERT INTO "Cards" VALUES(19953,214368,'[New Phyrexia]','normal','Mythic','Artifact -- Equipment','Sword of War and Peace',3,'Chris Rahn','{3}',0,NULL,NULL,NULL,'Equipped creature gets +2/+2 and has protection from red and from white.
 
 Whenever equipped creature deals combat damage to a player, Sword of War and Peace deals damage to that player equal to the number of cards in his or her hand and you gain 1 life for each card in your hand.
 
@@ -5706,7 +5706,7 @@ INSERT INTO "Cards" VALUES(19960,218044,'[New Phyrexia]','normal','Uncommon','So
 INSERT INTO "Cards" VALUES(19961,218079,'[New Phyrexia]','normal','Rare','Artifact','Unwinding Clock',4,'Mike Bierek','{4}',0,NULL,NULL,NULL,'Untap all artifacts you control during each other player''s untap step.','"The partisans have unearthed a strange artifact. None know its origin, but it gives them hope of a life beyond."
 
 --Elspeth''s journal');
-INSERT INTO "Cards" VALUES(19962,214378,'[New Phyrexia]','normal','Mythic Rare','Legendary Creature -- Praetor','Urabrask the Hidden',5,'Brad Rigney','{3}{R}{R}',8,'4','4',NULL,'Creatures you control have haste.
+INSERT INTO "Cards" VALUES(19962,214378,'[New Phyrexia]','normal','Mythic','Legendary Creature -- Praetor','Urabrask the Hidden',5,'Brad Rigney','{3}{R}{R}',8,'4','4',NULL,'Creatures you control have haste.
 
 Creatures your opponents control enter the battlefield tapped.','When the Mirran resistance arrived, the furnace dwellers looked to Urabrask for guidance. His decree stunned the others: "Let them be."');
 INSERT INTO "Cards" VALUES(19963,218017,'[New Phyrexia]','normal','Common','Instant','Vapor Snag',1,'Raymond Swanland','{U}',2,NULL,NULL,NULL,'Return target creature to its owner''s hand. Its controller loses 1 life.','"This creature is inadequate. Send it to the splicers for innovation."
@@ -5737,7 +5737,7 @@ INSERT INTO "Cards" VALUES(19969,233079,'[New Phyrexia]','normal','Uncommon','Cr
 
 --Vorinclex, Voice of Hunger');
 INSERT INTO "Cards" VALUES(19970,214381,'[New Phyrexia]','normal','Common','Instant','Volt Charge',3,'Jana Schirmer & Johannes Voss','{2}{R}',8,NULL,NULL,NULL,'Volt Charge deals 3 damage to target creature or player. Proliferate. (You choose any number of permanents and/or players with counters on them, then give each another counter of a kind already there.)',NULL);
-INSERT INTO "Cards" VALUES(19971,218002,'[New Phyrexia]','normal','Mythic Rare','Legendary Creature -- Praetor','Vorinclex, Voice of Hunger',8,'Karl Kopinski','{6}{G}{G}',16,'7','6',NULL,'Trample
+INSERT INTO "Cards" VALUES(19971,218002,'[New Phyrexia]','normal','Mythic','Legendary Creature -- Praetor','Vorinclex, Voice of Hunger',8,'Karl Kopinski','{6}{G}{G}',16,'7','6',NULL,'Trample
 
 Whenever you tap a land for mana, add one mana to your mana pool of any type that land produced.
 

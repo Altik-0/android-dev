@@ -27,6 +27,8 @@ public class CardListActivity extends Activity implements
 {
     public static final String SEARCH_PARAMS_KEY = "Search";
     public static final String ALLOW_ADDITION_KEY = "Allow Addition";
+    public static final String CARD_RETURN_KEY = CardDetailFragment.CARD_RETURN_KEY;
+    public static final int CARD_RETURN_CODE = 0x2299;
     public static Intent buildSearchIntent(Context requester, SearchParams params)
     {
         Intent toRet = new Intent(requester, CardListActivity.class);
@@ -59,6 +61,7 @@ public class CardListActivity extends Activity implements
         Intent intent = getIntent();
         SearchParams params = (SearchParams)intent.getSerializableExtra(SEARCH_PARAMS_KEY);
         boolean doesAllowAdd = intent.getBooleanExtra(ALLOW_ADDITION_KEY, false);
+        
         
         CardListFragment listFrag = (CardListFragment)getFragmentManager().findFragmentById(R.id.card_list);
         listFrag.setSearchParams(params);
@@ -105,7 +108,31 @@ public class CardListActivity extends Activity implements
             // for the selected item ID.
             Intent detailIntent = new Intent(this, CardDetailActivity.class);
             detailIntent.putExtra(CardDetailFragment.ARG_ITEM_ID, Integer.toString(card_id));
-            startActivity(detailIntent);
+            
+            // If we were called for a result, we want this activity to give it to us:
+            if (getCallingActivity() != null)
+                startActivityForResult(detailIntent, CARD_RETURN_CODE);
+            else
+                startActivity(detailIntent);
         }
+    }
+    
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data)
+    {
+        if (requestCode == CARD_RETURN_CODE)
+        {
+            // If cancelled, we're continue on our way. (User probably wanted to
+            // come back to this screen if they pushed <--). Otherwise, forward on
+            // them results!
+            if (resultCode == RESULT_CANCELED)
+                return;
+            setResult(resultCode, data);
+            finish();
+        }
+        
+        // If it wasn't our activity that called it, we'll assume the super class did:
+        else
+            super.onActivityResult(requestCode, resultCode, data);
     }
 }

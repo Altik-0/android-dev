@@ -6,12 +6,9 @@ import altik0.mtg.magictheorganizing.MtgDataTypes.CardData;
 import android.app.Activity;
 import android.os.Bundle;
 import android.app.ListFragment;
-import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.ListView;
 
 /**
@@ -23,7 +20,7 @@ import android.widget.ListView;
  * Activities containing this fragment MUST implement the {@link Callbacks}
  * interface.
  */
-public class CardListFragment extends ListFragment
+public class CardListAddFragment extends ListFragment
 {
     
     /**
@@ -31,7 +28,6 @@ public class CardListFragment extends ListFragment
      * activated item position. Only used on tablets.
      */
     private static final String STATE_ACTIVATED_POSITION = "activated_position";
-    private static final int ADD_CARD_REQUEST_CODE = 0x1337;
     
     /**
      * The fragment's current callback object, which is notified of list item
@@ -47,21 +43,6 @@ public class CardListFragment extends ListFragment
     // Used to determine which cards should be obtained from the database
     private SearchParams params;
     private CardListAdapter listAdapter;
-    private boolean allowAdd = false;
-    
-    // Button we'll add/remove depending on allowAdd status
-    private Button addButton;
-    
-    private OnClickListener addCardListener = new OnClickListener()
-    {
-        @Override
-        public void onClick(View v)
-        {
-            // Call AdvancedSearchActivity with intent of getting a card back
-            Intent getCardIntent = new Intent(getActivity(), AdvancedSearchActivity.class);
-            startActivityForResult(getCardIntent, ADD_CARD_REQUEST_CODE);
-        }  
-    };
     
     /**
      * A callback interface that all activities containing this fragment must
@@ -92,7 +73,7 @@ public class CardListFragment extends ListFragment
      * Mandatory empty constructor for the fragment manager to instantiate the
      * fragment (e.g. upon screen orientation changes).
      */
-    public CardListFragment()
+    public CardListAddFragment()
     {
     }
     
@@ -109,21 +90,6 @@ public class CardListFragment extends ListFragment
         params = new SearchParams();
         listAdapter = new CardListAdapter(getActivity(), params);
         setListAdapter(listAdapter);
-    }
-    
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState)
-    {
-        ViewGroup v = (ViewGroup)inflater.inflate(R.layout.fragment_card_list,
-                                                  container,
-                                                  false);
-        addButton = (Button)v.findViewById(R.id.addCard);
-        addButton.setOnClickListener(addCardListener);
-        if (!allowAdd)
-            v.removeView(addButton);
-        
-        return v;
     }
     
     @Override
@@ -162,22 +128,6 @@ public class CardListFragment extends ListFragment
         
         // Reset the active callbacks interface to the dummy implementation.
         mCallbacks = sDummyCallbacks;
-    }
-    
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data)
-    {
-        if (requestCode == ADD_CARD_REQUEST_CODE)
-        {
-            if (resultCode == Activity.RESULT_OK)
-            {
-                CardData card = (CardData)data.getSerializableExtra
-                                                (AdvancedSearchActivity.CARD_RETURN_KEY);
-                listAdapter.addCard(card);
-            }
-        }
-        else
-            super.onActivityResult(requestCode, resultCode, data);
     }
     
     @Override
@@ -234,19 +184,5 @@ public class CardListFragment extends ListFragment
     {
         params = _params;
         listAdapter.setSearchParams(_params);
-    }
-    
-    public void setCollectionMode(boolean _doesAllowAdd)
-    {
-        // Only want to remove/add if we actually change, to avoid errors and whatnot
-        if (allowAdd != _doesAllowAdd)
-        {
-            allowAdd = _doesAllowAdd;
-            if (allowAdd)
-                ((ViewGroup)getView()).addView(addButton);
-            else
-                ((ViewGroup)getView()).removeView(addButton);
-        }
-        //listAdapter.setSearchParams(params);
     }
 }

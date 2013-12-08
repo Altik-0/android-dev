@@ -211,7 +211,6 @@ public class MtgDatabaseManager extends SQLiteOpenHelper
         // For the things which aren't null, build the appropriate replacement:
         if (params.NameSearch != null)
         {
-            // TODO: smarter than just equivalent. String contains?
             nameCheck = "LOWER(card_table.Name) LIKE LOWER(?)";
             queryParams.addLast("%" + params.NameSearch + "%");
         }
@@ -373,7 +372,6 @@ public class MtgDatabaseManager extends SQLiteOpenHelper
         }
         if (params.NameSearch != null)
         {
-            // TODO: smarter than just equivalent. String contains?
             nameCheck = "LOWER(card_table.Name) LIKE LOWER(?)";
             queryParams.addLast("%" + params.NameSearch + "%");
         }
@@ -622,6 +620,47 @@ public class MtgDatabaseManager extends SQLiteOpenHelper
         SQLiteDatabase db = getWritableDatabase();
         db.execSQL("INSERT INTO Collections (Name, LocationID) " +
                    "VALUES (?, ?)", new String[]{collectionName, Integer.toString(locationId)});
+    }
+    
+    public void AddCardToCollection(int collectionId, CardData card)
+    {
+        // TODO: handle counts and tags. For now, just pretend card.Count == 1 and card.Tags = []
+        
+        // Check for preexisting entry:
+        SQLiteDatabase db = getWritableDatabase();
+        Cursor cursor = db.rawQuery("SELECT * FROM CollectedCards " +
+                                    "WHERE CollectionID = ? AND CardID = ?", 
+                                    new String[] {Integer.toString(collectionId),
+                                                  Integer.toString(card.getCardId())});
+
+        Integer oldCnt = null;
+        if (cursor.moveToFirst())
+        {
+            // TODO: there may be multiple entries for differing tags. For now,
+            // just assume that the tags match and go with it
+            oldCnt = cursor.getInt(0);
+        }
+        
+        // If we found a match, update the entry to increase count:
+        if (oldCnt != null)
+        {
+            // TODO: change to using card.Count instead of 1
+            db.execSQL("UPDATE CollectedCards SET Count = ? " +
+                       "WHERE CollectionID = ? AND CardID = ?",
+                       new String[] {Integer.toString(oldCnt + 1),
+                                     Integer.toString(collectionId),
+                                     Integer.toString(card.getCardId())});
+        }
+        // If we didn't find a match, insert the card into the database:
+        else
+        {
+            // TODO: use card.Count instead of 1. Also, insert tags
+            db.execSQL("INSERT INTO CollectedCards (CollectionID, CardID, Count) " +
+            		   "VALUES (?, ?, ?)",
+            		   new String[] {Integer.toString(collectionId),
+                                     Integer.toString(card.getCardId()),
+                                     Integer.toString(1)});
+        }
     }
     
     public void CopyCollection(int oldColId, String newName)
