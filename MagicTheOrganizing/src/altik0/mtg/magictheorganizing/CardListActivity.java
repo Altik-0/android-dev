@@ -1,7 +1,9 @@
 package altik0.mtg.magictheorganizing;
 
+import altik0.mtg.magictheorganizing.CardDetailFragment.DetailFragmentState;
 import altik0.mtg.magictheorganizing.Database.CollectionModel.Collection;
 import altik0.mtg.magictheorganizing.Database.SearchParams;
+import altik0.mtg.magictheorganizing.MtgDataTypes.CardData;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -27,8 +29,10 @@ public class CardListActivity extends Activity implements
 {
     public static final String SEARCH_PARAMS_KEY = "Search";
     public static final String ALLOW_ADDITION_KEY = "Allow Addition";
+    public static final String COLLECTION_MODE = "Collection mode";
     public static final String CARD_RETURN_KEY = CardDetailFragment.CARD_RETURN_KEY;
     public static final int CARD_RETURN_CODE = 0x2299;
+    private boolean collectionMode = false;
     public static Intent buildSearchIntent(Context requester, SearchParams params)
     {
         Intent toRet = new Intent(requester, CardListActivity.class);
@@ -37,11 +41,12 @@ public class CardListActivity extends Activity implements
     }
     
     public static Intent buildSearchIntent(Context requester, SearchParams params,
-                                           boolean allowAddition)
+                                           boolean allowAddition, boolean collectionMode)
     {
         Intent toRet = new Intent(requester, CardListActivity.class);
         toRet.putExtra(SEARCH_PARAMS_KEY, params);
         toRet.putExtra(ALLOW_ADDITION_KEY, allowAddition);
+        toRet.putExtra(COLLECTION_MODE, collectionMode);
         
         return toRet;
     }
@@ -61,6 +66,7 @@ public class CardListActivity extends Activity implements
         Intent intent = getIntent();
         SearchParams params = (SearchParams)intent.getSerializableExtra(SEARCH_PARAMS_KEY);
         boolean doesAllowAdd = intent.getBooleanExtra(ALLOW_ADDITION_KEY, false);
+        collectionMode = intent.getBooleanExtra(COLLECTION_MODE, false);
         
         
         CardListFragment listFrag = (CardListFragment)getFragmentManager().findFragmentById(R.id.card_list);
@@ -88,8 +94,9 @@ public class CardListActivity extends Activity implements
      * the item with the given ID was selected.
      */
     @Override
-    public void onItemSelected(int card_id)
+    public void onItemSelected(CardData card)
     {
+        int card_id = collectionMode ? card.getCollectedId() : card.getCardId();
         if (mTwoPane)
         {
             // In two-pane mode, show the detail view in this activity by
@@ -97,10 +104,18 @@ public class CardListActivity extends Activity implements
             // fragment transaction.
             Bundle arguments = new Bundle();
             arguments.putInt(CardDetailFragment.ARG_ITEM_ID, card_id);
+            arguments.putBoolean(CardDetailFragment.COLLECTION_MODE, collectionMode);
             CardDetailFragment fragment = new CardDetailFragment();
             fragment.setArguments(arguments);
             getFragmentManager().beginTransaction()
                     .replace(R.id.card_detail_container, fragment).commit();
+
+            if (this.getCallingActivity() != null)
+                fragment.setState(DetailFragmentState.Return);
+            else if (collectionMode)
+                fragment.setState(DetailFragmentState.Collection);
+            else
+                fragment.setState(DetailFragmentState.Normal);
             
         } else
         {
@@ -108,6 +123,7 @@ public class CardListActivity extends Activity implements
             // for the selected item ID.
             Intent detailIntent = new Intent(this, CardDetailActivity.class);
             detailIntent.putExtra(CardDetailFragment.ARG_ITEM_ID, Integer.toString(card_id));
+            detailIntent.putExtra(CardDetailActivity.COLLECTION_MODE, collectionMode);
             
             // If we were called for a result, we want this activity to give it to us:
             if (getCallingActivity() != null)

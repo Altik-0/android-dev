@@ -24,32 +24,20 @@ public class CardListAdapter extends BaseAdapter
     {
         context = _context;
         params = _params;
-        MtgDatabaseManager db = MtgDatabaseManager.getInstance(_context);
-        data = db.SearchForCards(params);
-        notifyDataSetChanged();
+        refresh();
     }
     
     public CardListAdapter(Context _context, SearchParams _params, Collection _c)
     {
         context = _context;
         params = _params;
-        MtgDatabaseManager db = MtgDatabaseManager.getInstance(_context);
-        if (!params.searchOverCollection)
-            data = db.SearchForCards(params);
-        else
-            data = db.SearchCollectionForCards(params);
-        notifyDataSetChanged();
+        refresh();
     }
     
     public void setSearchParams(SearchParams _params)
     {
         params = _params;
-        MtgDatabaseManager db = MtgDatabaseManager.getInstance(context);
-        if (!params.searchOverCollection)
-            data = db.SearchForCards(params);
-        else
-            data = db.SearchCollectionForCards(params);
-        notifyDataSetChanged();
+        refresh();
     }
     
     public void addCard(CardData card)
@@ -61,8 +49,7 @@ public class CardListAdapter extends BaseAdapter
         // Otherwise, insert
         MtgDatabaseManager db = MtgDatabaseManager.getInstance(context);
         db.AddCardToCollection(params.CollectionId, card);
-        data = db.SearchCollectionForCards(params);
-        notifyDataSetChanged();
+        refresh();
     }
     
     @Override
@@ -136,5 +123,15 @@ public class CardListAdapter extends BaseAdapter
     {
         // TODO Auto-generated method stub
         return true;
+    }
+    
+    public void refresh()
+    {
+        MtgDatabaseManager db = MtgDatabaseManager.getInstance(context);
+        if (!params.searchOverCollection)
+            data = db.SearchForCards(params);
+        else
+            data = db.SearchCollectionForCards(params);
+        notifyDataSetChanged();
     }
 }

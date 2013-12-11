@@ -1,6 +1,8 @@
 package altik0.mtg.magictheorganizing;
 
 import altik0.mtg.magictheorganizing.Database.CollectionModel.Collection;
+import altik0.mtg.magictheorganizing.Database.MtgDatabaseManager.DatabaseListener;
+import altik0.mtg.magictheorganizing.Database.MtgDatabaseManager;
 import altik0.mtg.magictheorganizing.Database.SearchParams;
 import altik0.mtg.magictheorganizing.MtgDataTypes.CardData;
 import android.app.Activity;
@@ -23,7 +25,7 @@ import android.widget.ListView;
  * Activities containing this fragment MUST implement the {@link Callbacks}
  * interface.
  */
-public class CardListFragment extends ListFragment
+public class CardListFragment extends ListFragment implements DatabaseListener
 {
     
     /**
@@ -73,7 +75,7 @@ public class CardListFragment extends ListFragment
         /**
          * Callback for when an item has been selected.
          */
-        public void onItemSelected(int card_id);
+        public void onItemSelected(CardData card);
     }
     
     /**
@@ -83,7 +85,7 @@ public class CardListFragment extends ListFragment
     private static Callbacks sDummyCallbacks = new Callbacks()
     {
         @Override
-        public void onItemSelected(int card_id)
+        public void onItemSelected(CardData card)
         {
         }
     };
@@ -101,14 +103,13 @@ public class CardListFragment extends ListFragment
     {
         super.onCreate(savedInstanceState);
         
-        // TODO: replace with a real list adapter.
-        //setListAdapter(new ArrayAdapter<DummyContent.DummyItem>(getActivity(),
-        //        android.R.layout.simple_list_item_activated_1,
-        //        android.R.id.text1, DummyContent.ITEMS));
-        
+        // Setup list adapter:
         params = new SearchParams();
         listAdapter = new CardListAdapter(getActivity(), params);
         setListAdapter(listAdapter);
+        
+        // Assign ourselves as a listener to the database:
+        MtgDatabaseManager.RegisterListener(this);
     }
     
     @Override
@@ -190,7 +191,7 @@ public class CardListFragment extends ListFragment
         // Notify the active callbacks interface (the activity, if the
         // fragment is attached to one) that an item has been selected.
         CardData card = (CardData)listAdapter.getItem(position);
-        mCallbacks.onItemSelected(card.getCardId());
+        mCallbacks.onItemSelected(card);
     }
     
     @Override
@@ -202,6 +203,15 @@ public class CardListFragment extends ListFragment
             // Serialize and persist the activated item position.
             outState.putInt(STATE_ACTIVATED_POSITION, mActivatedPosition);
         }
+    }
+    
+    @Override
+    public void onDestroy()
+    {
+        // be certain we are unregistered before we are supposed to be destroyed
+        MtgDatabaseManager.UnregisterListener(this);
+        
+        super.onDestroy();
     }
     
     /**
@@ -248,5 +258,11 @@ public class CardListFragment extends ListFragment
                 ((ViewGroup)getView()).removeView(addButton);
         }
         //listAdapter.setSearchParams(params);
+    }
+
+    @Override
+    public void refresh()
+    {
+        listAdapter.refresh();
     }
 }

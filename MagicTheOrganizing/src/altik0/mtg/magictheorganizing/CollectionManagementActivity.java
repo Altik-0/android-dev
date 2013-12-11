@@ -7,6 +7,7 @@ import altik0.mtg.magictheorganizing.Database.CollectionModel;
 import altik0.mtg.magictheorganizing.Database.CollectionModel.Collection;
 import altik0.mtg.magictheorganizing.Database.CollectionModel.Location;
 import altik0.mtg.magictheorganizing.Database.MtgDatabaseManager;
+import altik0.mtg.magictheorganizing.Database.MtgDatabaseManager.DatabaseListener;
 import altik0.mtg.magictheorganizing.Database.SearchParams;
 import altik0.mtg.magictheorganizing.dialogFragments.*;
 import altik0.mtg.magictheorganizing.dialogFragments.AddCollectionDialogFragment.AddCollectionHolder;
@@ -37,6 +38,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 public class CollectionManagementActivity extends Activity implements ListAdapter,
+                                                                      DatabaseListener,
                                                                       EditLocationHolder,
                                                                       AddLocationHolder,
                                                                       RenameLocationHolder,
@@ -121,7 +123,7 @@ public class CollectionManagementActivity extends Activity implements ListAdapte
             params.CollectionId = c.CollectionId;
             params.searchOverCollection = true;
             Intent collectionViewIntent = CardListActivity.buildSearchIntent(
-                    CollectionManagementActivity.this, params, true);
+                    CollectionManagementActivity.this, params, true, true);
             startActivity(collectionViewIntent);
         }
     };
@@ -149,6 +151,9 @@ public class CollectionManagementActivity extends Activity implements ListAdapte
         collectionList.addFooterView(addLocationButtonBox);
         collectionList.setAdapter(this);
         collectionList.setOnItemClickListener(normalSelectedListener);
+        
+        // Register ourselves as a database listener:
+        MtgDatabaseManager.RegisterListener(this);
     }
     
     @Override
@@ -175,6 +180,15 @@ public class CollectionManagementActivity extends Activity implements ListAdapte
             setState(ActivityState.editing);
         else
             setState(ActivityState.normal);
+    }
+    
+    @Override
+    public void onDestroy()
+    {
+        // Unregister ourselves from the database
+        MtgDatabaseManager.UnregisterListener(this);
+        
+        super.onDestroy();
     }
 
     @Override
@@ -337,7 +351,7 @@ public class CollectionManagementActivity extends Activity implements ListAdapte
         return false;
     }
     
-    private void refresh()
+    public void refresh()
     {
         collectionMap = MtgDatabaseManager.getInstance(this).GetLocationsWithCollections();
         ListView lv = (ListView)findViewById(R.id.contentManagementList);
@@ -440,7 +454,6 @@ public class CollectionManagementActivity extends Activity implements ListAdapte
         // the user and delete their shit with no regard for
         // their feelings of accidents
         MtgDatabaseManager.getInstance(this).DeleteLocation(l.LocationId);
-        refresh();
     }
 
     @Override
@@ -485,21 +498,18 @@ public class CollectionManagementActivity extends Activity implements ListAdapte
     public void addLocation(String newName)
     {
         MtgDatabaseManager.getInstance(this).AddLocation(newName);
-        refresh();
     }
 
     @Override
     public void renameLocationWithName(Location l, String newName)
     {
         MtgDatabaseManager.getInstance(this).RenameLocation(l.LocationId, newName);
-        refresh();
     }
 
     @Override
     public void addCollectionWithName(Location l, String newName)
     {
         MtgDatabaseManager.getInstance(this).AddCollectionToLocation(l.LocationId, newName);
-        refresh();
     }
 
     @Override
@@ -508,7 +518,6 @@ public class CollectionManagementActivity extends Activity implements ListAdapte
         // TODO probably want to prompt user that they're sure
         // for now, just do it
         MtgDatabaseManager.getInstance(this).DeleteCollection(c.CollectionId);
-        refresh();
     }
 
     @Override
@@ -534,7 +543,6 @@ public class CollectionManagementActivity extends Activity implements ListAdapte
     public void copyCollection(Collection c)
     {
         MtgDatabaseManager.getInstance(this).CopyCollection(c.CollectionId, "Copy of " + c.Name);
-        refresh();
     }
 
     @Override
@@ -547,6 +555,5 @@ public class CollectionManagementActivity extends Activity implements ListAdapte
     public void renameCollectionWithName(Collection c, String newName)
     {
         MtgDatabaseManager.getInstance(this).RenameCollection(c.CollectionId, newName);
-        refresh();
     }
 }

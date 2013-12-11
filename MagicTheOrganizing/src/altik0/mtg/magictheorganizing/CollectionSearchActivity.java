@@ -107,7 +107,8 @@ public class CollectionSearchActivity extends Activity
                 params.CollectionId = collections.get(index).CollectionId;
             
             // Build the intent, and launch that activity!
-            Intent searchIntent = CardListActivity.buildSearchIntent(CollectionSearchActivity.this, params);
+            Intent searchIntent = CardListActivity.buildSearchIntent(
+                    CollectionSearchActivity.this, params, false, true);
             startActivity(searchIntent);
         }
     };

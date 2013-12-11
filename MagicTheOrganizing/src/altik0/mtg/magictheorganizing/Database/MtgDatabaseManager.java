@@ -12,6 +12,7 @@ import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.os.Debug;
 import android.util.Log;
 
 import java.io.BufferedReader;
@@ -29,6 +30,29 @@ public class MtgDatabaseManager extends SQLiteOpenHelper
     private static final int VER_NUM = 1;
     private Context context;
     
+    // Listener functionality
+    public interface DatabaseListener
+    {
+        public void refresh();
+    }
+    private static LinkedList<DatabaseListener> listeners = new LinkedList<DatabaseListener>();
+    
+    public static void RegisterListener(DatabaseListener listener)
+    {
+        listeners.add(listener);
+    }
+    
+    public static void UnregisterListener(DatabaseListener listener)
+    {
+        listeners.remove(listener);
+    }
+    
+    public static void RefreshListeners()
+    {
+        for (DatabaseListener listener : listeners)
+            listener.refresh();
+    }
+    
     public MtgDatabaseManager(Context _context)
     {
         super (_context, DB_NAME, null, VER_NUM);
@@ -39,7 +63,7 @@ public class MtgDatabaseManager extends SQLiteOpenHelper
     public void onCreate(SQLiteDatabase db)
     {
         // Open sql file
-        InputStream is = context.getResources().openRawResource(R.raw.mtg_sql);
+        InputStream is = context.getResources().openRawResource(R.raw.mtg_sql_small);
         InputStreamReader isr = new InputStreamReader(is);
         BufferedReader buf = new BufferedReader(isr);
         
@@ -194,8 +218,61 @@ public class MtgDatabaseManager extends SQLiteOpenHelper
         return toRet.get(0);
     }
     
+    public CardData GetCardWithCollectionId(int id)
+    {
+        ArrayList<CardData> toRet = new ArrayList<CardData>();
+        
+        SQLiteDatabase db = getWritableDatabase();
+        Cursor cursor = db.rawQuery("SELECT * FROM CollectedCards col_cards JOIN Cards card_table " +
+                                    "ON card_table.CardID = col_cards.CardID " +
+                                    "WHERE col_cards.CollectedID = ?",
+                                    new String[]{Integer.toString(id)});
+        
+        // Read cards
+        if (cursor.moveToFirst())
+        {
+            do
+            {
+                CardData card = new CardData();
+                card.setCollectedId(cursor.getInt(0));
+                card.setCardId(cursor.getInt(1));
+                card.setRarity(cursor.getString(9));
+                card.setName(cursor.getString(11));
+                card.setCmc(cursor.getInt(12));
+                card.setManaCost(cursor.getString(14));
+                card.setPower(cursor.getString(16));
+                card.setToughness(cursor.getString(17));
+                card.setLoyalty(cursor.getInt(18));
+                card.setText(cursor.getString(19));
+                card.setFlavorText(cursor.getString(20));
+                card.setCount(cursor.getInt(3));
+                
+                int colorCode = cursor.getInt(15);
+                String typeCode = cursor.getString(10);
+                String setCode = cursor.getString(7);
+                String tagsCode = cursor.getString(2);
+                
+                card.setColorsFromCode(colorCode);
+                card.setTypesFromCode(typeCode);
+                card.setSetsFromCode(setCode);
+                card.setTagsFromCode(tagsCode);
+    
+                // Add card to list
+                toRet.add(card);
+            } while(cursor.moveToNext());
+        }
+        
+        // We only used an array list because all the functions take that contract
+        // In reality, it's just going to be one item. If there weren't any, I suppose
+        // that would be a problem, but we can address that later.
+        // I guess TODO and whatnot.
+        return toRet.get(0);
+    }
+    
     public ArrayList<CardData> SearchForCards(SearchParams params)
     {
+        //Debug.startMethodTracing("SearchTrace");
+        
         // Build dat query
         String query = "SELECT * FROM Cards card_table WHERE ";
         
@@ -343,6 +420,8 @@ public class MtgDatabaseManager extends SQLiteOpenHelper
             } while(cursor.moveToNext());
         }
         
+        //Debug.stopMethodTracing();
+        
         return toRet;
     }
     
@@ -481,6 +560,7 @@ public class MtgDatabaseManager extends SQLiteOpenHelper
             do
             {
                 CardData card = new CardData();
+                card.setCollectedId(cursor.getInt(0));
                 card.setCardId(cursor.getInt(1));
                 card.setRarity(cursor.getString(9));
                 card.setName(cursor.getString(11));
@@ -491,15 +571,17 @@ public class MtgDatabaseManager extends SQLiteOpenHelper
                 card.setLoyalty(cursor.getInt(18));
                 card.setText(cursor.getString(19));
                 card.setFlavorText(cursor.getString(20));
-                // TODO: get count, tags
+                card.setCount(cursor.getInt(3));
                 
                 int colorCode = cursor.getInt(15);
                 String typeCode = cursor.getString(10);
                 String setCode = cursor.getString(7);
+                String tagsCode = cursor.getString(2);
                 
                 card.setColorsFromCode(colorCode);
                 card.setTypesFromCode(typeCode);
                 card.setSetsFromCode(setCode);
+                card.setTagsFromCode(tagsCode);
     
                 // Add card to list
                 toRet.add(card);
@@ -553,6 +635,9 @@ public class MtgDatabaseManager extends SQLiteOpenHelper
     {
         SQLiteDatabase db = getWritableDatabase();
         db.execSQL("INSERT INTO Locations(Name) VALUES(?)", new String[] {locationName});
+        
+        // Tell our listeners that we've changed the data
+        RefreshListeners();
     }
     
     public void DeleteLocation(int locationId)
@@ -568,13 +653,12 @@ public class MtgDatabaseManager extends SQLiteOpenHelper
                             new String[] {Integer.toString(locationId)});
         
         if (cursor.moveToFirst())
+        {
             do
             {
                 collectionIds.add(cursor.getInt(0));
             } while(cursor.moveToNext());
-        // If no entry was found, delete is done!
-        else
-            return;
+        }
         
         // Delete the collections previously grabbed
         db.execSQL("DELETE FROM Collections WHERE LocationID = ?",
@@ -586,6 +670,9 @@ public class MtgDatabaseManager extends SQLiteOpenHelper
             db.execSQL("DELETE FROM CollectedCards WHERE CollectionID = ?",
                     new String[] {Integer.toString(id)});
         }
+        
+        // Tell our listeners that we've changed the data
+        RefreshListeners();
     }
     
     public void DeleteCollection(int collectionId)
@@ -598,6 +685,9 @@ public class MtgDatabaseManager extends SQLiteOpenHelper
         // Now, delete CollectedCards in these collections
         db.execSQL("DELETE FROM CollectedCards WHERE CollectionID = ?",
             new String[] {Integer.toString(collectionId)});
+        
+        // Tell our listeners that we've changed the data
+        RefreshListeners();
     }
     
     public void RenameLocation(int locationId, String newName)
@@ -605,6 +695,9 @@ public class MtgDatabaseManager extends SQLiteOpenHelper
         SQLiteDatabase db = getWritableDatabase();
         db.execSQL("UPDATE Locations SET Name=? WHERE LocationID=?",
                 new String[] {newName, Integer.toString(locationId)});
+        
+        // Tell our listeners that we've changed the data
+        RefreshListeners();
     }
     
     public void RenameCollection(int collectionId, String newName)
@@ -612,6 +705,9 @@ public class MtgDatabaseManager extends SQLiteOpenHelper
         SQLiteDatabase db = getWritableDatabase();
         db.execSQL("UPDATE Collections SET Name=? WHERE CollectionID=?",
                 new String[] {newName, Integer.toString(collectionId)});
+        
+        // Tell our listeners that we've changed the data
+        RefreshListeners();
     }
     
     public void AddCollectionToLocation(int locationId, String collectionName)
@@ -620,11 +716,14 @@ public class MtgDatabaseManager extends SQLiteOpenHelper
         SQLiteDatabase db = getWritableDatabase();
         db.execSQL("INSERT INTO Collections (Name, LocationID) " +
                    "VALUES (?, ?)", new String[]{collectionName, Integer.toString(locationId)});
+        
+        // Tell our listeners that we've changed the data
+        RefreshListeners();
     }
     
     public void AddCardToCollection(int collectionId, CardData card)
     {
-        // TODO: handle counts and tags. For now, just pretend card.Count == 1 and card.Tags = []
+        // TODO: handle tags properly
         
         // Check for preexisting entry:
         SQLiteDatabase db = getWritableDatabase();
@@ -644,23 +743,40 @@ public class MtgDatabaseManager extends SQLiteOpenHelper
         // If we found a match, update the entry to increase count:
         if (oldCnt != null)
         {
-            // TODO: change to using card.Count instead of 1
+            // TODO: update tags
             db.execSQL("UPDATE CollectedCards SET Count = ? " +
                        "WHERE CollectionID = ? AND CardID = ?",
-                       new String[] {Integer.toString(oldCnt + 1),
+                       new String[] {Integer.toString(oldCnt + card.getCount()),
                                      Integer.toString(collectionId),
                                      Integer.toString(card.getCardId())});
         }
         // If we didn't find a match, insert the card into the database:
         else
         {
-            // TODO: use card.Count instead of 1. Also, insert tags
+            // TODO: insert tags
             db.execSQL("INSERT INTO CollectedCards (CollectionID, CardID, Count) " +
             		   "VALUES (?, ?, ?)",
             		   new String[] {Integer.toString(collectionId),
                                      Integer.toString(card.getCardId()),
-                                     Integer.toString(1)});
+                                     Integer.toString(card.getCount())});
         }
+        
+        // Tell our listeners that we've changed the data
+        RefreshListeners();
+    }
+    
+    public void UpdateCollectedCard(int oldCollectedId, CardData newData)
+    {
+        SQLiteDatabase db = getWritableDatabase();
+        db.execSQL("UPDATE CollectedCards SET " +
+        		   "CardID = ?, Count = ? " +
+        		   "WHERE CollectedID = ?",       // TODO: tags
+        		   new String[] {Integer.toString(newData.getCardId()),
+                                 Integer.toString(newData.getCount()),
+                                 Integer.toString(oldCollectedId)});
+        
+        // Tell our listeners that we've changed the data
+        RefreshListeners();
     }
     
     public void CopyCollection(int oldColId, String newName)
@@ -691,6 +807,9 @@ public class MtgDatabaseManager extends SQLiteOpenHelper
                    "SELECT CardID, ?, Count, Tags FROM CollectedCards " +
                    "WHERE CollectionID = ?",
                    new String[] {Integer.toString(newColId), Integer.toString(oldColId)});
+        
+        // Tell our listeners that we've changed the data
+        RefreshListeners();
     }
     
     public ArrayList<Collection> GetCollections()
@@ -751,118 +870,6 @@ public class MtgDatabaseManager extends SQLiteOpenHelper
         return toRet;
     }
     
-    // Held onto for documentation purposes, but ultimately not used anymore
-    /*
-    // Takes cards, which are presumed to just have data from the Cards database,
-    // and appends data for various list-type fields spread across different tables
-    private static void FixCardListData(ArrayList<CardData> cards, SQLiteDatabase db, Cursor cursor)
-    {
-        for (CardData card : cards)
-        {
-            // Get colors
-            cursor = db.rawQuery(
-                    "SELECT color_table.Name FROM Cards card_table " +
-                    "JOIN CardColors card_color_table ON card_color_table.CardID = card_table.CardID " +
-                    "JOIN Colors color_table ON card_color_table.ColorID = color_table.ColorID " +
-                    "WHERE card_table.CardID = ?",
-                    new String[] { Integer.toString(card.getCardId()) });
-            
-            if (cursor.moveToFirst())
-            {
-                card.setSet(cursor.getString(0));
-                do
-                {
-                    String color = cursor.getString(0);
-                    if (color.toUpperCase().equals("WHITE"))
-                        card.addColor(CardColor.White);
-                    else if (color.toUpperCase().equals("BLUE"))
-                        card.addColor(CardColor.Blue);
-                    else if (color.toUpperCase().equals("BLACK"))
-                        card.addColor(CardColor.Black);
-                    else if (color.toUpperCase().equals("RED"))
-                        card.addColor(CardColor.Red);
-                    else if (color.toUpperCase().equals("GREEN"))
-                        card.addColor(CardColor.Green);
-                } while(cursor.moveToNext());
-            }
-                    
-            // Get types
-            cursor = db.rawQuery(
-                    "SELECT type_table.Name FROM Cards card_table " +
-                    "JOIN CardTypes card_type_table ON card_type_table.CardID = card_table.CardID " +
-                    "JOIN Types type_table ON card_type_table.TypeID = type_table.TypeID " +
-                    "WHERE card_table.CardID = ?",
-                    new String[] { Integer.toString(card.getCardId()) });
-            
-            if (cursor.moveToFirst())
-            {
-                do
-                {
-                    String type = cursor.getString(0);
-                    if (type.toUpperCase().equals("ARTIFACT"))
-                        card.addType(CardType.Artifact);
-                    else if (type.toUpperCase().equals("CREATURE"))
-                        card.addType(CardType.Creature);
-                    else if (type.toUpperCase().equals("ENCHANTMENT"))
-                        card.addType(CardType.Enchantment);
-                    else if (type.toUpperCase().equals("INSTANT"))
-                        card.addType(CardType.Instant);
-                    else if (type.toUpperCase().equals("SORCERY"))
-                        card.addType(CardType.Sorcery);
-                    else if (type.toUpperCase().equals("PLANESWALKER"))
-                        card.addType(CardType.Planeswalker);
-                    else if (type.toUpperCase().equals("LAND"))
-                        card.addType(CardType.Land);
-                    else if (type.toUpperCase().equals("TRIBAL"))
-                        card.addType(CardType.Tribal);
-                } while(cursor.moveToNext());
-            }
-            
-            // Get supertypes
-            cursor = db.rawQuery(
-                    "SELECT type_table.Name FROM Cards card_table " +
-                    "JOIN CardSupertypes card_type_table ON card_type_table.CardID = card_table.CardID " +
-                    "JOIN Supertypes type_table ON card_type_table.SupertypeID = type_table.SupertypeID " +
-                    "WHERE card_table.CardID = ?",
-                    new String[] { Integer.toString(card.getCardId()) });
-            
-            if (cursor.moveToFirst())
-            {
-                do
-                {
-                    String type = cursor.getString(0);
-                    if (type.toUpperCase().equals("LEGENDARY"))
-                        card.addSupertype(CardSupertype.Legendary);
-                    else if (type.toUpperCase().equals("SNOW"))
-                        card.addSupertype(CardSupertype.Snow);
-                    else if (type.toUpperCase().equals("BASIC"))
-                        card.addSupertype(CardSupertype.Basic);
-                    else if (type.toUpperCase().equals("WORLD"))
-                        card.addSupertype(CardSupertype.World);
-                } while(cursor.moveToNext());
-            }
-            
-
-            
-            // Get subtypes
-           cursor = db.rawQuery(
-                   "SELECT type_table.Name FROM Cards card_table " +
-                   "JOIN CardSubtypes card_type_table ON card_type_table.CardID = card_table.CardID " +
-                   "JOIN Subtypes type_table ON card_type_table.SubtypeID = type_table.SubtypeID " +
-                   "WHERE card_table.CardID = ?",
-                   new String[] { Integer.toString(card.getCardId()) });
-           
-           if (cursor.moveToFirst())
-           {
-               do
-               {
-                   card.addSubtype(cursor.getString(0));
-               } while(cursor.moveToNext());
-           }
-        }
-    }
-    */
-
     private static MtgDatabaseManager instance = null;
     public static synchronized MtgDatabaseManager getInstance(Context _context)
     {

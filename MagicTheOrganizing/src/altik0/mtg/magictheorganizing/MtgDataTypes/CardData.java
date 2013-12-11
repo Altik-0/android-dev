@@ -16,6 +16,11 @@ public class CardData implements Serializable
     
     // Database indicator things
     private int cardId;
+    private Integer collectedId = null;
+    
+    // Collection values
+    private int count;
+    private String tags;    // TODO: proper list for tags
     
     // Cached values
     private int cmc;
@@ -110,6 +115,12 @@ public class CardData implements Serializable
             colors.add(CardColor.Red);
         if ((colorCode & GREEN_CODE) != 0)
             colors.add(CardColor.Green);
+	}
+	
+	public void setTagsFromCode(String tagCode)
+	{
+	    // TODO: proper
+	    tags = tagCode;
 	}
 	
 	public void setTypesFromCode(String typeString)
@@ -340,5 +351,39 @@ public class CardData implements Serializable
     public void setFlavorText(String _FlavorText)
     {
         flavorText = _FlavorText;
+    }
+
+    public int getCount()
+    {
+        return count;
+    }
+
+    public void setCount(int count)
+    {
+        this.count = count;
+    }
+
+    public ArrayList<String> getTags()
+    {
+        // TODO: proper shit
+        ArrayList<String> thng = new ArrayList<String>();
+        thng.add(tags);
+        return thng;
+    }
+
+    public void setTags(ArrayList<String> tags)
+    {
+        // TODO: smarter
+        this.tags = tags.toString();
+    }
+
+    public Integer getCollectedId()
+    {
+        return collectedId;
+    }
+
+    public void setCollectedId(Integer collectedId)
+    {
+        this.collectedId = collectedId;
     }
 }

@@ -1,5 +1,6 @@
 package altik0.mtg.magictheorganizing;
 
+import altik0.mtg.magictheorganizing.CardDetailFragment.DetailFragmentState;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
@@ -15,6 +16,8 @@ import android.view.MenuItem;
  */
 public class CardDetailActivity extends Activity
 {
+    public static final String COLLECTION_MODE = "Collection mode";
+    boolean collectionMode = false;
     
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -24,6 +27,9 @@ public class CardDetailActivity extends Activity
         
         // Show the Up button in the action bar.
         getActionBar().setDisplayHomeAsUpEnabled(true);
+        
+        Intent intent = getIntent();
+        collectionMode = intent.getBooleanExtra(COLLECTION_MODE, false);
         
         // savedInstanceState is non-null when there is fragment state
         // saved from previous configurations of this activity
@@ -42,11 +48,26 @@ public class CardDetailActivity extends Activity
             String idStr = getIntent().getStringExtra(CardDetailFragment.ARG_ITEM_ID);
             int id = Integer.parseInt(idStr);
             arguments.putInt(CardDetailFragment.ARG_ITEM_ID, id);
+            arguments.putBoolean(CardDetailFragment.COLLECTION_MODE, collectionMode);
             CardDetailFragment fragment = new CardDetailFragment();
             fragment.setArguments(arguments);
             getFragmentManager().beginTransaction()
                     .add(R.id.card_detail_container, fragment).commit();
+
+            if (this.getCallingActivity() != null)
+                fragment.setState(DetailFragmentState.Return);
+            else if (collectionMode)
+                fragment.setState(DetailFragmentState.Collection);
+            else
+                fragment.setState(DetailFragmentState.Normal);
         }
+
+        collectionMode = intent.getBooleanExtra(COLLECTION_MODE, false);
+        collectionMode = intent.getBooleanExtra(COLLECTION_MODE, false);
+        collectionMode = intent.getBooleanExtra(COLLECTION_MODE, false);
+        collectionMode = intent.getBooleanExtra(COLLECTION_MODE, false);
+        collectionMode = intent.getBooleanExtra(COLLECTION_MODE, false);
+        collectionMode = intent.getBooleanExtra(COLLECTION_MODE, false);
     }
     
     @Override
