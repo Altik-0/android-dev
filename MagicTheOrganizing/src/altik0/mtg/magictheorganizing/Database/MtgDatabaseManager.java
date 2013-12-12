@@ -822,6 +822,37 @@ public class MtgDatabaseManager extends SQLiteOpenHelper
         RefreshListeners();
     }
     
+    public void MoveCollectionToLocation(int collectionId, int locationId)
+    {
+        SQLiteDatabase db = getWritableDatabase();
+        db.execSQL("UPDATE Collections SET LocationID = ? WHERE CollectionID = ?",
+                   new String[] {Integer.toString(locationId), Integer.toString(collectionId)});
+        
+        // Tell our listeners we've changed the data
+        RefreshListeners();
+    }
+    
+    public ArrayList<Location> GetLocations()
+    {
+        ArrayList<Location> toRet = new ArrayList<Location>();
+        
+        SQLiteDatabase db = getWritableDatabase();
+        Cursor cursor = db.rawQuery("SELECT LocationID, Name FROM Locations", null);
+        
+        if (cursor.moveToFirst())
+        {
+            do
+            {
+                Location l = new Location();
+                l.LocationId = cursor.getInt(0);
+                l.Name = cursor.getString(1);
+                toRet.add(l);
+            } while(cursor.moveToNext());
+        }
+        
+        return toRet;
+    }
+    
     public ArrayList<Collection> GetCollections()
     {
         ArrayList<Collection> toRet = new ArrayList<Collection>();

@@ -16,6 +16,7 @@ import altik0.mtg.magictheorganizing.dialogFragments.EditCollectionDialogFragmen
 import altik0.mtg.magictheorganizing.dialogFragments.RenameCollectionDialogFragment.RenameCollectionHolder;
 import altik0.mtg.magictheorganizing.dialogFragments.RenameLocationDialogFragment.RenameLocationHolder;
 import altik0.mtg.magictheorganizing.dialogFragments.EditLocationDialogFragment.EditLocationHolder;
+import altik0.mtg.magictheorganizing.dialogFragments.SelectLocationDialogFragment.LocationAccepter;
 import android.os.Bundle;
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -546,9 +547,30 @@ public class CollectionManagementActivity extends Activity implements ListAdapte
     }
 
     @Override
-    public void moveCollection(Collection c)
+    public void moveCollection(final Collection c)
     {
-        // TODO: this is a silly feature that will take too long to implement probably
+        FragmentTransaction trans = getFragmentManager().beginTransaction();
+        Fragment oldDialog = getFragmentManager().findFragmentByTag(DIALOG_TAG);
+        if (oldDialog != null)
+            trans.remove(oldDialog);
+        
+        //trans.addToBackStack(null);
+        
+        SelectLocationDialogFragment newDialog = new SelectLocationDialogFragment();
+        Bundle args = new Bundle();
+        newDialog.setArguments(args);
+        newDialog.setLocationAccepter(new LocationAccepter()
+        {
+            @Override
+            public void returnLocation(Location l)
+            {
+                MtgDatabaseManager.
+                    getInstance(CollectionManagementActivity.this).
+                    MoveCollectionToLocation(c.CollectionId, l.LocationId);
+            }
+        });
+        
+        newDialog.show(trans, DIALOG_TAG);
     }
 
     @Override
