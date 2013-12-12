@@ -25,7 +25,7 @@ import android.os.Bundle;
  * interface to listen for item selections.
  */
 public class CardListActivity extends Activity implements
-        CardListFragment.Callbacks
+        CardListFragment.Callbacks, CardDetailFragment.ContainerCallbacks
 {
     public static final String SEARCH_PARAMS_KEY = "Search";
     public static final String ALLOW_ADDITION_KEY = "Allow Addition";
@@ -150,5 +150,22 @@ public class CardListActivity extends Activity implements
         // If it wasn't our activity that called it, we'll assume the super class did:
         else
             super.onActivityResult(requestCode, resultCode, data);
+    }
+
+    @Override
+    public void detailContentDeleted()
+    {
+        // TODO: something smarter. For now, just tell list fragment to select top element
+        CardListFragment listFrag = (CardListFragment)getFragmentManager().findFragmentById(R.id.card_list);
+        int curPos = listFrag.getSelectedItemPosition();
+        if (listFrag.getListAdapter().getCount() == 0)
+        {
+            // ???
+        }
+        else
+        {
+            curPos = (curPos == 0) ? curPos + 1 : curPos - 1;
+        }
+        listFrag.setSelection(curPos);
     }
 }

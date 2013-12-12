@@ -14,10 +14,13 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
 
+import altik0.mtg.magictheorganizing.Database.CollectionModel.Collection;
 import altik0.mtg.magictheorganizing.Database.MtgDatabaseManager;
 import altik0.mtg.magictheorganizing.Database.CollectionModel.Location;
 import altik0.mtg.magictheorganizing.Database.MtgDatabaseManager.DatabaseListener;
 import altik0.mtg.magictheorganizing.MtgDataTypes.CardData;
+import altik0.mtg.magictheorganizing.dialogFragments.AddCardToCollectionDialogFragment;
+import altik0.mtg.magictheorganizing.dialogFragments.AddCardToCollectionDialogFragment.DataAccepter;
 import altik0.mtg.magictheorganizing.dialogFragments.EditLocationDialogFragment;
 import altik0.mtg.magictheorganizing.dialogFragments.PromptCountAndTagsDialogFragment;
 import altik0.mtg.magictheorganizing.dialogFragments.PromptCountAndTagsDialogFragment.CountAndTagAccepter;
@@ -40,6 +43,17 @@ public class CardDetailFragment extends Fragment implements DatabaseListener
     public static final String DIALOG_TAG = "dialog";
     public static final String STATE_KEY = "state saving yayayay!";
     
+    public interface ContainerCallbacks
+    {
+        public void detailContentDeleted();
+    }
+    private ContainerCallbacks container;
+    
+    public void setContainerCallbacks(ContainerCallbacks _container)
+    {
+        container = _container;
+    }
+    
     // States the fragment can be in
     //     Normal: no buttons, no collection data
     //     Collection: buttons for edit/delete, collection data
@@ -54,7 +68,9 @@ public class CardDetailFragment extends Fragment implements DatabaseListener
     private Button selectButton;
     private Button editButton;
     private Button removeButton;
+    private Button addButton;
     private ViewGroup buttonSet;
+    private ViewGroup collectionButtons;
     private ViewGroup collectionData;
     
     private OnClickListener selectCardListener = new OnClickListener()
@@ -80,8 +96,23 @@ public class CardDetailFragment extends Fragment implements DatabaseListener
         @Override
         public void onClick(View v)
         {
-            // TODO: tell appropriate channels to remove this card
+            // Unregister ourselves from the database manager, since our data is going away:
+            MtgDatabaseManager.UnregisterListener(CardDetailFragment.this);
+            // Perform delete:
+            MtgDatabaseManager.getInstance(getActivity()).DeleteCardFromCollection(card.getCollectedId());
+            // If we delete the card, we need to tell the activity - this fragment
+            // is now invalid, and we may need to end, or possibly refresh with new content
+            informDelete();
         }
+    };
+    
+    private OnClickListener addListener = new OnClickListener()
+    {
+        @Override
+        public void onClick(View arg0)
+        {
+            displayAddCardToCollectionDialog(card.getCount(), card.getTags());
+        }  
     };
     
     /**
@@ -147,13 +178,16 @@ public class CardDetailFragment extends Fragment implements DatabaseListener
         selectButton = (Button)rootView.findViewById(R.id.selectCardButton);
         editButton = (Button)rootView.findViewById(R.id.editButton);
         removeButton = (Button)rootView.findViewById(R.id.removeButton);
+        addButton = (Button)rootView.findViewById(R.id.addCardButton);
         buttonSet = (ViewGroup)rootView.findViewById(R.id.detailButtonSet);
         collectionData = (ViewGroup)rootView.findViewById(R.id.detailsCollection);
+        collectionButtons = (ViewGroup)rootView.findViewById(R.id.collectionButtonList);
         
         // Hookup button click listeners:
         selectButton.setOnClickListener(selectCardListener);
         editButton.setOnClickListener(editListener);
         removeButton.setOnClickListener(removeListener);
+        addButton.setOnClickListener(addListener);
         
         // Show the dummy content as text in a TextView.
         if (card != null)
@@ -189,15 +223,19 @@ public class CardDetailFragment extends Fragment implements DatabaseListener
         // Delete appropriate content based on state
         if (state == DetailFragmentState.Normal)
         {
+            buttonSet.removeView(collectionButtons);
+            buttonSet.removeView(selectButton);
             rootView.removeView(collectionData);
-            rootView.removeView(buttonSet);
         }
         else if (state == DetailFragmentState.Return)
         {
-            buttonSet.removeView(rootView.findViewById(R.id.collectionButtonList));
+            buttonSet.removeView(collectionButtons);
+            buttonSet.removeView(addButton);
+            rootView.removeView(collectionData);
         }
         else // if(state == DetailFragmentState.Collection)
         {
+            buttonSet.removeView(addButton);
             buttonSet.removeView(selectButton);
         }
         
@@ -245,15 +283,19 @@ public class CardDetailFragment extends Fragment implements DatabaseListener
             {
                 if (state == DetailFragmentState.Normal)
                 {
+                    buttonSet.addView(collectionButtons);
+                    buttonSet.addView(selectButton);
                     rootView.addView(collectionData);
-                    rootView.addView(buttonSet);
                 }
                 else if (state == DetailFragmentState.Return)
                 {
-                    buttonSet.addView(rootView.findViewById(R.id.collectionButtonList));
+                    buttonSet.addView(collectionButtons);
+                    buttonSet.addView(addButton);
+                    rootView.addView(collectionData);
                 }
                 else // if(state == DetailFragmentState.Collection)
                 {
+                    buttonSet.addView(addButton);
                     buttonSet.addView(selectButton);
                 }
             }
@@ -264,19 +306,62 @@ public class CardDetailFragment extends Fragment implements DatabaseListener
             {
                 if (state == DetailFragmentState.Normal)
                 {
+                    buttonSet.removeView(collectionButtons);
+                    buttonSet.removeView(selectButton);
                     rootView.removeView(collectionData);
-                    rootView.removeView(buttonSet);
                 }
                 else if (state == DetailFragmentState.Return)
                 {
-                    buttonSet.removeView(rootView.findViewById(R.id.collectionButtonList));
+                    buttonSet.removeView(collectionButtons);
+                    buttonSet.removeView(addButton);
+                    rootView.removeView(collectionData);
                 }
                 else // if(state == DetailFragmentState.Collection)
                 {
+                    buttonSet.removeView(addButton);
                     buttonSet.removeView(selectButton);
                 }
             }
         }
+    }
+    
+    private void displayAddCardToCollectionDialog(int count, ArrayList<String> tags)
+    {
+        FragmentTransaction trans = getFragmentManager().beginTransaction();
+        Fragment oldDialog = getFragmentManager().findFragmentByTag(DIALOG_TAG);
+        if (oldDialog != null)
+            trans.remove(oldDialog);
+        
+        //trans.addToBackStack(null);
+        
+        AddCardToCollectionDialogFragment newDialog = new AddCardToCollectionDialogFragment();
+        Bundle args = new Bundle();
+        args.putInt(AddCardToCollectionDialogFragment.COUNT_KEY, count);
+        args.putSerializable(AddCardToCollectionDialogFragment.TAGS_KEY, tags);
+        // TODO: don't use static titles
+        args.putString(AddCardToCollectionDialogFragment.TITLE_KEY, "Insert into Collection");
+        newDialog.setArguments(args);
+        newDialog.setDataAccepter(new DataAccepter()
+        {
+            @Override
+            public void returnValues(int cnt, ArrayList<String> tags, Collection c)
+            {
+                // TODO: new prompt in this case
+                // If count is 0, do nothing:
+                if (cnt == 0)
+                    return;
+                else
+                {
+                    CardData newCard = new CardData(card);
+                    newCard.setCount(cnt);
+                    newCard.setTags(tags);
+                    MtgDatabaseManager.getInstance(getActivity()).AddCardToCollection(
+                            c.CollectionId, newCard);
+                }
+            }
+        });
+        
+        newDialog.show(trans, DIALOG_TAG);
     }
     
     private void displayPromptCountAndTagsPopupForEdit(int count, ArrayList<String> tags)
@@ -300,10 +385,24 @@ public class CardDetailFragment extends Fragment implements DatabaseListener
             @Override
             public void returnValues(int cnt, ArrayList<String> tags)
             {
-                card.setCount(cnt);
-                card.setTags(tags);
-                MtgDatabaseManager.getInstance(getActivity()).UpdateCollectedCard(
-                        card.getCollectedId(), card);
+                // If count is 0, instead delete the card:
+                if (cnt == 0)
+                {
+                 // Unregister ourselves from the database manager, since our data is going away:
+                    MtgDatabaseManager.UnregisterListener(CardDetailFragment.this);
+                    // Perform delete:
+                    MtgDatabaseManager.getInstance(getActivity()).DeleteCardFromCollection(card.getCollectedId());
+                    // If we delete the card, we need to tell the activity - this fragment
+                    // is now invalid, and we may need to end, or possibly refresh with new content
+                    informDelete();
+                }
+                else
+                {
+                    card.setCount(cnt);
+                    card.setTags(tags);
+                    MtgDatabaseManager.getInstance(getActivity()).UpdateCollectedCard(
+                            card.getCollectedId(), card);
+                }
             }
         });
         
@@ -331,6 +430,11 @@ public class CardDetailFragment extends Fragment implements DatabaseListener
             @Override
             public void returnValues(int cnt, ArrayList<String> tags)
             {
+                // TODO: if count is 0, present popup alerting error, and continue.
+                // For now, just don't return anything
+                if (cnt == 0)
+                    return;
+                
                 card.setCount(cnt);
                 card.setTags(tags);
                 Intent returnIntent = new Intent();
@@ -383,5 +487,11 @@ public class CardDetailFragment extends Fragment implements DatabaseListener
             countText.setText("Count: " + card.getCount());
             tagText.setText("Tags: " + card.getTags());
         }
+    }
+    
+    private void informDelete()
+    {
+        if (container != null)
+            container.detailContentDeleted();
     }
 }

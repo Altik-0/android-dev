@@ -690,6 +690,16 @@ public class MtgDatabaseManager extends SQLiteOpenHelper
         RefreshListeners();
     }
     
+    public void DeleteCardFromCollection(int collectedId)
+    {
+        SQLiteDatabase db = getWritableDatabase();
+        db.execSQL("DELETE FROM CollectedCards WHERE CollectedID = ?",
+                   new String[] {Integer.toString(collectedId)});
+        
+        // Tell our listeners that we've changed the data
+        RefreshListeners();
+    }
+    
     public void RenameLocation(int locationId, String newName)
     {
         SQLiteDatabase db = getWritableDatabase();

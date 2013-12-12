@@ -1,5 +1,6 @@
 package altik0.mtg.magictheorganizing;
 
+import altik0.mtg.magictheorganizing.CardDetailFragment.ContainerCallbacks;
 import altik0.mtg.magictheorganizing.CardDetailFragment.DetailFragmentState;
 import android.app.Activity;
 import android.content.Intent;
@@ -14,7 +15,7 @@ import android.view.MenuItem;
  * This activity is mostly just a 'shell' activity containing nothing more than
  * a {@link CardDetailFragment}.
  */
-public class CardDetailActivity extends Activity
+public class CardDetailActivity extends Activity implements ContainerCallbacks
 {
     public static final String COLLECTION_MODE = "Collection mode";
     boolean collectionMode = false;
@@ -53,6 +54,7 @@ public class CardDetailActivity extends Activity
             fragment.setArguments(arguments);
             getFragmentManager().beginTransaction()
                     .add(R.id.card_detail_container, fragment).commit();
+            fragment.setContainerCallbacks(this);
 
             if (this.getCallingActivity() != null)
                 fragment.setState(DetailFragmentState.Return);
@@ -75,5 +77,11 @@ public class CardDetailActivity extends Activity
     {
         // TODO
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void detailContentDeleted()
+    {
+        finish();
     }
 }
