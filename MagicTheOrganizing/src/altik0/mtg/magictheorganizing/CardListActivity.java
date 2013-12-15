@@ -5,6 +5,7 @@ import altik0.mtg.magictheorganizing.Database.CollectionModel.Collection;
 import altik0.mtg.magictheorganizing.Database.SearchParams;
 import altik0.mtg.magictheorganizing.MtgDataTypes.CardData;
 import android.app.Activity;
+import android.app.Fragment;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
@@ -109,6 +110,7 @@ public class CardListActivity extends Activity implements
             fragment.setArguments(arguments);
             getFragmentManager().beginTransaction()
                     .replace(R.id.card_detail_container, fragment).commit();
+            fragment.setContainerCallbacks(this);
 
             if (this.getCallingActivity() != null)
                 fragment.setState(DetailFragmentState.Return);
@@ -156,16 +158,7 @@ public class CardListActivity extends Activity implements
     public void detailContentDeleted()
     {
         // TODO: something smarter. For now, just tell list fragment to select top element
-        CardListFragment listFrag = (CardListFragment)getFragmentManager().findFragmentById(R.id.card_list);
-        int curPos = listFrag.getSelectedItemPosition();
-        if (listFrag.getListAdapter().getCount() == 0)
-        {
-            // ???
-        }
-        else
-        {
-            curPos = (curPos == 0) ? curPos + 1 : curPos - 1;
-        }
-        listFrag.setSelection(curPos);
+        Fragment frag = getFragmentManager().findFragmentById(R.id.card_detail_container);
+        getFragmentManager().beginTransaction().remove(frag).commit();
     }
 }

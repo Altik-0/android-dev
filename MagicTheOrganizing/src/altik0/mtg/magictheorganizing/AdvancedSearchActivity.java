@@ -47,7 +47,6 @@ public class AdvancedSearchActivity extends Activity
             EditText textBox = (EditText)findViewById(R.id.cardTextTextBox);
             
             // Build search params:
-            // TODO: comma separated tags
             SearchParams params = new SearchParams();
             if (!nameBox.getText().toString().equals(""))
                 params.NameSearch = nameBox.getText().toString();
@@ -71,12 +70,11 @@ public class AdvancedSearchActivity extends Activity
                 colorSearch |= SearchParams.GREEN_FLAG;
             if (colorlessBox.isChecked())
                 colorSearch |= SearchParams.COLORLESS_FLAG;
+            if (colorSearch != 0 && excUnselectedBox.isChecked())
+                colorSearch |= SearchParams.EXCLUDE_UNSELECTED_FLAG;
             if (reqMultiBox.isChecked())
                 colorSearch |= SearchParams.REQUIRE_MULTICOLOR_FLAG;
-            if (excUnselectedBox.isChecked())
-                colorSearch |= SearchParams.EXCLUDE_UNSELECTED_FLAG;
-            if ((colorSearch & ~(SearchParams.EXCLUDE_UNSELECTED_FLAG | 
-                                 SearchParams.REQUIRE_MULTICOLOR_FLAG)) != 0)
+            if (colorSearch != 0)
                 params.ColorFilter = colorSearch;
             
             int raritySearch = 0;

@@ -283,6 +283,7 @@ public class MtgDatabaseManager extends SQLiteOpenHelper
         String nameCheck = "1 = 1";
         String typeCheck = "1 = 1";
         String colorCheck = "1 = 1";
+        String reqMultiCheck = "1 = 1";
         LinkedList<String> queryParams = new LinkedList<String>();
         
         // For the things which aren't null, build the appropriate replacement:
@@ -337,41 +338,80 @@ public class MtgDatabaseManager extends SQLiteOpenHelper
         }
         if (params.ColorFilter != null)
         {
-            // TODO: req. multicolor and exc. unselected
+            boolean excUnselected = (params.ColorFilter & SearchParams.EXCLUDE_UNSELECTED_FLAG) != 0;
+            
             String whiteCheck = "0 = 1";
+            String excWhiteCheck = "1 = 1";
             String blueCheck = "0 = 1";
+            String excBlueCheck = "1 = 1";
             String blackCheck = "0 = 1";
+            String excBlackCheck = "1 = 1";
             String redCheck = "0 = 1";
+            String excRedCheck = "1 = 1";
             String greenCheck = "0 = 1";
+            String excGreenCheck = "1 = 1";
+            String colorlessCheck = "0 = 1";
             
             int filter = params.ColorFilter;
             if ((filter & SearchParams.WHITE_FLAG) != 0)
-            {
                 whiteCheck = "(card_table.Colors & 1) != 0";
-            }
+            else if (excUnselected)
+                excWhiteCheck = "(card_table.Colors & 1) = 0";
             if ((filter & SearchParams.BLUE_FLAG) != 0)
-            {
                 blueCheck = "(card_table.Colors & 2) != 0";
-            }
+            else if (excUnselected)
+                excBlueCheck = "(card_table.Colors & 2) = 0";
             if ((filter & SearchParams.BLACK_FLAG) != 0)
-            {
                 blackCheck = "(card_table.Colors & 4) != 0";
-            }
+            else if (excUnselected)
+                excBlackCheck = "(card_table.Colors & 4) = 0";
             if ((filter & SearchParams.RED_FLAG) != 0)
-            {
                 redCheck = "(card_table.Colors & 8) != 0";
-            }
+            else if (excUnselected)
+                excRedCheck = "(card_table.Colors & 8) = 0";
             if ((filter & SearchParams.GREEN_FLAG) != 0)
-            {
                 greenCheck = "(card_table.Colors & 16) != 0";
+            else if (excUnselected)
+                excGreenCheck = "(card_table.Colors & 16) = 0";
+            if ((filter & SearchParams.COLORLESS_FLAG) != 0)
+                colorlessCheck = "card_table.Colors = 0";
+            if ((filter & SearchParams.REQUIRE_MULTICOLOR_FLAG) != 0)
+            {
+                // Bit twiddling hack explanation:
+                //  requiring multicolor is equivalent to >= 2 bits on in color mask.
+                //  This is equivalent to color mask is a non-zero non-power of 2.
+                //  (x != 0) && !(x & (x - 1)) returns true iff x is a power of 2.
+                //  In query form, that is (x != 0) AND ((x & (x-1)) = 0)
+                //  Negating the whole expression returns true on 0 or a non-power of 2.
+                //  Un-negating the first term excludes 0, but keeps everything else.
+                reqMultiCheck = "((card_table.Colors != 0) AND " +
+                                 "((card_table.Colors & (card_table.Colors - 1)) != 0))";
             }
             
-            colorCheck = "(" +
-                    whiteCheck + " OR " +
-                    blueCheck + " OR " +
-                    blackCheck + " OR " +
-                    redCheck + " OR " +
-                    greenCheck + ")";
+            // If the only bit turned on is req. multicolor, we don't want to have a big
+            // chain of falses killing our search.
+            if ((filter ^ SearchParams.REQUIRE_MULTICOLOR_FLAG) != 0)
+            {   
+                colorCheck = "(" +
+                        whiteCheck + " OR " +
+                        blueCheck + " OR " +
+                        blackCheck + " OR " +
+                        redCheck + " OR " +
+                        greenCheck + " OR " +
+                        colorlessCheck + ")";
+                
+                // Only bother with excluding unselected if the box actually got checked:
+                if (excUnselected)
+                {
+                    colorCheck += " AND " +
+                                  "(" +
+                                  excWhiteCheck + " AND " +
+                                  excBlueCheck + " AND " +
+                                  excBlackCheck + " AND " +
+                                  excRedCheck + " AND " +
+                                  excGreenCheck + ")";
+                }
+            }
         }
         
         String[] queryArray = queryParams.toArray(new String[0]);
@@ -382,7 +422,8 @@ public class MtgDatabaseManager extends SQLiteOpenHelper
                  expansionCheck + " AND " +
                  typeCheck + " AND " +
                  rarityCheck + " AND " +
-                 colorCheck;
+                 colorCheck + " AND " +
+                 reqMultiCheck;
         
         // Get the datas
         ArrayList<CardData> toRet = new ArrayList<CardData>();
@@ -441,13 +482,14 @@ public class MtgDatabaseManager extends SQLiteOpenHelper
         String nameCheck = "1 = 1";
         String typeCheck = "1 = 1";
         String colorCheck = "1 = 1";
+        String reqMultiCheck = "1 = 1";
         LinkedList<String> queryParams = new LinkedList<String>();
         
         // For the things which aren't null, build the appropriate replacement:
         if (params.CollectionId != null)
         {
             colCheck = "col_cards.CollectionID = ?";
-            queryParams.add(Integer.toString(params.CollectionId));
+            queryParams.addFirst(Integer.toString(params.CollectionId));
         }
         if (params.NameSearch != null)
         {
@@ -500,41 +542,80 @@ public class MtgDatabaseManager extends SQLiteOpenHelper
         }
         if (params.ColorFilter != null)
         {
-            // TODO: req. multicolor and exc. unselected
+            boolean excUnselected = (params.ColorFilter & SearchParams.EXCLUDE_UNSELECTED_FLAG) != 0;
+            
             String whiteCheck = "0 = 1";
+            String excWhiteCheck = "1 = 1";
             String blueCheck = "0 = 1";
+            String excBlueCheck = "1 = 1";
             String blackCheck = "0 = 1";
+            String excBlackCheck = "1 = 1";
             String redCheck = "0 = 1";
+            String excRedCheck = "1 = 1";
             String greenCheck = "0 = 1";
+            String excGreenCheck = "1 = 1";
+            String colorlessCheck = "0 = 1";
             
             int filter = params.ColorFilter;
             if ((filter & SearchParams.WHITE_FLAG) != 0)
-            {
                 whiteCheck = "(card_table.Colors & 1) != 0";
-            }
+            else if (excUnselected)
+                excWhiteCheck = "(card_table.Colors & 1) = 0";
             if ((filter & SearchParams.BLUE_FLAG) != 0)
-            {
                 blueCheck = "(card_table.Colors & 2) != 0";
-            }
+            else if (excUnselected)
+                excBlueCheck = "(card_table.Colors & 2) = 0";
             if ((filter & SearchParams.BLACK_FLAG) != 0)
-            {
                 blackCheck = "(card_table.Colors & 4) != 0";
-            }
+            else if (excUnselected)
+                excBlackCheck = "(card_table.Colors & 4) = 0";
             if ((filter & SearchParams.RED_FLAG) != 0)
-            {
                 redCheck = "(card_table.Colors & 8) != 0";
-            }
+            else if (excUnselected)
+                excRedCheck = "(card_table.Colors & 8) = 0";
             if ((filter & SearchParams.GREEN_FLAG) != 0)
-            {
                 greenCheck = "(card_table.Colors & 16) != 0";
+            else if (excUnselected)
+                excGreenCheck = "(card_table.Colors & 16) = 0";
+            if ((filter & SearchParams.COLORLESS_FLAG) != 0)
+                colorlessCheck = "card_table.Colors = 0";
+            if ((filter & SearchParams.REQUIRE_MULTICOLOR_FLAG) != 0)
+            {
+                // Bit twiddling hack explanation:
+                //  requiring multicolor is equivalent to >= 2 bits on in color mask.
+                //  This is equivalent to color mask is a non-zero non-power of 2.
+                //  (x != 0) && !(x & (x - 1)) returns true iff x is a power of 2.
+                //  In query form, that is (x != 0) AND ((x & (x-1)) = 0)
+                //  Negating the whole expression returns true on 0 or a non-power of 2.
+                //  Un-negating the first term excludes 0, but keeps everything else.
+                reqMultiCheck = "((card_table.Colors != 0) AND " +
+                                 "((card_table.Colors & (card_table.Colors - 1)) != 0))";
             }
             
-            colorCheck = "(" +
-                    whiteCheck + " OR " +
-                    blueCheck + " OR " +
-                    blackCheck + " OR " +
-                    redCheck + " OR " +
-                    greenCheck + ")";
+            // If the only bit turned on is req. multicolor, we don't want to have a big
+            // chain of falses killing our search.
+            if ((filter ^ SearchParams.REQUIRE_MULTICOLOR_FLAG) != 0)
+            {   
+                colorCheck = "(" +
+                        whiteCheck + " OR " +
+                        blueCheck + " OR " +
+                        blackCheck + " OR " +
+                        redCheck + " OR " +
+                        greenCheck + " OR " +
+                        colorlessCheck + ")";
+                
+                // Only bother with excluding unselected if the box actually got checked:
+                if (excUnselected)
+                {
+                    colorCheck += " AND " +
+                                  "(" +
+                                  excWhiteCheck + " AND " +
+                                  excBlueCheck + " AND " +
+                                  excBlackCheck + " AND " +
+                                  excRedCheck + " AND " +
+                                  excGreenCheck + ")";
+                }
+            }
         }
         
         String[] queryArray = queryParams.toArray(new String[0]);
@@ -546,7 +627,8 @@ public class MtgDatabaseManager extends SQLiteOpenHelper
                  expansionCheck + " AND " +
                  typeCheck + " AND " +
                  rarityCheck + " AND " +
-                 colorCheck;
+                 colorCheck + " AND " +
+                 reqMultiCheck;
         
         // Get the datas
         ArrayList<CardData> toRet = new ArrayList<CardData>();
