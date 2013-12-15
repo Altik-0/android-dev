@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical" >
+
+    <TextView
+        android:id="@+id/colorText"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight = "1"
+        android:text="Color" />
+    
+    <TableLayout
+        android:id="@+id/colorLayout"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight = "9"
+        android:orientation="horizontal" >
+        
+        <TableRow
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight = "1" >
+            
+	        <CheckBox
+	            android:id="@+id/whiteCheckBox"
+		        android:layout_width="0dp"
+		        android:layout_height="match_parent"
+	            android:layout_weight="1"
+	            android:text = "White" />
+	        
+	        <CheckBox
+	            android:id="@+id/blueCheckBox"
+		        android:layout_width="0dp"
+		        android:layout_height="match_parent"
+	            android:layout_weight="1"
+	            android:text = "Blue" />
+	        
+	        <CheckBox
+	            android:id="@+id/blackCheckBox"
+		        android:layout_width="0dp"
+		        android:layout_height="match_parent"
+	            android:layout_weight="1"
+	            android:text = "Black" />
+	   	
+        </TableRow>
+        
+        <TableRow
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight = "1" >
+	       
+	        <CheckBox
+	            android:id="@+id/redCheckBox"
+		        android:layout_width="0dp"
+		        android:layout_height="match_parent"
+	            android:layout_weight="1"
+	            android:text = "Red" />
+	        
+	        <CheckBox
+	            android:id="@+id/greenCheckBox"
+		        android:layout_width="0dp"
+		        android:layout_height="match_parent"
+	            android:layout_weight="1"
+	            android:text = "Green" />
+	        
+	        <CheckBox
+	            android:id="@+id/colorlessCheckBox"
+		        android:layout_width="0dp"
+		        android:layout_height="match_parent"
+	            android:layout_weight="1"
+	            android:text = "Colorless" />
+		       
+       </TableRow>
+	    
+        <TableRow
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight = "1" >
+		    
+		    <CheckBox 
+		        android:id="@+id/excludeUnselectedBox"
+		        android:layout_width="0dp"
+		        android:layout_height="match_parent"
+	            android:layout_weight="1"
+		        android:text = "Exclude Unselected" />
+		    
+		    <CheckBox 
+		        android:id="@+id/forceMulticolorBox"
+		        android:layout_width="0dp"
+		        android:layout_height="match_parent"
+	            android:layout_weight="1"
+		        android:text = "Require Multicolor" />
+           
+       </TableRow>
+        
+    </TableLayout>
+
+</LinearLayout>

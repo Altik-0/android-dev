@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation = "vertical" >
+
+    <TextView
+        android:id="@+id/rarityText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="left"
+        android:text="Rarity" />
+    
+    <TableLayout
+        android:id="@+id/rarityLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal" >
+        
+        <TableRow
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight = "1" >
+            
+	        <CheckBox
+	            android:id="@+id/commonCheckBox"
+		        android:layout_width="0dp"
+		        android:layout_height="match_parent"
+	            android:layout_weight="1"
+	            android:text = "Common" />
+	        
+	        <CheckBox
+	            android:id="@+id/uncommonCheckBox"
+		        android:layout_width="0dp"
+		        android:layout_height="match_parent"
+	            android:layout_weight="1"
+	            android:text = "Uncommon" />
+	   	
+        </TableRow>
+        
+       	<TableRow
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight = "1" >
+	        
+	        <CheckBox
+	            android:id="@+id/rareCheckBox"
+		        android:layout_width="0dp"
+		        android:layout_height="match_parent"
+	            android:layout_weight="1"
+	            android:text = "Rare" />
+	        
+	        <CheckBox
+	            android:id="@+id/mythicCheckBox"
+		        android:layout_width="0dp"
+		        android:layout_height="match_parent"
+	            android:layout_weight="1"
+	            android:text = "Mythic" />
+		       
+       </TableRow>
+        
+    </TableLayout>
+
+</LinearLayout>

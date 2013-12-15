@@ -8,59 +8,31 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
-        android:inputType="text" />
-    
-    <TextView 
-        android:id="@+id/nameText"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/nameTextBox"
-        android:layout_alignParentLeft="true"
-        android:text="Card Name" />
+        android:inputType="text"
+        android:hint="Card Name" />
     
     <EditText
         android:id = "@+id/expansionTextBox"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@id/nameText"
-        android:inputType="text" />
-    
-    <TextView 
-        android:id="@+id/expansionText"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/expansionTextBox"
-        android:layout_alignParentLeft="true"
-        android:text="Expansion" />
+        android:layout_below="@id/nameTextBox"
+        android:inputType="text"
+        android:hint="Expansion" />
     
     <EditText
         android:id = "@+id/cardTypeTextBox"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@id/expansionText"
-        android:inputType="text" />
-    
-    <TextView 
-        android:id="@+id/cardTypeText"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/cardTypeTextBox"
-        android:layout_alignParentLeft="true"
-        android:text="Card Types" />
+        android:layout_below="@id/expansionTextBox"
+        android:inputType="text"
+        android:hint="Card Types" />
     
     <EditText
         android:id = "@+id/cardTextTextBox"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@id/cardTypeText"
-        android:inputType="textMultiLine" />
-    
-    <TextView 
-        android:id="@+id/cardTextText"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/cardTextTextBox"
-        android:layout_alignParentLeft="true"
-        android:text="Card Text" />
+        android:layout_below="@id/cardTypeTextBox"
+        android:inputType="textMultiLine"
+        android:hint="Card Text" />
 
 </RelativeLayout>

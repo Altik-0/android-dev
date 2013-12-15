@@ -24,7 +24,8 @@
 		        android:layout_width="match_parent"
 		        android:layout_height="wrap_content"
 		        android:layout_span="6" 
-		        android:layout_weight="1"/>
+		        android:layout_weight="1"
+		        android:hint = "Quick Search..." />
 		    
 		    <Button 
 		        android:id = "@+id/quickSearchButton"
@@ -41,40 +42,25 @@
 		        android:id = "@+id/quickSearchNameCheck"
 		        android:layout_width="match_parent"
 		        android:layout_height="wrap_content"
-		        android:layout_weight="1" />
-		    
-		    <TextView
-		        android:id = "@+id/quickSearchNameText"
-		        android:layout_width="match_parent"
-		        android:layout_height="wrap_content"
-		        android:text="Name"
-		        android:layout_weight="1" />
+		        android:layout_weight="1"
+		        android:layout_gravity = "right"
+		        android:text="Name" />
 		    
 		    <CheckBox 
 		        android:id = "@+id/quickSearchTextCheck"
 		        android:layout_width="match_parent"
 		        android:layout_height="wrap_content"
-		        android:layout_weight="1" />
-		        
-		    <TextView
-		        android:id = "@+id/quickSearchTextText"
-		        android:layout_width="match_parent"
-		        android:layout_height="wrap_content"
-		        android:text="Text"
-		        android:layout_weight="1" />
+		        android:layout_weight="1"
+		        android:layout_gravity = "center"
+		        android:text="Text" />
 		    
 		    <CheckBox 
 		        android:id = "@+id/quickSearchTypeCheck"
 		        android:layout_width="match_parent"
 		        android:layout_height="wrap_content"
-		        android:layout_weight="1" />
-		        
-		    <TextView
-		        android:id = "@+id/quickSearchTypeText"
-		        android:layout_width="match_parent"
-		        android:layout_height="wrap_content"
-		        android:text="Type"
-		        android:layout_weight="1" />
+		        android:layout_weight="1"
+		        android:layout_gravity = "left"
+		        android:text="Type" />
 		    
 		</TableRow>
 	    
