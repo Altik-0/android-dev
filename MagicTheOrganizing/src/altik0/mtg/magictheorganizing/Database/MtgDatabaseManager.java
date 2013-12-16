@@ -172,6 +172,24 @@ public class MtgDatabaseManager extends SQLiteOpenHelper
         onCreate(db);
     }
     
+    public ArrayList<String> GetAllCardNames()
+    {
+        ArrayList<String> toRet = new ArrayList<String>();
+        
+        SQLiteDatabase db = getReadableDatabase();
+        Cursor cursor = db.rawQuery("SELECT Name FROM Cards", null);
+        
+        if (cursor.moveToFirst())
+        {
+            do
+            {
+                toRet.add(cursor.getString(0));
+            } while(cursor.moveToNext());
+        }
+        
+        return toRet;
+    }
+    
     public CardData GetCardWithId(int id)
     {
         ArrayList<CardData> toRet = new ArrayList<CardData>();

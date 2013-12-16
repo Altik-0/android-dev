@@ -7,13 +7,27 @@
     <TextView 
         android:id="@+id/cardTextText"
         android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+    
+    <TextView 
+        android:id="@+id/cardText"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="TODO lorem ipsum text blah blah this is a long text card name bplar" />
+        android:layout_marginBottom="6dp"
+        android:textStyle="bold|italic"
+        android:text="Card Text" />
   
     <TextView 
         android:id="@+id/cardFlavorTextText"
         android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+    
+    <TextView 
+        android:id="@+id/cardFlavorText"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="TODO lorem ipsum text blah blah this is a long text card name bplar" />
+        android:layout_marginBottom="6dp"
+        android:textStyle="bold|italic"
+        android:text="Flavor Text" />
 
 </LinearLayout>

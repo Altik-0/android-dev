@@ -12,7 +12,7 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="5"
+        android:layout_weight="6"
         android:orientation="horizontal" >
     
 	    <!-- Display Card -->
@@ -21,7 +21,7 @@
             android:id="@+id/cardDetail"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
+            android:layout_weight="3"
         	android:layout_marginRight="8dp" />
 	    
 	    <!-- Main Card Details
@@ -36,40 +36,40 @@
 	        layout = "@layout/card_detail_primary"
 	        android:layout_width="0dp"
 	        android:layout_height="wrap_content"
-	        android:layout_weight="1"
+	        android:layout_weight="3"
 	        android:layout_gravity="center" />
+	    
+	    <LinearLayout
+  	    	android:id = "@+id/details_layout"
+	        android:layout_width = "0dp"
+	        android:layout_height = "match_parent"
+	        android:layout_weight = "4"
+	        android:orientation = "vertical" >
+	        
+	        <!-- Other Card Details
+	  			- Card Text
+	  			- Expansion
+	  			- Artist (?)
+	  			- Extra Tags in scroll view
+	  			 -->
+  	
+		  	<include
+		        android:id = "@+id/detailsSecondary"
+		  	    layout = "@layout/card_detail_secondary"
+		  	    android:layout_width="match_parent"
+		  	    android:layout_height="0dp"
+		  	    android:layout_weight="4" />
+		  	
+		  	<include 
+		  	    android:id = "@+id/detailsCollection"
+		  	    layout = "@layout/card_detail_collection"
+		  	    android:layout_width = "match_parent"
+		  	    android:layout_height = "0dp"
+		  	    android:layout_weight = "1" />
+	        
+	    </LinearLayout>
     
     </LinearLayout>
-    		
-  	<!-- Other Card Details
-  			- Card Text
-  			- Expansion
-  			- Artist (?)
-  			- Extra Tags in scroll view
-  			 -->
-  	
-  	<LinearLayout
-  	    android:id = "@+id/details_layout"
-  	    android:layout_width="match_parent"
-  	    android:layout_height="0dp"
-  	    android:layout_weight="5"
-  	    android:orientation="vertical" >
-	    
-	  	<include
-	        android:id = "@+id/detailsSecondary"
-	  	    layout = "@layout/card_detail_secondary"
-	  	    android:layout_width="match_parent"
-	  	    android:layout_height="0dp"
-	  	    android:layout_weight="3" />
-	  	
-	  	<include 
-	  	    android:id = "@+id/detailsCollection"
-	  	    layout = "@layout/card_detail_collection"
-	  	    android:layout_width = "match_parent"
-	  	    android:layout_height = "0dp"
-	  	    android:layout_weight = "2" />
-  	
-  	</LinearLayout>
 	
   	<include
   	    android:id = "@+id/detailButtonSet"

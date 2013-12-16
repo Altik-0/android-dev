@@ -7,37 +7,68 @@
     <TextView
          android:id = "@+id/nameDetailText"
          android:layout_width="match_parent"
-         android:layout_height="wrap_content"
-         android:text="Name: " />
-     
-     <TextView
-         android:id = "@+id/typeDetailText"
+         android:layout_height="wrap_content" />
+    
+    <TextView
+         android:id = "@+id/nameDetail"
          android:layout_width="match_parent"
          android:layout_height="wrap_content"
-         android:text="Type: " />
+         android:layout_marginBottom="6dp"
+         android:textStyle="bold|italic"
+         android:text="Name" />
      
+    <TextView
+         android:id = "@+id/typeDetailText"
+         android:layout_width="match_parent"
+         android:layout_height="wrap_content" />
+    
+     <TextView
+         android:id = "@+id/typeDetail"
+         android:layout_width="match_parent"
+         android:layout_height="wrap_content"
+         android:layout_marginBottom="6dp"
+         android:textStyle="bold|italic"
+         android:text="Type" />
+     
+     <!-- TODO: replace with custom mana symbol view -->
      <TextView
          android:id = "@+id/costDetailText"
          android:layout_width="match_parent"
+         android:layout_height="wrap_content" />
+     
+     <TextView
+         android:id = "@+id/costDetail"
+         android:layout_width="match_parent"
          android:layout_height="wrap_content"
-         android:text="Cost: " />
+         android:layout_marginBottom="6dp"
+         android:textStyle="bold|italic"
+         android:text="Cost" />
      
      <TextView
          android:id = "@+id/ptDetailText"
          android:layout_width="match_parent"
+         android:layout_height="wrap_content" />
+     
+     <TextView
+         android:id = "@+id/ptDetail"
+         android:layout_width="match_parent"
          android:layout_height="wrap_content"
-         android:text="P/T: " />
+         android:layout_marginBottom="6dp"
+         android:textStyle="bold|italic"
+         android:text="Power/Toughness" />
  
-    <TextView 
-        android:id="@+id/expansionText"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Expansion: " />
-    
-    <TextView 
-        android:id="@+id/artistText"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Artist: " />
+     <TextView 
+         android:id="@+id/expansionText"
+         android:layout_width="match_parent"
+         android:layout_height="wrap_content" />
+     
+     <TextView 
+         android:id="@+id/expansion"
+         android:layout_width="match_parent"
+         android:layout_height="wrap_content"
+         android:layout_marginBottom="6dp"
+         android:textStyle="bold|italic"
+         android:text="Expansion" />
+   
 
 </LinearLayout>

@@ -72,6 +72,7 @@ public class CardDetailFragment extends Fragment implements DatabaseListener
     private ViewGroup buttonSet;
     private ViewGroup collectionButtons;
     private ViewGroup collectionData;
+    private ViewGroup detailSet;
     
     private OnClickListener selectCardListener = new OnClickListener()
     {
@@ -182,6 +183,7 @@ public class CardDetailFragment extends Fragment implements DatabaseListener
         buttonSet = (ViewGroup)rootView.findViewById(R.id.detailButtonSet);
         collectionData = (ViewGroup)rootView.findViewById(R.id.detailsCollection);
         collectionButtons = (ViewGroup)rootView.findViewById(R.id.collectionButtonList);
+        detailSet = (ViewGroup)rootView.findViewById(R.id.details_layout);
         
         // Hookup button click listeners:
         selectButton.setOnClickListener(selectCardListener);
@@ -196,28 +198,30 @@ public class CardDetailFragment extends Fragment implements DatabaseListener
             TextView nameText = (TextView)rootView.findViewById(R.id.nameDetailText);
             TextView typeText = (TextView)rootView.findViewById(R.id.typeDetailText);
             TextView costText = (TextView)rootView.findViewById(R.id.costDetailText);
+            TextView ptText = (TextView)rootView.findViewById(R.id.ptDetailText);
             TextView textText = (TextView)rootView.findViewById(R.id.cardTextText);
             TextView flavorTextText = (TextView)rootView.findViewById(R.id.cardFlavorTextText);
             TextView expansionText = (TextView)rootView.findViewById(R.id.expansionText);
-            TextView artistText = (TextView)rootView.findViewById(R.id.artistText);
+            //TextView artistText = (TextView)rootView.findViewById(R.id.artistText);
             TextView countText = (TextView)rootView.findViewById(R.id.countText);
-            TextView tagText = (TextView)rootView.findViewById(R.id.tagText);
+            //TextView tagText = (TextView)rootView.findViewById(R.id.tagText);
             
             // TODO:
             //  1) replace static strings with R values (for localization and whatnot)
             //  2) make mana costs not text
             //  3) All the fields durp
             cardDetail.setCardData(card);
-            nameText.setText("Name: " + card.getName());
-            typeText.setText("Type: " + card.getTypeString());
-            costText.setText("Cost: " + card.getManaCost());
-            textText.setText("Card Text: " + card.getText());
-            expansionText.setText("Expansions: " + card.getSets().get(0));
-            flavorTextText.setText("Flavor Text: " + card.getFlavorText());
+            nameText.setText(card.getName());
+            typeText.setText(card.getTypeString());
+            costText.setText(card.getManaCost());
+            ptText.setText(card.getPowerToughnessString());
+            textText.setText(card.getText());
+            expansionText.setText(card.getSets().get(0));
+            flavorTextText.setText(card.getFlavorText());
             
             // We'll set these fields, but delete them later if necessary
-            countText.setText("Count: " + card.getCount());
-            tagText.setText("Tags: " + card.getTags());
+            countText.setText(Integer.toString(card.getCount()));
+            //tagText.setText("Tags: " + card.getTags());
         }
         
         // Delete appropriate content based on state
@@ -225,13 +229,13 @@ public class CardDetailFragment extends Fragment implements DatabaseListener
         {
             buttonSet.removeView(collectionButtons);
             buttonSet.removeView(selectButton);
-            rootView.removeView(collectionData);
+            detailSet.removeView(collectionData);
         }
         else if (state == DetailFragmentState.Return)
         {
             buttonSet.removeView(collectionButtons);
             buttonSet.removeView(addButton);
-            rootView.removeView(collectionData);
+            detailSet.removeView(collectionData);
         }
         else // if(state == DetailFragmentState.Collection)
         {
@@ -285,13 +289,13 @@ public class CardDetailFragment extends Fragment implements DatabaseListener
                 {
                     buttonSet.addView(collectionButtons);
                     buttonSet.addView(selectButton);
-                    rootView.addView(collectionData);
+                    detailSet.addView(collectionData);
                 }
                 else if (state == DetailFragmentState.Return)
                 {
                     buttonSet.addView(collectionButtons);
                     buttonSet.addView(addButton);
-                    rootView.addView(collectionData);
+                    detailSet.addView(collectionData);
                 }
                 else // if(state == DetailFragmentState.Collection)
                 {
@@ -308,13 +312,13 @@ public class CardDetailFragment extends Fragment implements DatabaseListener
                 {
                     buttonSet.removeView(collectionButtons);
                     buttonSet.removeView(selectButton);
-                    rootView.removeView(collectionData);
+                    detailSet.removeView(collectionData);
                 }
                 else if (state == DetailFragmentState.Return)
                 {
                     buttonSet.removeView(collectionButtons);
                     buttonSet.removeView(addButton);
-                    rootView.removeView(collectionData);
+                    detailSet.removeView(collectionData);
                 }
                 else // if(state == DetailFragmentState.Collection)
                 {
@@ -464,28 +468,29 @@ public class CardDetailFragment extends Fragment implements DatabaseListener
             TextView nameText = (TextView)rootView.findViewById(R.id.nameDetailText);
             TextView typeText = (TextView)rootView.findViewById(R.id.typeDetailText);
             TextView costText = (TextView)rootView.findViewById(R.id.costDetailText);
+            TextView ptText = (TextView)rootView.findViewById(R.id.ptDetailText);
             TextView textText = (TextView)rootView.findViewById(R.id.cardTextText);
             TextView flavorTextText = (TextView)rootView.findViewById(R.id.cardFlavorTextText);
             TextView expansionText = (TextView)rootView.findViewById(R.id.expansionText);
-            TextView artistText = (TextView)rootView.findViewById(R.id.artistText);
+            //TextView artistText = (TextView)rootView.findViewById(R.id.artistText);
             TextView countText = (TextView)collectionData.findViewById(R.id.countText);
-            TextView tagText = (TextView)collectionData.findViewById(R.id.tagText);
+            //TextView tagText = (TextView)collectionData.findViewById(R.id.tagText);
             
             // TODO:
-            //  1) replace static strings with R values (for localization and whatnot)
             //  2) make mana costs not text
             //  3) All the fields durp
             cardDetail.setCardData(card);
-            nameText.setText("Name: " + card.getName());
-            typeText.setText("Type: " + card.getTypeString());
-            costText.setText("Cost: " + card.getManaCost());
-            textText.setText("Card Text: " + card.getText());
-            expansionText.setText("Expansions: " + card.getSets().get(0));
-            flavorTextText.setText("Flavor Text: " + card.getFlavorText());
+            nameText.setText(card.getName());
+            typeText.setText(card.getTypeString());
+            costText.setText(card.getManaCost());
+            ptText.setText(card.getPowerToughnessString());
+            textText.setText(card.getText());
+            expansionText.setText(card.getSets().get(0));
+            flavorTextText.setText(card.getFlavorText());
             
             // We'll set these fields, but delete them later if necessary
-            countText.setText("Count: " + card.getCount());
-            tagText.setText("Tags: " + card.getTags());
+            countText.setText(Integer.toString(card.getCount()));
+            //tagText.setText(card.getTags());
         }
     }
     

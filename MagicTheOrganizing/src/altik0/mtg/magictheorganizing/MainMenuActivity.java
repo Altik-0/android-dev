@@ -1,19 +1,33 @@
 package altik0.mtg.magictheorganizing;
 
+import java.util.ArrayList;
+
+import altik0.mtg.magictheorganizing.Database.MtgDatabaseManager;
 import altik0.mtg.magictheorganizing.Database.SearchParams;
 import android.os.Bundle;
 import android.app.Activity;
 import android.content.Intent;
+import android.database.DataSetObserver;
 import android.util.Log;
 import android.view.Menu;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.ViewGroup;
+import android.widget.Adapter;
+import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.CheckBox;
+import android.widget.CompoundButton;
+import android.widget.CompoundButton.OnCheckedChangeListener;
+import android.widget.Filter;
+import android.widget.Filterable;
+import android.widget.ListAdapter;
 
 public class MainMenuActivity extends Activity
 {
+    private AutoCompleteTextView quickSearchBox;
+    private ArrayAdapter<String> adapter;
     
     private OnClickListener mainMenuListener = new OnClickListener()
     {
@@ -43,7 +57,6 @@ public class MainMenuActivity extends Activity
                 
                 // Build search params - based on checked boxes
                 String quickSearchVal = null;
-                AutoCompleteTextView quickSearchBox = (AutoCompleteTextView)findViewById(R.id.quickSearch);
                 if (!(quickSearchBox.getText().toString().equals("")))
                     quickSearchVal = quickSearchBox.getText().toString();
                 
@@ -66,11 +79,33 @@ public class MainMenuActivity extends Activity
         }
     };
     
+    private OnCheckedChangeListener nameCheckListener = new OnCheckedChangeListener()
+    {
+        @Override
+        public void onCheckedChanged(CompoundButton view, boolean checked)
+        {
+            if (checked)
+                quickSearchBox.setAdapter(adapter);
+            else
+                quickSearchBox.setAdapter(null);
+        }
+    };
+    
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main_menu);
+        
+        ArrayList<String> cardNames = MtgDatabaseManager.getInstance(this).GetAllCardNames();
+        adapter = new ArrayAdapter<String>(
+                                this,
+                                android.R.layout.select_dialog_item,
+                                cardNames);
+        
+        quickSearchBox = (AutoCompleteTextView)findViewById(R.id.quickSearch);
+        //quickSearchBox.setAdapter(adapter);
+        quickSearchBox.setAdapter(null);
         
         Button searchAllCardsButton = (Button)findViewById(R.id.searchAllCardsButton);
         searchAllCardsButton.setOnClickListener(mainMenuListener);
@@ -83,6 +118,9 @@ public class MainMenuActivity extends Activity
         
         Button quickSearchButton = (Button)findViewById(R.id.quickSearchButton);
         quickSearchButton.setOnClickListener(mainMenuListener);
+        
+        CheckBox nameBox = (CheckBox)findViewById(R.id.quickSearchNameCheck);
+        nameBox.setOnCheckedChangeListener(nameCheckListener);
     }
     
     @Override
@@ -92,5 +130,4 @@ public class MainMenuActivity extends Activity
         getMenuInflater().inflate(R.menu.main_menu, menu);
         return true;
     }
-    
 }
