@@ -28,9 +28,9 @@ public class CardData implements Serializable
     // We'll put something in by default, so there isn't a crash
     // if we haven't initialized data.
 	private String name = "NULL";
-	private String manaCost = "NULL";
-	private String text = "";
-	private String flavorText = "";
+	private String manaCost;
+	private String text;
+	private String flavorText;
 
     private String power = null;
 	private String toughness = null;

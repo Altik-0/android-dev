@@ -72,7 +72,14 @@ public class CardDetailFragment extends Fragment implements DatabaseListener
     private ViewGroup buttonSet;
     private ViewGroup collectionButtons;
     private ViewGroup collectionData;
-    private ViewGroup detailSet;
+    private ViewGroup secondaryDetailSet;
+    private TextView ptDetail;
+    private TextView ptTag;
+    private TextView loyaltyDetail;
+    private TextView loyaltyTag;
+    private TextView costDetail;
+    private TextView costTag;
+    private ViewGroup mainDetails;
     
     private OnClickListener selectCardListener = new OnClickListener()
     {
@@ -183,7 +190,14 @@ public class CardDetailFragment extends Fragment implements DatabaseListener
         buttonSet = (ViewGroup)rootView.findViewById(R.id.detailButtonSet);
         collectionData = (ViewGroup)rootView.findViewById(R.id.detailsCollection);
         collectionButtons = (ViewGroup)rootView.findViewById(R.id.collectionButtonList);
-        detailSet = (ViewGroup)rootView.findViewById(R.id.details_layout);
+        secondaryDetailSet = (ViewGroup)rootView.findViewById(R.id.details_layout);
+        ptDetail = (TextView)rootView.findViewById(R.id.ptDetailText);
+        ptTag = (TextView)rootView.findViewById(R.id.ptDetail);
+        loyaltyDetail = (TextView)rootView.findViewById(R.id.loyaltyDetailText);
+        loyaltyTag = (TextView)rootView.findViewById(R.id.loyaltyDetail);
+        costDetail = (TextView)rootView.findViewById(R.id.costDetailText);
+        costTag = (TextView)rootView.findViewById(R.id.costDetail);
+        mainDetails = (ViewGroup)rootView.findViewById(R.id.detailsMain);
         
         // Hookup button click listeners:
         selectButton.setOnClickListener(selectCardListener);
@@ -197,13 +211,11 @@ public class CardDetailFragment extends Fragment implements DatabaseListener
             CardView cardDetail = (CardView)rootView.findViewById(R.id.cardDetail);
             TextView nameText = (TextView)rootView.findViewById(R.id.nameDetailText);
             TextView typeText = (TextView)rootView.findViewById(R.id.typeDetailText);
-            TextView costText = (TextView)rootView.findViewById(R.id.costDetailText);
-            TextView ptText = (TextView)rootView.findViewById(R.id.ptDetailText);
             TextView textText = (TextView)rootView.findViewById(R.id.cardTextText);
             TextView flavorTextText = (TextView)rootView.findViewById(R.id.cardFlavorTextText);
             TextView expansionText = (TextView)rootView.findViewById(R.id.expansionText);
-            //TextView artistText = (TextView)rootView.findViewById(R.id.artistText);
             TextView countText = (TextView)rootView.findViewById(R.id.countText);
+            //TextView artistText = (TextView)rootView.findViewById(R.id.artistText);
             //TextView tagText = (TextView)rootView.findViewById(R.id.tagText);
             
             // TODO:
@@ -213,11 +225,13 @@ public class CardDetailFragment extends Fragment implements DatabaseListener
             cardDetail.setCardData(card);
             nameText.setText(card.getName());
             typeText.setText(card.getTypeString());
-            costText.setText(card.getManaCost());
-            ptText.setText(card.getPowerToughnessString());
             textText.setText(card.getText());
             expansionText.setText(card.getSets().get(0));
             flavorTextText.setText(card.getFlavorText());
+            costDetail.setText(card.getManaCost());
+            ptDetail.setText(card.getPowerToughnessString());
+            if (card.getLoyalty() != null)
+                loyaltyDetail.setText(Integer.toString(card.getLoyalty()));
             
             // We'll set these fields, but delete them later if necessary
             countText.setText(Integer.toString(card.getCount()));
@@ -229,18 +243,35 @@ public class CardDetailFragment extends Fragment implements DatabaseListener
         {
             buttonSet.removeView(collectionButtons);
             buttonSet.removeView(selectButton);
-            detailSet.removeView(collectionData);
+            secondaryDetailSet.removeView(collectionData);
         }
         else if (state == DetailFragmentState.Return)
         {
             buttonSet.removeView(collectionButtons);
             buttonSet.removeView(addButton);
-            detailSet.removeView(collectionData);
+            secondaryDetailSet.removeView(collectionData);
         }
         else // if(state == DetailFragmentState.Collection)
         {
             buttonSet.removeView(addButton);
             buttonSet.removeView(selectButton);
+        }
+        
+        // Clear out unused fields
+        if (card.getPower() == null)         // Assumption: power null only when toughness also
+        {
+            mainDetails.removeView(ptDetail);
+            mainDetails.removeView(ptTag);
+        }
+        if (card.getLoyalty() == null)
+        {
+            mainDetails.removeView(loyaltyDetail);
+            mainDetails.removeView(loyaltyTag);
+        }
+        if (card.getManaCost() == null)
+        {
+            mainDetails.removeView(costDetail);
+            mainDetails.removeView(costTag);
         }
         
         return rootView;
@@ -289,13 +320,13 @@ public class CardDetailFragment extends Fragment implements DatabaseListener
                 {
                     buttonSet.addView(collectionButtons);
                     buttonSet.addView(selectButton);
-                    detailSet.addView(collectionData);
+                    secondaryDetailSet.addView(collectionData);
                 }
                 else if (state == DetailFragmentState.Return)
                 {
                     buttonSet.addView(collectionButtons);
                     buttonSet.addView(addButton);
-                    detailSet.addView(collectionData);
+                    secondaryDetailSet.addView(collectionData);
                 }
                 else // if(state == DetailFragmentState.Collection)
                 {
@@ -312,13 +343,13 @@ public class CardDetailFragment extends Fragment implements DatabaseListener
                 {
                     buttonSet.removeView(collectionButtons);
                     buttonSet.removeView(selectButton);
-                    detailSet.removeView(collectionData);
+                    secondaryDetailSet.removeView(collectionData);
                 }
                 else if (state == DetailFragmentState.Return)
                 {
                     buttonSet.removeView(collectionButtons);
                     buttonSet.removeView(addButton);
-                    detailSet.removeView(collectionData);
+                    secondaryDetailSet.removeView(collectionData);
                 }
                 else // if(state == DetailFragmentState.Collection)
                 {
@@ -454,6 +485,11 @@ public class CardDetailFragment extends Fragment implements DatabaseListener
     @Override
     public void refresh()
     {
+        // TODO: right now, I'm assuming none of the card-crucial details will change
+        // between refreshes. This will certainly hold true unless I implement some way
+        // to create custom cards, but it would still be more rigorous to re-insert the
+        // text views, and delete again if required
+        
         // Obtain card
         if (collectionMode)
             card = MtgDatabaseManager.getInstance(getActivity()).GetCardWithCollectionId(id);
@@ -467,8 +503,6 @@ public class CardDetailFragment extends Fragment implements DatabaseListener
             CardView cardDetail = (CardView)rootView.findViewById(R.id.cardDetail);
             TextView nameText = (TextView)rootView.findViewById(R.id.nameDetailText);
             TextView typeText = (TextView)rootView.findViewById(R.id.typeDetailText);
-            TextView costText = (TextView)rootView.findViewById(R.id.costDetailText);
-            TextView ptText = (TextView)rootView.findViewById(R.id.ptDetailText);
             TextView textText = (TextView)rootView.findViewById(R.id.cardTextText);
             TextView flavorTextText = (TextView)rootView.findViewById(R.id.cardFlavorTextText);
             TextView expansionText = (TextView)rootView.findViewById(R.id.expansionText);
@@ -482,11 +516,13 @@ public class CardDetailFragment extends Fragment implements DatabaseListener
             cardDetail.setCardData(card);
             nameText.setText(card.getName());
             typeText.setText(card.getTypeString());
-            costText.setText(card.getManaCost());
-            ptText.setText(card.getPowerToughnessString());
             textText.setText(card.getText());
             expansionText.setText(card.getSets().get(0));
             flavorTextText.setText(card.getFlavorText());
+            costDetail.setText(card.getManaCost());
+            ptDetail.setText(card.getPowerToughnessString());
+            if (card.getLoyalty() != null)
+                loyaltyDetail.setText(Integer.toString(card.getLoyalty()));
             
             // We'll set these fields, but delete them later if necessary
             countText.setText(Integer.toString(card.getCount()));

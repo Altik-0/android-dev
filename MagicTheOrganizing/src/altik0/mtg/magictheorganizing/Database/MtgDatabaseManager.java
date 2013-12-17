@@ -212,14 +212,14 @@ public class MtgDatabaseManager extends SQLiteOpenHelper
                 card.setManaCost(cursor.getString(9));
                 card.setPower(cursor.getString(11));
                 card.setToughness(cursor.getString(12));
-                card.setLoyalty(cursor.getInt(13));
+                if (!cursor.isNull(13))
+                    card.setLoyalty(cursor.getInt(13));
                 card.setText(cursor.getString(14));
                 card.setFlavorText(cursor.getString(15));
                 
                 int colorCode = cursor.getInt(10);
                 String typeCode = cursor.getString(5);
                 String setCode = cursor.getString(2);
-                
                 card.setColorsFromCode(colorCode);
                 card.setTypesFromCode(typeCode);
                 card.setSetsFromCode(setCode);
@@ -260,7 +260,8 @@ public class MtgDatabaseManager extends SQLiteOpenHelper
                 card.setManaCost(cursor.getString(14));
                 card.setPower(cursor.getString(16));
                 card.setToughness(cursor.getString(17));
-                card.setLoyalty(cursor.getInt(18));
+                if (!cursor.isNull(18))
+                    card.setLoyalty(cursor.getInt(18));
                 card.setText(cursor.getString(19));
                 card.setFlavorText(cursor.getString(20));
                 card.setCount(cursor.getInt(3));
@@ -462,7 +463,8 @@ public class MtgDatabaseManager extends SQLiteOpenHelper
                 card.setManaCost(cursor.getString(9));
                 card.setPower(cursor.getString(11));
                 card.setToughness(cursor.getString(12));
-                card.setLoyalty(cursor.getInt(13));
+                if (!cursor.isNull(13))
+                    card.setLoyalty(cursor.getInt(13));
                 card.setText(cursor.getString(14));
                 card.setFlavorText(cursor.getString(15));
                 
@@ -668,7 +670,8 @@ public class MtgDatabaseManager extends SQLiteOpenHelper
                 card.setManaCost(cursor.getString(14));
                 card.setPower(cursor.getString(16));
                 card.setToughness(cursor.getString(17));
-                card.setLoyalty(cursor.getInt(18));
+                if (!cursor.isNull(18))
+                    card.setLoyalty(cursor.getInt(18));
                 card.setText(cursor.getString(19));
                 card.setFlavorText(cursor.getString(20));
                 card.setCount(cursor.getInt(3));
@@ -711,7 +714,8 @@ public class MtgDatabaseManager extends SQLiteOpenHelper
                 card.setManaCost(cursor.getString(9));
                 card.setPower(cursor.getString(11));
                 card.setToughness(cursor.getString(12));
-                card.setLoyalty(cursor.getInt(13));
+                if (!cursor.isNull(13))
+                    card.setLoyalty(cursor.getInt(13));
                 card.setText(cursor.getString(14));
                 card.setFlavorText(cursor.getString(15));
                 
