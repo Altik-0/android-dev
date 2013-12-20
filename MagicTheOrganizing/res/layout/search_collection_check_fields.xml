@@ -84,6 +84,7 @@
         android:id="@+id/rarityText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+    	style = "@style/text_tag"
         android:text="Rarity" />
     
     <TableLayout
@@ -238,6 +239,7 @@
         android:id="@+id/colorText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+    	style = "@style/text_tag"
         android:text="Color" />
     
     <Spinner

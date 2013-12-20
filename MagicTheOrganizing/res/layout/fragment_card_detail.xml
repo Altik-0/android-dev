@@ -60,7 +60,8 @@
 	  	    layout = "@layout/card_detail_secondary"
 	  	    android:layout_width="match_parent"
 	  	    android:layout_height="0dp"
-	  	    android:layout_weight="3" />
+	  	    android:layout_weight="3"
+	  	    android:layout_gravity="center" />
 	  	
 	  	<include 
 	  	    android:id = "@+id/detailsCollection"

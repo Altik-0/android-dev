@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    
+    <color name = "btn_bg_unselected" >#999</color>
+    <color name = "btn_bg_clicked" >#0000dd</color>
+    
+    <color name = "main_bg" >#111</color>
+    
+    <color name = "hint_text_color" >#888</color>
+        
+</resources>

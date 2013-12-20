@@ -109,14 +109,6 @@ public class AdvancedSearchActivity extends Activity
     }
     
     @Override
-    public boolean onCreateOptionsMenu(Menu menu)
-    {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.advanced_search, menu);
-        return true;
-    }
-    
-    @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data)
     {
         if (requestCode == CARD_RETURN_REQUEST_CODE)

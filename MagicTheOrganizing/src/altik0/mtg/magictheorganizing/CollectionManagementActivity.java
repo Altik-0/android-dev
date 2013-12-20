@@ -158,14 +158,6 @@ public class CollectionManagementActivity extends Activity implements ListAdapte
     }
     
     @Override
-    public boolean onCreateOptionsMenu(Menu menu)
-    {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.collection_management, menu);
-        return true;
-    }
-    
-    @Override
     protected void onSaveInstanceState(Bundle outBundle)
     {
         outBundle.putString("ActivityState", state.toString());
@@ -265,8 +257,9 @@ public class CollectionManagementActivity extends Activity implements ListAdapte
         {
             case 0:
                 Location l = (Location)getItem(position);
-                tv.setText(l.Name);
-                tv.setBackgroundColor(0x88000000);
+                // TODO: don't use static strings
+                tv.setText("Location: " + l.Name);
+                tv.setBackgroundColor(0x88ffffff);
                 tv.setTextColor(0xFFFFFFFF);
                 tv.setHeight(75);
                 tv.setTextSize(20.0f);
@@ -277,7 +270,7 @@ public class CollectionManagementActivity extends Activity implements ListAdapte
                 Collection c = (Collection)getItem(position);
                 tv.setText(c.Name);
                 tv.setBackgroundColor(0x00000000);
-                tv.setTextColor(0xFF000000);
+                tv.setTextColor(0xFFffffff);
                 tv.setHeight(150);
                 tv.setTextSize(20.0f);
                 //tv.setTextAlignment(TextView.TEXT_ALIGNMENT_CENTER);

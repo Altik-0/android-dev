@@ -7,6 +7,7 @@
     android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
+    android:background="@color/main_bg"
     tools:context=".MainMenuActivity" >
 
     <TableLayout
@@ -25,11 +26,13 @@
                  android:layout_height="wrap_content"
                  android:layout_span="6"
                  android:layout_weight="1"
+                 android:textColorHint="@color/hint_text_color"
+                 android:maxLines="1"
                  android:hint = "Quick Search..." />
                 
                  <Button
                  android:id = "@+id/quickSearchButton"
-                 android:text="Search" />
+                 android:text="Go" />
                 
          </TableRow>
         
@@ -76,22 +79,25 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_weight="1"
+            android:layout_margin="10dp"
             android:id = "@+id/searchAllCardsButton"
-            android:text="Search All Cards" />
+            android:text="@string/advanced_search_all" />
         
         <Button
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_weight="1"
+            android:layout_margin="10dp"
             android:id = "@+id/searchYourCollectionsButton"
-            android:text="Search Your Collections" />
+            android:text="@string/advanced_search_collections" />
         
         <Button
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_weight="1"
+            android:layout_margin="10dp"
             android:id = "@+id/manageYourCollectionsButton"
-            android:text="Manage Your Collections" />
+            android:text="@string/manage_collections" />
         
     </LinearLayout>
     

@@ -17,6 +17,7 @@ public class PromptCountAndTagsDialogFragment extends DialogFragment
     public static final String COUNT_KEY = "this is a count key! :D";
     public static final String TAGS_KEY = "this is a tags key... ._.";
     public static final String TITLE_KEY = "Dialog Title :o";
+    public static final String MESSAGE_KEY = "ZOMFG this is a message! @__@";
     
     // Used to track callback functions
     public interface CountAndTagAccepter
@@ -46,6 +47,9 @@ public class PromptCountAndTagsDialogFragment extends DialogFragment
         // Only set the title if we were given one:
         if (args.containsKey(TITLE_KEY))
             editLocDialog.setTitle(args.getString(TITLE_KEY));
+        if (args.containsKey(MESSAGE_KEY))
+            editLocDialog.setMessage(args.getString(MESSAGE_KEY));
+        
         final ViewGroup v = (ViewGroup)View.inflate(getActivity(),
                                                     R.layout.prompt_count_and_tags_view,
                                                     null);

@@ -26,9 +26,6 @@ public class CardDetailActivity extends Activity implements ContainerCallbacks
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_card_detail);
         
-        // Show the Up button in the action bar.
-        getActionBar().setDisplayHomeAsUpEnabled(true);
-        
         Intent intent = getIntent();
         collectionMode = intent.getBooleanExtra(COLLECTION_MODE, false);
         
@@ -70,13 +67,6 @@ public class CardDetailActivity extends Activity implements ContainerCallbacks
         collectionMode = intent.getBooleanExtra(COLLECTION_MODE, false);
         collectionMode = intent.getBooleanExtra(COLLECTION_MODE, false);
         collectionMode = intent.getBooleanExtra(COLLECTION_MODE, false);
-    }
-    
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item)
-    {
-        // TODO
-        return super.onOptionsItemSelected(item);
     }
 
     @Override

@@ -58,14 +58,16 @@
 		  	    layout = "@layout/card_detail_secondary"
 		  	    android:layout_width="match_parent"
 		  	    android:layout_height="0dp"
-		  	    android:layout_weight="4" />
+		  	    android:layout_weight="4"
+	        	android:layout_gravity="center" />
 		  	
 		  	<include 
 		  	    android:id = "@+id/detailsCollection"
 		  	    layout = "@layout/card_detail_collection"
 		  	    android:layout_width = "match_parent"
 		  	    android:layout_height = "0dp"
-		  	    android:layout_weight = "1" />
+		  	    android:layout_weight = "1"
+	        	android:layout_gravity="center" />
 	        
 	    </LinearLayout>
     

@@ -135,12 +135,4 @@ public class CollectionSearchActivity extends Activity
         Button searchButton = (Button)findViewById(R.id.advancedSearchButton);
         searchButton.setOnClickListener(searchListener);
     }
-    
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu)
-    {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.advanced_search, menu);
-        return true;
-    }
 }

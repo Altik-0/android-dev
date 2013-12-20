@@ -3,7 +3,6 @@
 
     <string name="app_name">MagicTheOrganizing</string>
     <string name="action_settings">Settings</string>
-    <string name="hello_world">Hello world!</string>
     <string name="title_activity_main_menu">MainMenuActivity</string>
     <string name="title_activity_advanced_search">AdvancedSearchActivity</string>
     <string name="title_activity_collection_search">CollectionSearchActivity</string>
@@ -11,5 +10,9 @@
     <string name="title_card_detail">Card Detail</string>
     <string name="title_activity_collection_management">CollectionManagementActivity</string>
     
+    <!-- Button labels -->
+	<string name="advanced_search_all"><b>Advanced Search</b>\n<i>- All Cards -</i></string>
+	<string name="advanced_search_collections"><b>Advanced Search</b>\n<i>- My Collections -</i></string>
+	<string name="manage_collections"><b>Manage My Collections</b></string>
 
 </resources>

@@ -79,7 +79,12 @@ public class CardDetailFragment extends Fragment implements DatabaseListener
     private TextView loyaltyTag;
     private TextView costDetail;
     private TextView costTag;
+    private TextView flavorTextDetail;
+    private TextView cardTextDetail;
+    private TextView flavorTextTag;
+    private TextView cardTextTag;
     private ViewGroup mainDetails;
+    private ViewGroup secondaryDetails;
     
     private OnClickListener selectCardListener = new OnClickListener()
     {
@@ -197,7 +202,12 @@ public class CardDetailFragment extends Fragment implements DatabaseListener
         loyaltyTag = (TextView)rootView.findViewById(R.id.loyaltyDetail);
         costDetail = (TextView)rootView.findViewById(R.id.costDetailText);
         costTag = (TextView)rootView.findViewById(R.id.costDetail);
+        flavorTextDetail = (TextView)rootView.findViewById(R.id.cardFlavorTextText);
+        flavorTextTag = (TextView)rootView.findViewById(R.id.cardFlavorText);
+        cardTextDetail = (TextView)rootView.findViewById(R.id.cardTextText);
+        cardTextTag = (TextView)rootView.findViewById(R.id.cardText);
         mainDetails = (ViewGroup)rootView.findViewById(R.id.detailsMain);
+        secondaryDetails = (ViewGroup)rootView.findViewById(R.id.detailsSecondary);
         
         // Hookup button click listeners:
         selectButton.setOnClickListener(selectCardListener);
@@ -272,6 +282,16 @@ public class CardDetailFragment extends Fragment implements DatabaseListener
         {
             mainDetails.removeView(costDetail);
             mainDetails.removeView(costTag);
+        }
+        if (card.getFlavorText() == null)
+        {
+            secondaryDetails.removeView(flavorTextDetail);
+            secondaryDetails.removeView(flavorTextTag);
+        }
+        if (card.getText() == null)
+        {
+            secondaryDetails.removeView(cardTextDetail);
+            secondaryDetails.removeView(cardTextTag);
         }
         
         return rootView;
@@ -413,7 +433,8 @@ public class CardDetailFragment extends Fragment implements DatabaseListener
         args.putInt(PromptCountAndTagsDialogFragment.COUNT_KEY, count);
         args.putSerializable(PromptCountAndTagsDialogFragment.TAGS_KEY, tags);
         // TODO: don't use static titles
-        args.putString(PromptCountAndTagsDialogFragment.TITLE_KEY, "Edit Data");
+        args.putString(PromptCountAndTagsDialogFragment.TITLE_KEY, "Edit Card");
+        args.putString(PromptCountAndTagsDialogFragment.MESSAGE_KEY, "Enter new count");
         newDialog.setArguments(args);
         newDialog.setCountAndTagAccepter(new CountAndTagAccepter()
         {
@@ -458,7 +479,8 @@ public class CardDetailFragment extends Fragment implements DatabaseListener
         args.putInt(PromptCountAndTagsDialogFragment.COUNT_KEY, count);
         args.putSerializable(PromptCountAndTagsDialogFragment.TAGS_KEY, tags);
         // TODO: don't use static titles
-        args.putString(PromptCountAndTagsDialogFragment.TITLE_KEY, "Enter Data");
+        args.putString(PromptCountAndTagsDialogFragment.TITLE_KEY, "Add Card");
+        args.putString(PromptCountAndTagsDialogFragment.MESSAGE_KEY, "Enter count to add");
         newDialog.setArguments(args);
         newDialog.setCountAndTagAccepter(new CountAndTagAccepter()
         {
